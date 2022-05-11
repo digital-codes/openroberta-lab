@@ -15,38 +15,87 @@ var __extends = (this && this.__extends) || (function () {
 })();
 define(["require", "exports", "interpreter.constants", "simulation.math", "guiState.controller", "./simulation.objects", "util", "jquery", "blockly"], function (require, exports, C, SIMATH, GUISTATE_C, simulation_objects_1, UTIL, $, Blockly) {
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.Motors = exports.PinActuators = exports.MbotRGBLed = exports.ThymioSoundLed = exports.ThymioTemperatureLeds = exports.ThymioProxHLeds = exports.ThymioButtonLeds = exports.ThymioCircleLeds = exports.ThymioRGBLeds = exports.RGBLed = exports.MbotDisplay = exports.MbedDisplay = exports.MatrixDisplay = exports.WebAudio = exports.TTS = exports.StatusLed = exports.MbotChassis = exports.ThymioChassis = exports.NXTChassis = exports.EV3Chassis = exports.LegoChassis = exports.ChassisDiffDrive = void 0;
-    var ChassisDiffDrive = /** @class */ (function () {
+    exports.Motors = exports.PinActuators = exports.MbotRGBLed = exports.ThymioSoundLed = exports.ThymioTemperatureLeds = exports.ThymioProxHLeds = exports.ThymioButtonLeds = exports.ThymioCircleLeds = exports.ThymioRGBLeds = exports.RGBLed = exports.MbotDisplay = exports.MbedDisplay = exports.MatrixDisplay = exports.WebAudio = exports.TTS = exports.StatusLed = exports.MbotChassis = exports.ThymioChassis = exports.NXTChassis = exports.EV3Chassis = exports.LegoChassis = exports.RobotinoChassis = exports.ChassisDiffDrive = exports.ChassisMobile = void 0;
+    var ChassisMobile = /** @class */ (function () {
+        function ChassisMobile(id) {
+            this.drawPriority = 0;
+            this.id = id;
+        }
+        ChassisMobile.prototype.getLines = function () {
+            return [
+                {
+                    x1: this.backLeft.rx,
+                    x2: this.frontLeft.rx,
+                    y1: this.backLeft.ry,
+                    y2: this.frontLeft.ry
+                },
+                {
+                    x1: this.frontLeft.rx,
+                    x2: this.frontRight.rx,
+                    y1: this.frontLeft.ry,
+                    y2: this.frontRight.ry
+                },
+                {
+                    x1: this.frontRight.rx,
+                    x2: this.backRight.rx,
+                    y1: this.frontRight.ry,
+                    y2: this.backRight.ry
+                },
+                {
+                    x1: this.backRight.rx,
+                    x2: this.backLeft.rx,
+                    y1: this.backRight.ry,
+                    y2: this.backLeft.ry
+                }
+            ];
+        };
+        ChassisMobile.prototype.transformNewPose = function (pose, chassis) {
+            SIMATH.transform(pose, chassis.frontRight);
+            SIMATH.transform(pose, chassis.frontLeft);
+            SIMATH.transform(pose, chassis.backRight);
+            SIMATH.transform(pose, chassis.backLeft);
+        };
+        ChassisMobile.prototype.updateSensor = function (running, dt, myRobot, values, uCtx, udCtx, personalObstacleList) {
+            this.checkCollisions(this.id, myRobot.pose, dt, personalObstacleList);
+        };
+        ChassisMobile.prototype.getTolerance = function () {
+            return 0;
+        };
+        return ChassisMobile;
+    }());
+    exports.ChassisMobile = ChassisMobile;
+    var ChassisDiffDrive = /** @class */ (function (_super) {
+        __extends(ChassisDiffDrive, _super);
         function ChassisDiffDrive(id, configuration) {
-            this.left = { port: '', speed: 0 };
-            this.right = { port: '', speed: 0 };
-            this.wheelBackLeft = { bumped: false, rx: 0, ry: 0, x: 0, y: 0 };
-            this.wheelBackRight = { bumped: false, rx: 0, ry: 0, x: 0, y: 0 };
-            this.wheelFrontLeft = { bumped: false, rx: 0, ry: 0, x: 0, y: 0 };
-            this.wheelFrontRight = { bumped: false, rx: 0, ry: 0, x: 0, y: 0 };
-            this.encoder = {
+            var _this = _super.call(this, id) || this;
+            _this.left = { port: '', speed: 0 };
+            _this.right = { port: '', speed: 0 };
+            _this.wheelBackLeft = { bumped: false, rx: 0, ry: 0, x: 0, y: 0 };
+            _this.wheelBackRight = { bumped: false, rx: 0, ry: 0, x: 0, y: 0 };
+            _this.wheelFrontLeft = { bumped: false, rx: 0, ry: 0, x: 0, y: 0 };
+            _this.wheelFrontRight = { bumped: false, rx: 0, ry: 0, x: 0, y: 0 };
+            _this.encoder = {
                 left: 0,
                 right: 0,
                 rightAngle: 0,
                 leftAngle: 0
             };
-            this.drawPriority = 0;
-            this.id = id;
-            this.TRACKWIDTH = configuration['TRACKWIDTH'] * 3;
-            this.WHEELDIAMETER = configuration['WHEELDIAMETER'];
-            this.ENC = 360.0 / (3.0 * Math.PI * this.WHEELDIAMETER);
-            this.MAXPOWER = (2 * this.WHEELDIAMETER * Math.PI * 3) / 100;
+            _this.TRACKWIDTH = configuration['TRACKWIDTH'] * 3;
+            _this.WHEELDIAMETER = configuration['WHEELDIAMETER'];
+            _this.ENC = 360.0 / (3.0 * Math.PI * _this.WHEELDIAMETER);
+            _this.MAXPOWER = (2 * _this.WHEELDIAMETER * Math.PI * 3) / 100;
             for (var item in configuration['ACTUATORS']) {
                 var motor = configuration['ACTUATORS'][item];
                 if (motor['MOTOR_DRIVE'] === 'RIGHT') {
-                    this.right.port = item;
-                    this.right.speed = 0;
+                    _this.right.port = item;
+                    _this.right.speed = 0;
                 }
                 if (motor['MOTOR_DRIVE'] === 'LEFT') {
-                    this.left.port = item;
-                    this.left.speed = 0;
+                    _this.left.port = item;
+                    _this.left.speed = 0;
                 }
             }
+            return _this;
         }
         ChassisDiffDrive.prototype.draw = function (rCtx, myRobot) {
             rCtx.save();
@@ -91,45 +140,13 @@ define(["require", "exports", "interpreter.constants", "simulation.math", "guiSt
             rCtx.fillRect(this.wheelRight.x, this.wheelRight.y, this.wheelRight.w, this.wheelRight.h);
             rCtx.restore();
         };
-        ChassisDiffDrive.prototype.getLines = function () {
-            return [
-                {
-                    x1: this.backLeft.rx,
-                    x2: this.frontLeft.rx,
-                    y1: this.backLeft.ry,
-                    y2: this.frontLeft.ry
-                },
-                {
-                    x1: this.frontLeft.rx,
-                    x2: this.frontRight.rx,
-                    y1: this.frontLeft.ry,
-                    y2: this.frontRight.ry
-                },
-                {
-                    x1: this.frontRight.rx,
-                    x2: this.backRight.rx,
-                    y1: this.frontRight.ry,
-                    y2: this.backRight.ry
-                },
-                {
-                    x1: this.backRight.rx,
-                    x2: this.backLeft.rx,
-                    y1: this.backRight.ry,
-                    y2: this.backLeft.ry
-                }
-            ];
-        };
         ChassisDiffDrive.prototype.getTolerance = function () {
             return Math.max(Math.abs(this.right.speed), Math.abs(this.left.speed) || 0);
         };
         ChassisDiffDrive.prototype.transformNewPose = function (pose, chassis) {
-            SIMATH.transform(pose, chassis.frontRight);
-            SIMATH.transform(pose, chassis.frontLeft);
+            _super.prototype.transformNewPose.call(this, pose, chassis);
             SIMATH.transform(pose, chassis.frontMiddle);
-            SIMATH.transform(pose, chassis.backRight);
-            SIMATH.transform(pose, chassis.backLeft);
             SIMATH.transform(pose, chassis.backMiddle);
-            SIMATH.transform(pose, chassis.wheelFrontRight);
             SIMATH.transform(pose, chassis.wheelFrontRight);
             SIMATH.transform(pose, chassis.wheelBackRight);
             SIMATH.transform(pose, chassis.wheelFrontLeft);
@@ -296,10 +313,7 @@ define(["require", "exports", "interpreter.constants", "simulation.math", "guiSt
             }
             this.transformNewPose(myRobot.pose, this);
         };
-        ChassisDiffDrive.prototype.updateSensor = function (running, dt, myRobot, values, uCtx, udCtx, personalObstacleList) {
-            this.checkCollisions(this.id, dt, personalObstacleList);
-        };
-        ChassisDiffDrive.prototype.checkCollisions = function (myId, dt, personalObstacleList) {
+        ChassisDiffDrive.prototype.checkCollisions = function (myId, myPose, dt, personalObstacleList) {
             var ground = personalObstacleList.slice(-1)[0]; // ground is always the last element in the personal obstacle list
             function checkGround(p) {
                 if (p.rx < ground.x || p.rx > ground.x + ground.w || p.ry < ground.y || p.ry > ground.y + ground.h) {
@@ -322,7 +336,7 @@ define(["require", "exports", "interpreter.constants", "simulation.math", "guiSt
             });
             var _loop_1 = function (i) {
                 var myObstacle = personalObstacleList[i];
-                if (myObstacle instanceof ChassisDiffDrive && myObstacle.id == myId) {
+                if (myObstacle instanceof ChassisMobile && myObstacle.id == myId) {
                     return "continue";
                 }
                 var pointsInObstacle = myCheckPoints
@@ -341,7 +355,7 @@ define(["require", "exports", "interpreter.constants", "simulation.math", "guiSt
                         [this_1.wheelFrontLeft, this_1.wheelBackLeft]
                     ];
                     var p_1 = { x: 0, y: 0 };
-                    var thisTolerance_1 = Math.max(Math.abs(this_1.right['SPEED']), Math.abs(this_1.left['SPEED']));
+                    var thisTolerance_1 = Math.max(Math.abs(this_1.right.speed), Math.abs(this_1.left.speed));
                     if (!(myObstacle instanceof simulation_objects_1.CircleSimulationObject)) {
                         var obstacleLines_1 = myObstacle.getLines();
                         myCheckLines.forEach(function (checkLine) {
@@ -379,7 +393,7 @@ define(["require", "exports", "interpreter.constants", "simulation.math", "guiSt
                     this_1.frontLeft.bumped = this_1.frontLeft.bumped || this_1.frontMiddle.bumped;
                     this_1.frontRight.bumped = this_1.frontRight.bumped || this_1.frontMiddle.bumped;
                     this_1.backLeft.bumped = this_1.backLeft.bumped || this_1.backMiddle.bumped || this_1.wheelBackLeft.bumped;
-                    this_1.backRight.bumped = this_1.backRight.bumped || this_1.backMiddle.bumped || this_1.wheelFrontRight.bumped;
+                    this_1.backRight.bumped = this_1.backRight.bumped || this_1.backMiddle.bumped || this_1.wheelBackRight.bumped;
                 }
             };
             var this_1 = this;
@@ -388,8 +402,284 @@ define(["require", "exports", "interpreter.constants", "simulation.math", "guiSt
             }
         };
         return ChassisDiffDrive;
-    }());
+    }(ChassisMobile));
     exports.ChassisDiffDrive = ChassisDiffDrive;
+    var RobotinoChassis = /** @class */ (function (_super) {
+        __extends(RobotinoChassis, _super);
+        function RobotinoChassis(id, pose) {
+            var _this = _super.call(this, id) || this;
+            _this.RADIUS = 45 / 2;
+            _this.geom = {
+                x: -68,
+                y: -68,
+                w: 136,
+                h: 136,
+                radius: 68,
+                color: '#DDDDDD'
+            };
+            _this.bumpedAngle = [];
+            _this.xDiff = 0;
+            _this.yDiff = 0;
+            _this.thetaDiff = 0;
+            _this.xVel = 0;
+            _this.yVel = 0;
+            _this.thetaVel = 0;
+            _this.backLeft = {
+                x: -68,
+                y: -68,
+                rx: 0,
+                ry: 0,
+                bumped: false
+            };
+            _this.backRight = {
+                x: -68,
+                y: 68,
+                rx: 0,
+                ry: 0,
+                bumped: false
+            };
+            _this.frontLeft = {
+                x: 68,
+                y: -68,
+                rx: 0,
+                ry: 0,
+                bumped: false
+            };
+            _this.frontRight = {
+                x: 68,
+                y: 68,
+                rx: 0,
+                ry: 0,
+                bumped: false
+            };
+            _this.img = new Image();
+            _this.MAXPOWER = 1 * 3; // approx. 1 m/s
+            _this.MAXROTATION = _this.MAXPOWER / _this.RADIUS / 3;
+            _this.transformNewPose(pose, _this);
+            _this.img.src = '../../css/img/simulator/robotino.png';
+            return _this;
+        }
+        RobotinoChassis.prototype.reset = function () {
+            this.xVel = 0;
+            this.yVel = 0;
+            this.thetaVel = 0;
+            this.xDiff = 0;
+            this.yDiff = 0;
+            this.thetaDiff = 0;
+            $('#display' + this.id).html('');
+        };
+        RobotinoChassis.prototype.checkCollisions = function (myId, myPose, dt, personalObstacleList) {
+            this.bumpedAngle = [];
+            for (var i = 0; i < personalObstacleList.length; i++) {
+                var myObstacle = personalObstacleList[i];
+                if (myObstacle instanceof ChassisMobile && myObstacle.id == myId) {
+                    // never check if you are bumping yourself ;-)
+                    continue;
+                }
+                var obstacleTolerance = myObstacle.chassis && myObstacle.chassis.getTolerance() || 0;
+                myPose.radius = myPose.r = this.geom.radius + dt * (this.getTolerance() + obstacleTolerance);
+                //console.log((myPose as any).radius);
+                var bumpedAngles = this.getAnglePOI(myPose, myObstacle);
+                for (var j = 0; j < bumpedAngles.length; j++) {
+                    if (bumpedAngles[j] < 999) {
+                        this.bumpedAngle.push(bumpedAngles[j]);
+                    }
+                }
+            }
+        };
+        RobotinoChassis.prototype.updateAction = function (myRobot, dt, interpreterRunning) {
+            var robot = myRobot;
+            var omniDrive = myRobot.interpreter.getRobotBehaviour().getActionState('omniDrive', true);
+            if (omniDrive) {
+                this.xVel = 0;
+                this.yVel = 0;
+                this.thetaVel = 0;
+                if (omniDrive[C.X + C.SPEED] !== undefined) {
+                    this.xVel = omniDrive[C.X + C.SPEED] * this.MAXPOWER;
+                }
+                if (omniDrive[C.Y + C.SPEED] !== undefined) {
+                    this.yVel = omniDrive[C.Y + C.SPEED] * this.MAXPOWER;
+                }
+                if (omniDrive[C.ANGLE + C.SPEED] !== undefined) {
+                    this.thetaVel = omniDrive[C.ANGLE + C.SPEED] * this.MAXROTATION;
+                }
+                if (omniDrive[C.DISTANCE] !== undefined) {
+                    this.distance = Math.abs(omniDrive[C.DISTANCE]) * 3;
+                }
+                if (omniDrive[C.ANGLE] !== undefined) {
+                    this.angle = SIMATH.toRadians(Math.abs(omniDrive[C.ANGLE]));
+                }
+                if (omniDrive[C.X] !== undefined && omniDrive[C.Y] !== undefined && omniDrive[C.POWER] !== undefined) {
+                    var x = omniDrive[C.X] * 3;
+                    var y = omniDrive[C.Y] * 3;
+                    var power = omniDrive[C.POWER] * this.MAXPOWER;
+                    this.distance = Math.sqrt(x * x + y * y);
+                    var q = power / this.distance;
+                    this.xVel = x * q;
+                    this.yVel = y * q;
+                }
+            }
+            this.xVel = interpreterRunning ? this.xVel : 0;
+            this.yVel = interpreterRunning ? this.yVel : 0;
+            this.thetaVel = interpreterRunning ? this.thetaVel : 0;
+            var tempXVel = this.xVel * dt;
+            var tempYVel = -this.yVel * dt;
+            var tempThetaVel = this.thetaVel * dt;
+            var mX = Math.cos(robot.pose.theta) * tempXVel - Math.sin(robot.pose.theta) * tempYVel;
+            var mY = Math.sin(robot.pose.theta) * tempXVel + Math.cos(robot.pose.theta) * tempYVel;
+            var l = Math.sqrt(mX * mX + mY * mY);
+            var a = (Math.atan2(mY, mX) + 2 * Math.PI) % (2 * Math.PI);
+            for (var i = 0; i < this.bumpedAngle.length; i++) {
+                //console.log(a + ' ' + this.bumpedAngle[i]);
+                if (Math.min(Math.abs(this.bumpedAngle[i] - a), 2 * Math.PI - Math.abs(this.bumpedAngle[i] - a)) < Math.PI) {
+                    var x = l * Math.cos(this.bumpedAngle[i]);
+                    var y = l * Math.sin(this.bumpedAngle[i]);
+                    mX -= x;
+                    mY -= y;
+                }
+            }
+            robot.pose.x += mX;
+            robot.pose.y += mY;
+            robot.pose.theta += tempThetaVel;
+            robot.thetaDiff = tempThetaVel;
+            this.xDiff = mX;
+            this.yDiff = -mY;
+            this.transformNewPose(robot.pose, this);
+            if (this.distance) {
+                var dist = Math.sqrt(Math.pow(robot.pose.x - robot.pose.xOld, 2) + Math.pow(robot.pose.y - robot.pose.yOld, 2));
+                this.distance -= dist;
+                var div = (Math.abs(this.xVel) + Math.abs(this.yVel)) / 10;
+                if (this.distance < dist / div) {
+                    this.distance = null;
+                    robot.interpreter.getRobotBehaviour().setBlocking(false);
+                    this.reset();
+                }
+            }
+            if (this.angle) {
+                if (robot.thetaDiff >= 0) {
+                    this.angle -= robot.thetaDiff;
+                }
+                else {
+                    this.angle += robot.thetaDiff;
+                }
+                if (this.angle < Math.abs(robot.thetaDiff) / this.thetaVel / 10) {
+                    this.angle = null;
+                    robot.interpreter.getRobotBehaviour().setBlocking(false);
+                    this.reset();
+                }
+            }
+        };
+        RobotinoChassis.prototype.draw = function (rCtx, myRobot) {
+            rCtx.save();
+            if (this.bumpedAngle.length > 0) {
+                rCtx.fillStyle = '#ff0000';
+                rCtx.beginPath();
+                rCtx.arc(0, 0, this.geom.radius + 3, 0, Math.PI * 2);
+                rCtx.fill();
+            }
+            rCtx.shadowBlur = 5;
+            rCtx.shadowColor = 'black';
+            this.img.width;
+            rCtx.drawImage(this.img, 0, 0, this.img.width, this.img.height, this.geom.x, this.geom.y, this.geom.w, this.geom.h);
+            rCtx.restore();
+        };
+        RobotinoChassis.prototype.getTolerance = function () {
+            return 0.5 * (Math.abs(this.xVel) + Math.abs(this.yVel));
+        };
+        RobotinoChassis.prototype.getAnglePOI = function (circle, obstacle) {
+            var myObstacle = obstacle;
+            if (myObstacle instanceof simulation_objects_1.RectangleSimulationObject) {
+                var rect = myObstacle;
+                rect.angle = 0;
+                rect.centerY = rect.y + rect.h / 2;
+                rect.centerX = rect.x + rect.w / 2;
+                var unrotatedCircleX = Math.cos(rect.angle) * (circle.x - rect.centerX) - Math.sin(rect.angle) * (circle.y - rect.centerY) + rect.centerX;
+                var unrotatedCircleY = Math.sin(rect.angle) * (circle.x - rect.centerX) + Math.cos(rect.angle) * (circle.y - rect.centerY) + rect.centerY;
+                var closestX = void 0, closestY = void 0;
+                if (unrotatedCircleX < rect.x) {
+                    closestX = rect.x;
+                }
+                else if (unrotatedCircleX > rect.x + rect.w) {
+                    closestX = rect.x + rect.w;
+                }
+                else {
+                    closestX = unrotatedCircleX;
+                }
+                if (unrotatedCircleY < rect.y) {
+                    closestY = rect.y;
+                }
+                else if (unrotatedCircleY > rect.y + rect.h) {
+                    closestY = rect.y + rect.h;
+                }
+                else {
+                    closestY = unrotatedCircleY;
+                }
+                var distance = SIMATH.getDistance({ x: unrotatedCircleX, y: unrotatedCircleY }, { x: closestX, y: closestY });
+                var angle = void 0;
+                if (distance < circle.radius * circle.radius) {
+                    return [Math.atan2(closestY - unrotatedCircleY, closestX - unrotatedCircleX)];
+                }
+                else {
+                    return [999];
+                }
+            }
+            else if (myObstacle instanceof simulation_objects_1.CircleSimulationObject || myObstacle instanceof RobotinoChassis) {
+                if (obstacle instanceof RobotinoChassis) {
+                    var x = (obstacle.frontLeft.rx + obstacle.frontRight.rx + obstacle.backLeft.rx + obstacle.backRight.rx) / 4;
+                    var y = (obstacle.frontLeft.ry + obstacle.frontRight.ry + obstacle.backLeft.ry + obstacle.backRight.ry) / 4;
+                    myObstacle = { x: x, y: y, r: 70 };
+                }
+                var distance = Math.sqrt(SIMATH.getDistance(circle, myObstacle));
+                if (distance <= circle.radius + myObstacle.r) {
+                    return [(Math.atan2(myObstacle.y - circle.y, myObstacle.x - circle.x) + 2 * Math.PI) % (2 * Math.PI)];
+                }
+                return [999];
+            }
+            else if (myObstacle instanceof simulation_objects_1.TriangleSimulationObject || myObstacle instanceof simulation_objects_1.Ground) {
+                var triangleLines = myObstacle.getLines();
+                var minDistance = Infinity;
+                var myIP = void 0;
+                circle.r = circle.radius;
+                var as = [];
+                for (var i = 0; i < triangleLines.length; i++) {
+                    var IP = SIMATH.getMiddleIntersectionPointCircle(triangleLines[i], circle);
+                    if (IP) {
+                        as.push((Math.atan2(IP.y - circle.y, IP.x - circle.x) + 2 * Math.PI) % (2 * Math.PI));
+                    }
+                }
+                if (as.length == 0) {
+                    if (myObstacle instanceof simulation_objects_1.Ground) {
+                        var myPoints = [{ x: myObstacle.x, y: myObstacle.y }, { x: myObstacle.x + myObstacle.w, y: myObstacle.y + myObstacle.h }, { x: myObstacle.x + myObstacle.w, y: myObstacle.y }, { x: myObstacle.x, y: myObstacle.y + myObstacle.h }];
+                        for (var i = 0; i < 4; i++) {
+                            if ((myPoints[i].x - circle.x) * (myPoints[i].x - circle.x) + (myPoints[i].y - circle.y) * (myPoints[i].y - circle.y) <=
+                                circle.r * circle.r) {
+                                as.push((Math.atan2(myPoints[i].y - circle.y, myPoints[i].x - circle.x) + 2 * Math.PI) % (2 * Math.PI));
+                            }
+                        }
+                        if (as.length > 0) {
+                            return as;
+                        }
+                    }
+                    else {
+                        var myPoints = [{ x: myObstacle.ax, y: myObstacle.ay }, { x: myObstacle.bx, y: myObstacle.by }, { x: myObstacle.cx, y: myObstacle.cy }];
+                        for (var i = 0; i < 3; i++) {
+                            if ((myPoints[i].x - circle.x) * (myPoints[i].x - circle.x) + (myPoints[i].y - circle.y) * (myPoints[i].y - circle.y) <=
+                                circle.r * circle.r) {
+                                return [(Math.atan2(myPoints[i].y - circle.y, myPoints[i].x - circle.x) + 2 * Math.PI) % (2 * Math.PI)];
+                            }
+                        }
+                    }
+                    return [999];
+                }
+                else {
+                    return as;
+                }
+            }
+            return [999]; //no collision
+        };
+        return RobotinoChassis;
+    }(ChassisMobile));
+    exports.RobotinoChassis = RobotinoChassis;
     var LegoChassis = /** @class */ (function (_super) {
         __extends(LegoChassis, _super);
         function LegoChassis(id, configuration, pose) {
@@ -758,7 +1048,7 @@ define(["require", "exports", "interpreter.constants", "simulation.math", "guiSt
                 bumped: false
             };
             _this.frontMiddle = {
-                x: 34,
+                x: 26,
                 y: 0,
                 rx: 0,
                 ry: 0
