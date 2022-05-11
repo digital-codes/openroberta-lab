@@ -1,0 +1,43 @@
+<block_set xmlns="http://de.fhg.iais.roberta.blockly" robottype="mbot2" xmlversion="3.1" description="" tags="">
+    <instance x="300" y="80">
+        <block type="robConf_omnidrive" intask="true" id="1" deletable="false">
+            <field name="NAME">_O</field>
+            <field name="WEIGHT_KG">20</field>
+        </block>
+    </instance>
+    <instance x="100" y="50">
+        <block type="robConf_encoder" intask="true" id="2" deletable="false">
+            <field name="NAME">M1</field>
+        </block>
+    </instance>
+    <instance x="100" y="80">
+        <block type="robConf_encoder" intask="true" id="3" deletable="false">
+            <field name="NAME">M2</field>
+        </block>
+    </instance>
+    <instance x="100" y="110">
+        <block type="robConf_encoder" intask="true" id="3" deletable="false">
+            <field name="NAME">M3</field>
+        </block>
+    </instance>
+    <instance x="100" y="200">
+        <block type="robConf_touch" intask="true" id="13" deletable="false">
+            <field name="NAME">_T</field>
+        </block>
+    </instance>
+    <instance x="250" y="200">
+        <block type="robConf_odometry" intask="true" id="13" deletable="false">
+            <field name="NAME">_OD</field>
+        </block>
+    </instance>
+    <instance x="100" y="250">
+        <block type="robConf_infrared" intask="true" id="13" deletable="false">
+            <field name="NAME">_I</field>
+        </block>
+    </instance>
+    <instance x="100" y="300">
+        <block type="robConf_camera" intask="true" id="13" deletable="false">
+            <field name="NAME">_I</field>
+        </block>
+    </instance>
+</block_set>

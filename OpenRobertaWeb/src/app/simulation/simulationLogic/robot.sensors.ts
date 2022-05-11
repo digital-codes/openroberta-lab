@@ -1,15 +1,17 @@
-import { RobotBaseMobile } from 'robot.base.mobile';
+import { Pose, RobotBaseMobile } from 'robot.base.mobile';
+import * as C from 'interpreter.constants';
 import * as SIMATH from 'simulation.math';
 import * as UTIL from 'util';
-import { ChassisDiffDrive, WebAudio } from 'robot.actuators';
+import { ChassisMobile, RobotinoChassis, WebAudio } from 'robot.actuators';
 import { IDrawable, ILabel, IReset, IUpdateAction, RobotBase } from 'robot.base';
-import { CircleSimulationObject } from 'simulation.objects';
+import { CircleSimulationObject, MarkerSimulationObject } from 'simulation.objects';
 // @ts-ignore
 import * as Blockly from 'blockly';
 // @ts-ignore
 import * as VolumeMeter from 'volume-meter';
 import * as $ from 'jquery';
 import { SimulationRoberta } from 'simulation.roberta';
+import RobotRobotino from './robot.robotino';
 
 export interface ISensor {
     updateSensor(
@@ -19,7 +21,8 @@ export interface ISensor {
         values: object,
         uCtx: CanvasRenderingContext2D,
         udCtx: CanvasRenderingContext2D,
-        personalObstacleList: any[]
+        personalObstacleList: any[],
+        markerList: MarkerSimulationObject[]
     ): void;
 }
 
@@ -128,7 +131,7 @@ export abstract class DistanceSensor implements IExternalSensor, IDrawable {
     u: Point[] = [];
     wave: number = 0;
 
-    constructor(port: string, x: number, y: number, theta: number, maxDistance: number, color?: string) {
+    constructor(port: string, x: number, y: number, theta: number, maxDistance: number) {
         this.port = port;
         this.labelPriority = Number(this.port.replace('ORT_', ''));
         this.x = x;
@@ -136,7 +139,6 @@ export abstract class DistanceSensor implements IExternalSensor, IDrawable {
         this.theta = theta;
         this.maxDistance = maxDistance;
         this.maxLength = 3 * maxDistance;
-        this.color = color || this.color;
     }
 
     draw(rCtx: CanvasRenderingContext2D, myRobot: RobotBaseMobile): void {
@@ -231,7 +233,7 @@ export abstract class DistanceSensor implements IExternalSensor, IDrawable {
             const uDis = [this.maxLength, this.maxLength, this.maxLength, this.maxLength, this.maxLength];
             for (let i = 0; i < personalObstacleList.length; i++) {
                 let myObstacle: any = personalObstacleList[i];
-                if (myObstacle instanceof ChassisDiffDrive && myObstacle.id == robot.id) {
+                if (myObstacle instanceof ChassisMobile && myObstacle.id == robot.id) {
                     continue;
                 }
                 if (!(myObstacle instanceof CircleSimulationObject)) {
@@ -310,6 +312,13 @@ export class UltrasonicSensor extends DistanceSensor {
 }
 
 export class InfraredSensor extends DistanceSensor {
+    private relative = true;
+
+    constructor(port: string, x: number, y: number, theta: number, maxDistance: number, relative?: boolean) {
+        super(port, x, y, theta, maxDistance);
+        this.relative = relative !== undefined ? relative : this.relative;
+    }
+
     getLabel(): string {
         return (
             '<div><label>' +
@@ -335,21 +344,32 @@ export class InfraredSensor extends DistanceSensor {
         const distance = this.distance / 3.0;
         values['infrared'] = values['infrared'] || {};
         values['infrared'][this.port] = {};
-        if (distance < 70) {
-            values['infrared'][this.port].distance = (100.0 / 70.0) * distance;
+        if (this.relative) {
+            if (distance < this.maxDistance) {
+                values['infrared'][this.port].distance = (100.0 / this.maxDistance) * distance;
+            } else {
+                values['infrared'][this.port].distance = 100.0;
+            }
         } else {
-            values['infrared'][this.port].distance = 100.0;
+            if (distance < this.maxDistance) {
+                values['infrared'][this.port].distance = distance;
+            } else {
+                values['infrared'][this.port].distance = this.maxDistance;
+            }
         }
         values['infrared'][this.port].presence = false;
     }
 }
 
-export class ThymioInfraredSensor extends DistanceSensor {
-    constructor(port: string, x: number, y: number, theta: number, maxDistance: number, color?: string) {
-        super(port, x, y, theta, maxDistance, color);
+export class ThymioInfraredSensor extends InfraredSensor {
+    name: string = '';
+
+    constructor(port: string, x: number, y: number, theta: number, maxDistance: number, name?: string) {
+        super(port, x, y, theta, maxDistance, true);
+        this.name = name !== undefined ? name : this.name;
     }
 
-    getLabel(): string {
+    override getLabel(): string {
         let distance = this.distance / 3.0;
         if (distance < this.maxDistance) {
             distance *= 100.0 / this.maxDistance;
@@ -357,7 +377,7 @@ export class ThymioInfraredSensor extends DistanceSensor {
             distance = 100.0;
         }
         distance = UTIL.round(distance, 0);
-        return '<div><label>&nbsp;-&nbsp;' + this.color + '</label><span>' + UTIL.roundUltraSound(distance, 0) + ' %</span></div>';
+        return '<div><label>&nbsp;-&nbsp;' + this.name + '</label><span>' + UTIL.roundUltraSound(distance, 0) + ' %</span></div>';
     }
 
     override updateSensor(
@@ -739,6 +759,74 @@ export class MbotInfraredSensor implements IExternalSensor, IDrawable, ILabel {
     }
 }
 
+export class RobotinoInfraredSensor implements ISensor, IDrawable, ILabel {
+    drawPriority: number;
+    labelPriority: number;
+    infraredSensorArray: DistanceSensor[] = [];
+
+    constructor() {
+        this.infraredSensorArray[0] = new InfraredSensor('1', 68 * Math.cos(0), 68 * Math.sin(0), 0, 30, false);
+        this.infraredSensorArray[1] = new InfraredSensor(
+            '2',
+            68 * Math.cos((-Math.PI * 2) / 9),
+            68 * Math.sin((-Math.PI * 2) / 9),
+            (-Math.PI * 2) / 9,
+            30,
+            false
+        );
+        this.infraredSensorArray[2] = new InfraredSensor(
+            '3',
+            68 * Math.cos((-Math.PI * 4) / 9),
+            68 * Math.sin((-Math.PI * 4) / 9),
+            (-Math.PI * 4) / 9,
+            30,
+            false
+        );
+        this.infraredSensorArray[3] = new InfraredSensor(
+            '4',
+            68 * Math.cos((-Math.PI * 6) / 9),
+            68 * Math.sin((-Math.PI * 6) / 9),
+            (-Math.PI * 6) / 9,
+            30,
+            false
+        );
+        this.infraredSensorArray[4] = new InfraredSensor(
+            '5',
+            68 * Math.cos((-Math.PI * 8) / 9),
+            68 * Math.sin((-Math.PI * 8) / 9),
+            (-Math.PI * 8) / 9,
+            30,
+            false
+        );
+        this.infraredSensorArray[9] = new InfraredSensor('9', 68 * Math.cos((Math.PI * 2) / 9), 68 * Math.sin((Math.PI * 2) / 9), (Math.PI * 2) / 9, 30, false);
+        this.infraredSensorArray[8] = new InfraredSensor('8', 68 * Math.cos((Math.PI * 4) / 9), 68 * Math.sin((Math.PI * 4) / 9), (Math.PI * 4) / 9, 30, false);
+        this.infraredSensorArray[7] = new InfraredSensor('7', 68 * Math.cos((Math.PI * 6) / 9), 68 * Math.sin((Math.PI * 6) / 9), (Math.PI * 6) / 9, 30, false);
+        this.infraredSensorArray[6] = new InfraredSensor('6', 68 * Math.cos((Math.PI * 8) / 9), 68 * Math.sin((Math.PI * 8) / 9), (Math.PI * 8) / 9, 30, false);
+    }
+
+    draw(rCtx: CanvasRenderingContext2D, myRobot: RobotBase): void {
+        this.infraredSensorArray.forEach((sensor) => sensor.draw(rCtx, myRobot as RobotBaseMobile));
+    }
+
+    getLabel(): string {
+        let myLabel: string = '';
+        this.infraredSensorArray.forEach((sensor) => (myLabel += sensor.getLabel()));
+        return myLabel;
+    }
+
+    updateSensor(
+        running: boolean,
+        dt: number,
+        myRobot: RobotBase,
+        values: object,
+        uCtx: CanvasRenderingContext2D,
+        udCtx: CanvasRenderingContext2D,
+        personalObstacleList: any[]
+    ): void {
+        this.infraredSensorArray.forEach((sensor) => sensor.updateSensor(running, dt, myRobot, values, uCtx, udCtx, personalObstacleList));
+    }
+}
+
 export class TouchSensor implements IExternalSensor, IDrawable, ILabel {
     readonly color: string = '#FF69B4';
     readonly port: string;
@@ -811,6 +899,32 @@ export class TapSensor implements ISensor {
             (myRobot as RobotBaseMobile).chassis.backLeft.bumped ||
             (myRobot as RobotBaseMobile).chassis.backRight.bumped;
         values['touch'] = touch ? 1 : 0;
+    }
+}
+
+export class RobotinoTouchSensor implements ISensor, ILabel {
+    bumped: boolean = false;
+
+    public readonly drawPriority: number = 4;
+
+    getLabel(): string {
+        return '<div><label>' + Blockly.Msg['SENSOR_TOUCH'] + '</label><span>' + this.bumped + '</span></div>';
+    }
+
+    public readonly labelPriority: number;
+
+    updateSensor(
+        running: boolean,
+        dt: number,
+        myRobot: RobotBase,
+        values: object,
+        uCtx: CanvasRenderingContext2D,
+        udCtx: CanvasRenderingContext2D,
+        personalObstacleList: any[]
+    ): void {
+        values['touch'] = values['touch'] || {};
+        values['touch'] = this.bumped =
+            ((myRobot as RobotRobotino).chassis as RobotinoChassis).bumpedAngle.length > 0;
     }
 }
 
@@ -1835,4 +1949,287 @@ function createSlider($slider: JQuery<HTMLElement>, $range: JQuery<HTMLElement>,
             number: false
         }
     });
+}
+
+export class OdometrySensor implements ISensor, ILabel, IReset, IUpdateAction {
+    x: number = 0;
+    y: number = 0;
+    theta: number = 0;
+
+    labelPriority: number = 7;
+
+    getLabel(): string {
+        let myLabel: string = '<div><label>' + Blockly.Msg['SENSOR_ODOMETRY'] + '</label></div>';
+        myLabel += '<div><label>&nbsp;-&nbsp;x</label><span>' + UTIL.round(this.x, 1) + ' cm</span></div>';
+        myLabel += '<div><label>&nbsp;-&nbsp;y</label><span>' + UTIL.round(this.y, 1) + ' cm</span></div>';
+        myLabel += '<div><label>&nbsp;-&nbsp;θ</label><span>' + UTIL.round(this.theta, 0) + ' °</span></div>';
+        return myLabel;
+    }
+
+    reset(): void {
+        this.x = 0;
+        this.y = 0;
+        this.theta = 0;
+    }
+
+    updateSensor(
+        running: boolean,
+        dt: number,
+        myRobot: RobotBase,
+        values: object,
+        uCtx: CanvasRenderingContext2D,
+        udCtx: CanvasRenderingContext2D,
+        personalObstacleList: any[]
+    ): void {
+        values['odometry'] = values['odometry'] || {};
+        this.theta += SIMATH.toDegree((myRobot as RobotBaseMobile).thetaDiff);
+        values['odometry'][C.THETA] = this.theta;
+        this.x += (myRobot as RobotBaseMobile).chassis['xDiff'] / 3;
+        values['odometry'][C.X] = this.x;
+        this.y += (myRobot as RobotBaseMobile).chassis['yDiff'] / 3;
+        values['odometry'][C.Y] = this.y;
+    }
+
+    updateAction(myRobot: RobotBase, dt: number, interpreterRunning: boolean): void {
+        if (interpreterRunning) {
+            let odometry = myRobot.interpreter.getRobotBehaviour().getActionState('odometry', true);
+            if (odometry && odometry.reset) {
+                switch (odometry.reset) {
+                    case C.X:
+                        this.x = 0;
+                        break;
+                    case C.Y:
+                        this.y = 0;
+                        break;
+                    case C.THETA:
+                        this.theta = 0;
+                        break;
+                    case 'all':
+                        this.reset();
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    }
+}
+
+export class CameraSensor implements ISensor, IDrawable, ILabel, IReset {
+    readonly MAX_MARKER_DIST_SQR = 150 * 3 * 150 * 3;
+    readonly MAX_CAM_Y = 200 * 3 * 200 * 3;
+    readonly LINE_RADIUS: number = 50;
+    x: number;
+    y: number;
+    theta: number;
+    rx: number;
+    ry: number;
+    readonly AOV: number = 2 * Math.PI / 5;
+    listOfMarkersFound: MarkerSimulationObject[] = [];
+
+    labelPriority: number = 8;
+    private THRESHOLD: number = 75;
+    private line: number;
+
+    constructor(pose: Pose, aov: number) {
+        this.x = pose.x;
+        this.y = pose.y;
+        this.theta = pose.theta;
+        this.AOV = aov;
+    }
+
+    drawPriority: number = 1;
+
+    draw(rCtx: CanvasRenderingContext2D, myRobot: RobotBase): void {
+        rCtx.beginPath();
+        rCtx.strokeStyle = '#0000ff';
+        rCtx.beginPath();
+        rCtx.arc(this.x, this.y, 1000, Math.PI / 5, -Math.PI / 5, true);
+        rCtx.arc(this.x, this.y, 30, -Math.PI / 5, +Math.PI / 5, false);
+        rCtx.closePath();
+        rCtx.stroke();
+    }
+
+    getLabel(): string {
+        let myLabel: string = '<div><label>' + 'Line Sensor' + '</label><span>' + this.line + '</span></div>';
+
+        myLabel += '<div><label>' + 'Marker Sensor' + '</label></div>';
+        for (let i = 0; i < this.listOfMarkersFound.length; i++) {
+            let marker = this.listOfMarkersFound[i];
+            myLabel += '<div><label>&nbsp;-&nbsp;id ';
+            myLabel += marker.markerId;
+            myLabel += '</label><span>(';
+            myLabel += UTIL.round(marker.xRel, 3);
+            myLabel += ', ';
+            myLabel += UTIL.round(marker.yRel, 3);
+            myLabel += ', 0)</span></div>';
+        }
+
+        return myLabel;
+    }
+
+    reset(): void {
+
+    }
+
+    updateSensor(
+        running: boolean,
+        dt: number,
+        myRobot: RobotBase,
+        values: object,
+        uCtx: CanvasRenderingContext2D,
+        udCtx: CanvasRenderingContext2D,
+        personalObstacleList: any[],
+        markerList: MarkerSimulationObject[]
+    ): void {
+        this.listOfMarkersFound = [];
+        let robot: RobotRobotino = myRobot as RobotRobotino;
+        SIMATH.transform(robot.pose, this as PointRobotWorld);
+        let myPose: Pose = new Pose(this.rx, this.ry, this.theta);
+        let left = ((myRobot as RobotBaseMobile).pose.theta - this.AOV / 2 + 2 * Math.PI) % (2 * Math.PI);
+        let right = ((myRobot as RobotBaseMobile).pose.theta + this.AOV / 2 + 2 * Math.PI) % (2 * Math.PI);
+        markerList.filter(marker => {
+            let visible: boolean = false;
+            marker.sqrDistance = SIMATH.getDistance(myPose, marker);
+            if (marker.sqrDistance <= this.MAX_MARKER_DIST_SQR) {
+                let myMarkerPoints: Point[] = [{ x: marker.x - myPose.x, y: marker.y - myPose.y },
+                    { x: marker.x + marker.w - myPose.x, y: marker.y - myPose.y },
+                    { x: marker.x + marker.w - myPose.x, y: marker.y + marker.h - myPose.y },
+                    { x: marker.x - myPose.x, y: marker.y + marker.h - myPose.y }];
+                let visible: boolean = true;
+                for (let i = 0; i < myMarkerPoints.length; i++) {
+                    let myAngle = (Math.atan2(myMarkerPoints[i].y, myMarkerPoints[i].x) + 2 * Math.PI) % (2 * Math.PI);
+                    if ((left < right && (myAngle > left && myAngle < right)) || (left > right && (myAngle > left || myAngle < right))) {
+                        let p: Point = this.checkVisibility(robot.id, marker, personalObstacleList);
+                        if (p) {
+                            visible = false;
+                        }
+                    } else {
+                        visible = false;
+                    }
+                }
+                return visible;
+            }
+        }).forEach(marker => {
+            let myAngle = (Math.atan2(marker.y + marker.h / 2 - myPose.y, marker.x + marker.w / 2 - myPose.x) + 2 * Math.PI) % (2 * Math.PI);
+            if (left > right) {
+                right += 2 * Math.PI;
+                if (myAngle < left) {
+                    myAngle = myAngle + 2 * Math.PI;
+                }
+            }
+            marker.xRel = (myAngle - left) / (right - left) - 0.5;
+            marker.yRel = Math.sqrt(marker.sqrDistance) / Math.sqrt(this.MAX_CAM_Y) - 0.5;
+            this.listOfMarkersFound.push(marker);
+        });
+
+        this.line = -1;
+        let leftPoint = { x: this.LINE_RADIUS * Math.cos(left), y: this.LINE_RADIUS * Math.sin(left) };
+        let rightPoint = { x: this.LINE_RADIUS * Math.cos(right), y: this.LINE_RADIUS * Math.sin(right) };
+        let pixYWidth = Math.abs(rightPoint.y - leftPoint.y);
+        let pixXWidth = Math.abs(rightPoint.x - leftPoint.x);
+        let redPixOld = this.calculatePix(uCtx.getImageData(leftPoint.x + myPose.x, leftPoint.y + myPose.y, 1, 1).data);
+        if (pixYWidth > pixXWidth) {
+            if (leftPoint.x > 0) {
+                for (let i = leftPoint.y + this.ry; i <= rightPoint.y + this.ry; i += 0.5) {
+                    let a: number = (this.LINE_RADIUS) * (this.LINE_RADIUS) - (i - this.ry) * (i - this.ry);
+                    let xi = Math.sqrt(a) + this.rx;
+                    let redPix = this.calculatePix(uCtx.getImageData(xi, i, 1, 1).data);
+                    if (Math.abs(redPix - redPixOld) > this.THRESHOLD) {
+                        this.line = Math.abs(i - leftPoint.y - this.ry) / pixYWidth - 0.5;
+                        break;
+                    }
+                    redPixOld = redPix;
+                }
+            } else {
+                for (let i = leftPoint.y + this.ry; i >= rightPoint.y + this.ry; i -= 0.5) {
+                    let a: number = (this.LINE_RADIUS) * (this.LINE_RADIUS) - (i - this.ry) * (i - this.ry);
+                    let xi = -Math.sqrt(a) + this.rx;
+                    let redPix = this.calculatePix(uCtx.getImageData(xi, i, 1, 1).data);
+                    if (Math.abs(redPix - redPixOld) > this.THRESHOLD) {
+                        this.line = Math.abs(i - leftPoint.y - this.ry) / pixYWidth - 0.5;
+                        break;
+                    }
+                    redPixOld = redPix;
+                }
+            }
+        } else {
+            uCtx.fillStyle = '#00ff00';
+            if (leftPoint.y < 0) {
+                for (let i = leftPoint.x + this.rx; i <= rightPoint.x + this.rx; i += 0.5) {
+                    let a: number = (this.LINE_RADIUS) * (this.LINE_RADIUS) - (i - this.rx) * (i - this.rx);
+                    let yi = -Math.sqrt(a);
+
+                    let redPix = this.calculatePix(uCtx.getImageData(i, yi + this.ry, 1, 1).data);
+                    if (Math.abs(redPix - redPixOld) > this.THRESHOLD) {
+                        this.line = Math.abs(i - leftPoint.x - this.rx) / pixXWidth - 0.5;
+                        break;
+                    }
+                }
+            } else {
+                for (let i = leftPoint.x + this.rx; i >= rightPoint.x + this.rx; i -= 0.5) {
+                    let a: number = (this.LINE_RADIUS) * (this.LINE_RADIUS) - (i - this.rx) * (i - this.rx);
+                    let yi = Math.sqrt(a);
+                    let redPix = this.calculatePix(uCtx.getImageData(i, yi + this.ry, 1, 1).data);
+                    if (Math.abs(redPix - redPixOld) > this.THRESHOLD) {
+                        this.line = Math.abs(i - leftPoint.x - this.rx) / pixXWidth - 0.5;
+                        break;
+                    }
+                }
+            }
+        }
+        values['marker'] = {};
+        values['marker'][C.INFO] = {};
+
+        for (let i = 0; i < 16; i++) {
+            values['marker'][C.INFO][i] = [-1, -1, 0];
+        }
+
+        if (this.listOfMarkersFound.length == 0) {
+            values['marker'][C.ID] = [-1];
+        } else {
+            values['marker'][C.ID] = this.listOfMarkersFound.map(marker => marker.markerId);
+            this.listOfMarkersFound.forEach(marker => {
+                values['marker'][C.INFO][marker.markerId] = [marker.xRel, marker.yRel, 0];
+            });
+        }
+        values['camera'] = {};
+        values['camera'][C.LINE] = this.line;
+    }
+
+    private calculatePix(rawPix: Uint8ClampedArray): number {
+        let i = 3;
+        let pix = 0;
+        while (i--) {
+            pix += rawPix[i];
+        }
+        return pix / 3;
+    }
+
+    private checkVisibility(id: number, mP: Point, personalObstacleList: any[]): Point {
+        let myIntersectionPoint: Point;
+        let myLine: Line = { x1: this.rx, y1: this.ry, x2: mP.x, y2: mP.y };
+        for (let i = 0; i < personalObstacleList.length - 1; i++) {
+            let obstacle = personalObstacleList[i];
+            if (obstacle instanceof ChassisMobile && obstacle.id == id) {
+                continue;
+            }
+            if (!(obstacle instanceof CircleSimulationObject)) {
+                let obstacleLines = obstacle.getLines();
+                for (let j = 0; j < obstacleLines.length; j++) {
+                    myIntersectionPoint = SIMATH.getIntersectionPoint(myLine, obstacleLines[j]);
+                    if (myIntersectionPoint) {
+                        return myIntersectionPoint;
+                    }
+                }
+            } else {
+                let myCircle = (obstacle as CircleSimulationObject);
+                myIntersectionPoint = SIMATH.getClosestIntersectionPointCircle(myLine, myCircle);
+                if (myIntersectionPoint) {
+                    return myIntersectionPoint;
+                }
+            }
+        }
+        return null;
+    }
 }

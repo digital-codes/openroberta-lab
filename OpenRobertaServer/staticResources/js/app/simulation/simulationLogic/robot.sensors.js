@@ -13,9 +13,9 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-define(["require", "exports", "robot.base.mobile", "simulation.math", "util", "robot.actuators", "simulation.objects", "blockly", "volume-meter", "jquery", "simulation.roberta"], function (require, exports, robot_base_mobile_1, SIMATH, UTIL, robot_actuators_1, simulation_objects_1, Blockly, VolumeMeter, $, simulation_roberta_1) {
+define(["require", "exports", "robot.base.mobile", "interpreter.constants", "simulation.math", "util", "robot.actuators", "simulation.objects", "blockly", "volume-meter", "jquery", "simulation.roberta"], function (require, exports, robot_base_mobile_1, C, SIMATH, UTIL, robot_actuators_1, simulation_objects_1, Blockly, VolumeMeter, $, simulation_roberta_1) {
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.SoundSensor = exports.VolumeMeterSensor = exports.TemperatureSensor = exports.Rob3rtaInfraredSensor = exports.CalliopeLightSensor = exports.CompassSensor = exports.GestureSensor = exports.MbotButton = exports.MicrobitPins = exports.Pins = exports.TouchKeys = exports.EV3Keys = exports.Keys = exports.GyroSensorExt = exports.GyroSensor = exports.LightSensor = exports.NXTColorSensor = exports.ColorSensor = exports.TapSensor = exports.TouchSensor = exports.MbotInfraredSensor = exports.ThymioInfraredSensors = exports.ThymioLineSensor = exports.ThymioInfraredSensor = exports.InfraredSensor = exports.UltrasonicSensor = exports.DistanceSensor = exports.Timer = void 0;
+    exports.CameraSensor = exports.OdometrySensor = exports.SoundSensor = exports.VolumeMeterSensor = exports.TemperatureSensor = exports.Rob3rtaInfraredSensor = exports.CalliopeLightSensor = exports.CompassSensor = exports.GestureSensor = exports.MbotButton = exports.MicrobitPins = exports.Pins = exports.TouchKeys = exports.EV3Keys = exports.Keys = exports.GyroSensorExt = exports.GyroSensor = exports.LightSensor = exports.NXTColorSensor = exports.ColorSensor = exports.RobotinoTouchSensor = exports.TapSensor = exports.TouchSensor = exports.RobotinoInfraredSensor = exports.MbotInfraredSensor = exports.ThymioInfraredSensors = exports.ThymioLineSensor = exports.ThymioInfraredSensor = exports.InfraredSensor = exports.UltrasonicSensor = exports.DistanceSensor = exports.Timer = void 0;
     var WAVE_LENGTH = 60;
     var Timer = /** @class */ (function () {
         function Timer(num) {
@@ -64,7 +64,7 @@ define(["require", "exports", "robot.base.mobile", "simulation.math", "util", "r
     }());
     exports.Timer = Timer;
     var DistanceSensor = /** @class */ (function () {
-        function DistanceSensor(port, x, y, theta, maxDistance, color) {
+        function DistanceSensor(port, x, y, theta, maxDistance) {
             this.color = '#FF69B4';
             this.cx = 0;
             this.cy = 0;
@@ -81,7 +81,6 @@ define(["require", "exports", "robot.base.mobile", "simulation.math", "util", "r
             this.theta = theta;
             this.maxDistance = maxDistance;
             this.maxLength = 3 * maxDistance;
-            this.color = color || this.color;
         }
         DistanceSensor.prototype.draw = function (rCtx, myRobot) {
             rCtx.restore();
@@ -161,7 +160,7 @@ define(["require", "exports", "robot.base.mobile", "simulation.math", "util", "r
                 var uDis = [this.maxLength, this.maxLength, this.maxLength, this.maxLength, this.maxLength];
                 for (var i = 0; i < personalObstacleList.length; i++) {
                     var myObstacle = personalObstacleList[i];
-                    if (myObstacle instanceof robot_actuators_1.ChassisDiffDrive && myObstacle.id == robot.id) {
+                    if (myObstacle instanceof robot_actuators_1.ChassisMobile && myObstacle.id == robot.id) {
                         continue;
                     }
                     if (!(myObstacle instanceof simulation_objects_1.CircleSimulationObject)) {
@@ -238,8 +237,11 @@ define(["require", "exports", "robot.base.mobile", "simulation.math", "util", "r
     exports.UltrasonicSensor = UltrasonicSensor;
     var InfraredSensor = /** @class */ (function (_super) {
         __extends(InfraredSensor, _super);
-        function InfraredSensor() {
-            return _super !== null && _super.apply(this, arguments) || this;
+        function InfraredSensor(port, x, y, theta, maxDistance, relative) {
+            var _this = _super.call(this, port, x, y, theta, maxDistance) || this;
+            _this.relative = true;
+            _this.relative = relative !== undefined ? relative : _this.relative;
+            return _this;
         }
         InfraredSensor.prototype.getLabel = function () {
             return ('<div><label>' +
@@ -255,11 +257,21 @@ define(["require", "exports", "robot.base.mobile", "simulation.math", "util", "r
             var distance = this.distance / 3.0;
             values['infrared'] = values['infrared'] || {};
             values['infrared'][this.port] = {};
-            if (distance < 70) {
-                values['infrared'][this.port].distance = (100.0 / 70.0) * distance;
+            if (this.relative) {
+                if (distance < this.maxDistance) {
+                    values['infrared'][this.port].distance = (100.0 / this.maxDistance) * distance;
+                }
+                else {
+                    values['infrared'][this.port].distance = 100.0;
+                }
             }
             else {
-                values['infrared'][this.port].distance = 100.0;
+                if (distance < this.maxDistance) {
+                    values['infrared'][this.port].distance = distance;
+                }
+                else {
+                    values['infrared'][this.port].distance = this.maxDistance;
+                }
             }
             values['infrared'][this.port].presence = false;
         };
@@ -268,8 +280,11 @@ define(["require", "exports", "robot.base.mobile", "simulation.math", "util", "r
     exports.InfraredSensor = InfraredSensor;
     var ThymioInfraredSensor = /** @class */ (function (_super) {
         __extends(ThymioInfraredSensor, _super);
-        function ThymioInfraredSensor(port, x, y, theta, maxDistance, color) {
-            return _super.call(this, port, x, y, theta, maxDistance, color) || this;
+        function ThymioInfraredSensor(port, x, y, theta, maxDistance, name) {
+            var _this = _super.call(this, port, x, y, theta, maxDistance, true) || this;
+            _this.name = '';
+            _this.name = name !== undefined ? name : _this.name;
+            return _this;
         }
         ThymioInfraredSensor.prototype.getLabel = function () {
             var distance = this.distance / 3.0;
@@ -280,7 +295,7 @@ define(["require", "exports", "robot.base.mobile", "simulation.math", "util", "r
                 distance = 100.0;
             }
             distance = UTIL.round(distance, 0);
-            return '<div><label>&nbsp;-&nbsp;' + this.color + '</label><span>' + UTIL.roundUltraSound(distance, 0) + ' %</span></div>';
+            return '<div><label>&nbsp;-&nbsp;' + this.name + '</label><span>' + UTIL.roundUltraSound(distance, 0) + ' %</span></div>';
         };
         ThymioInfraredSensor.prototype.updateSensor = function (running, dt, myRobot, values, uCtx, udCtx, personalObstacleList) {
             _super.prototype.updateSensor.call(this, running, dt, myRobot, values, uCtx, udCtx, personalObstacleList);
@@ -321,7 +336,7 @@ define(["require", "exports", "robot.base.mobile", "simulation.math", "util", "r
             rCtx.rotate(myRobot.pose.theta);
         };
         return ThymioInfraredSensor;
-    }(DistanceSensor));
+    }(InfraredSensor));
     exports.ThymioInfraredSensor = ThymioInfraredSensor;
     var ThymioLineSensor = /** @class */ (function () {
         function ThymioLineSensor(location) {
@@ -573,6 +588,33 @@ define(["require", "exports", "robot.base.mobile", "simulation.math", "util", "r
         return MbotInfraredSensor;
     }());
     exports.MbotInfraredSensor = MbotInfraredSensor;
+    var RobotinoInfraredSensor = /** @class */ (function () {
+        function RobotinoInfraredSensor() {
+            this.infraredSensorArray = [];
+            this.infraredSensorArray[0] = new InfraredSensor('1', 68 * Math.cos(0), 68 * Math.sin(0), 0, 30, false);
+            this.infraredSensorArray[1] = new InfraredSensor('2', 68 * Math.cos((-Math.PI * 2) / 9), 68 * Math.sin((-Math.PI * 2) / 9), (-Math.PI * 2) / 9, 30, false);
+            this.infraredSensorArray[2] = new InfraredSensor('3', 68 * Math.cos((-Math.PI * 4) / 9), 68 * Math.sin((-Math.PI * 4) / 9), (-Math.PI * 4) / 9, 30, false);
+            this.infraredSensorArray[3] = new InfraredSensor('4', 68 * Math.cos((-Math.PI * 6) / 9), 68 * Math.sin((-Math.PI * 6) / 9), (-Math.PI * 6) / 9, 30, false);
+            this.infraredSensorArray[4] = new InfraredSensor('5', 68 * Math.cos((-Math.PI * 8) / 9), 68 * Math.sin((-Math.PI * 8) / 9), (-Math.PI * 8) / 9, 30, false);
+            this.infraredSensorArray[9] = new InfraredSensor('9', 68 * Math.cos((Math.PI * 2) / 9), 68 * Math.sin((Math.PI * 2) / 9), (Math.PI * 2) / 9, 30, false);
+            this.infraredSensorArray[8] = new InfraredSensor('8', 68 * Math.cos((Math.PI * 4) / 9), 68 * Math.sin((Math.PI * 4) / 9), (Math.PI * 4) / 9, 30, false);
+            this.infraredSensorArray[7] = new InfraredSensor('7', 68 * Math.cos((Math.PI * 6) / 9), 68 * Math.sin((Math.PI * 6) / 9), (Math.PI * 6) / 9, 30, false);
+            this.infraredSensorArray[6] = new InfraredSensor('6', 68 * Math.cos((Math.PI * 8) / 9), 68 * Math.sin((Math.PI * 8) / 9), (Math.PI * 8) / 9, 30, false);
+        }
+        RobotinoInfraredSensor.prototype.draw = function (rCtx, myRobot) {
+            this.infraredSensorArray.forEach(function (sensor) { return sensor.draw(rCtx, myRobot); });
+        };
+        RobotinoInfraredSensor.prototype.getLabel = function () {
+            var myLabel = '';
+            this.infraredSensorArray.forEach(function (sensor) { return (myLabel += sensor.getLabel()); });
+            return myLabel;
+        };
+        RobotinoInfraredSensor.prototype.updateSensor = function (running, dt, myRobot, values, uCtx, udCtx, personalObstacleList) {
+            this.infraredSensorArray.forEach(function (sensor) { return sensor.updateSensor(running, dt, myRobot, values, uCtx, udCtx, personalObstacleList); });
+        };
+        return RobotinoInfraredSensor;
+    }());
+    exports.RobotinoInfraredSensor = RobotinoInfraredSensor;
     var TouchSensor = /** @class */ (function () {
         function TouchSensor(port, x, y, color) {
             this.color = '#FF69B4';
@@ -625,6 +667,22 @@ define(["require", "exports", "robot.base.mobile", "simulation.math", "util", "r
         return TapSensor;
     }());
     exports.TapSensor = TapSensor;
+    var RobotinoTouchSensor = /** @class */ (function () {
+        function RobotinoTouchSensor() {
+            this.bumped = false;
+            this.drawPriority = 4;
+        }
+        RobotinoTouchSensor.prototype.getLabel = function () {
+            return '<div><label>' + Blockly.Msg['SENSOR_TOUCH'] + '</label><span>' + this.bumped + '</span></div>';
+        };
+        RobotinoTouchSensor.prototype.updateSensor = function (running, dt, myRobot, values, uCtx, udCtx, personalObstacleList) {
+            values['touch'] = values['touch'] || {};
+            values['touch'] = this.bumped =
+                myRobot.chassis.bumpedAngle.length > 0;
+        };
+        return RobotinoTouchSensor;
+    }());
+    exports.RobotinoTouchSensor = RobotinoTouchSensor;
     var ColorSensor = /** @class */ (function () {
         function ColorSensor(port, x, y, theta, r, color) {
             this.color = 'grey';
@@ -1476,4 +1534,254 @@ define(["require", "exports", "robot.base.mobile", "simulation.math", "util", "r
             }
         });
     }
+    var OdometrySensor = /** @class */ (function () {
+        function OdometrySensor() {
+            this.x = 0;
+            this.y = 0;
+            this.theta = 0;
+            this.labelPriority = 7;
+        }
+        OdometrySensor.prototype.getLabel = function () {
+            var myLabel = '<div><label>' + Blockly.Msg['SENSOR_ODOMETRY'] + '</label></div>';
+            myLabel += '<div><label>&nbsp;-&nbsp;x</label><span>' + UTIL.round(this.x, 1) + ' cm</span></div>';
+            myLabel += '<div><label>&nbsp;-&nbsp;y</label><span>' + UTIL.round(this.y, 1) + ' cm</span></div>';
+            myLabel += '<div><label>&nbsp;-&nbsp;θ</label><span>' + UTIL.round(this.theta, 0) + ' °</span></div>';
+            return myLabel;
+        };
+        OdometrySensor.prototype.reset = function () {
+            this.x = 0;
+            this.y = 0;
+            this.theta = 0;
+        };
+        OdometrySensor.prototype.updateSensor = function (running, dt, myRobot, values, uCtx, udCtx, personalObstacleList) {
+            values['odometry'] = values['odometry'] || {};
+            this.theta += SIMATH.toDegree(myRobot.thetaDiff);
+            values['odometry'][C.THETA] = this.theta;
+            this.x += myRobot.chassis['xDiff'] / 3;
+            values['odometry'][C.X] = this.x;
+            this.y += myRobot.chassis['yDiff'] / 3;
+            values['odometry'][C.Y] = this.y;
+        };
+        OdometrySensor.prototype.updateAction = function (myRobot, dt, interpreterRunning) {
+            if (interpreterRunning) {
+                var odometry = myRobot.interpreter.getRobotBehaviour().getActionState('odometry', true);
+                if (odometry && odometry.reset) {
+                    switch (odometry.reset) {
+                        case C.X:
+                            this.x = 0;
+                            break;
+                        case C.Y:
+                            this.y = 0;
+                            break;
+                        case C.THETA:
+                            this.theta = 0;
+                            break;
+                        case 'all':
+                            this.reset();
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        };
+        return OdometrySensor;
+    }());
+    exports.OdometrySensor = OdometrySensor;
+    var CameraSensor = /** @class */ (function () {
+        function CameraSensor(pose, aov) {
+            this.MAX_MARKER_DIST_SQR = 150 * 3 * 150 * 3;
+            this.MAX_CAM_Y = 200 * 3 * 200 * 3;
+            this.LINE_RADIUS = 50;
+            this.AOV = 2 * Math.PI / 5;
+            this.listOfMarkersFound = [];
+            this.labelPriority = 8;
+            this.THRESHOLD = 75;
+            this.drawPriority = 1;
+            this.x = pose.x;
+            this.y = pose.y;
+            this.theta = pose.theta;
+            this.AOV = aov;
+        }
+        CameraSensor.prototype.draw = function (rCtx, myRobot) {
+            rCtx.beginPath();
+            rCtx.strokeStyle = '#0000ff';
+            rCtx.beginPath();
+            rCtx.arc(this.x, this.y, 1000, Math.PI / 5, -Math.PI / 5, true);
+            rCtx.arc(this.x, this.y, 30, -Math.PI / 5, +Math.PI / 5, false);
+            rCtx.closePath();
+            rCtx.stroke();
+        };
+        CameraSensor.prototype.getLabel = function () {
+            var myLabel = '<div><label>' + 'Line Sensor' + '</label><span>' + this.line + '</span></div>';
+            myLabel += '<div><label>' + 'Marker Sensor' + '</label></div>';
+            for (var i = 0; i < this.listOfMarkersFound.length; i++) {
+                var marker = this.listOfMarkersFound[i];
+                myLabel += '<div><label>&nbsp;-&nbsp;id ';
+                myLabel += marker.markerId;
+                myLabel += '</label><span>(';
+                myLabel += UTIL.round(marker.xRel, 3);
+                myLabel += ', ';
+                myLabel += UTIL.round(marker.yRel, 3);
+                myLabel += ', 0)</span></div>';
+            }
+            return myLabel;
+        };
+        CameraSensor.prototype.reset = function () {
+        };
+        CameraSensor.prototype.updateSensor = function (running, dt, myRobot, values, uCtx, udCtx, personalObstacleList, markerList) {
+            var _this = this;
+            this.listOfMarkersFound = [];
+            var robot = myRobot;
+            SIMATH.transform(robot.pose, this);
+            var myPose = new robot_base_mobile_1.Pose(this.rx, this.ry, this.theta);
+            var left = (myRobot.pose.theta - this.AOV / 2 + 2 * Math.PI) % (2 * Math.PI);
+            var right = (myRobot.pose.theta + this.AOV / 2 + 2 * Math.PI) % (2 * Math.PI);
+            markerList.filter(function (marker) {
+                var visible = false;
+                marker.sqrDistance = SIMATH.getDistance(myPose, marker);
+                if (marker.sqrDistance <= _this.MAX_MARKER_DIST_SQR) {
+                    var myMarkerPoints = [{ x: marker.x - myPose.x, y: marker.y - myPose.y },
+                        { x: marker.x + marker.w - myPose.x, y: marker.y - myPose.y },
+                        { x: marker.x + marker.w - myPose.x, y: marker.y + marker.h - myPose.y },
+                        { x: marker.x - myPose.x, y: marker.y + marker.h - myPose.y }];
+                    var visible_1 = true;
+                    for (var i = 0; i < myMarkerPoints.length; i++) {
+                        var myAngle = (Math.atan2(myMarkerPoints[i].y, myMarkerPoints[i].x) + 2 * Math.PI) % (2 * Math.PI);
+                        if ((left < right && (myAngle > left && myAngle < right)) || (left > right && (myAngle > left || myAngle < right))) {
+                            var p = _this.checkVisibility(robot.id, marker, personalObstacleList);
+                            if (p) {
+                                visible_1 = false;
+                            }
+                        }
+                        else {
+                            visible_1 = false;
+                        }
+                    }
+                    return visible_1;
+                }
+            }).forEach(function (marker) {
+                var myAngle = (Math.atan2(marker.y + marker.h / 2 - myPose.y, marker.x + marker.w / 2 - myPose.x) + 2 * Math.PI) % (2 * Math.PI);
+                if (left > right) {
+                    right += 2 * Math.PI;
+                    if (myAngle < left) {
+                        myAngle = myAngle + 2 * Math.PI;
+                    }
+                }
+                marker.xRel = (myAngle - left) / (right - left) - 0.5;
+                marker.yRel = Math.sqrt(marker.sqrDistance) / Math.sqrt(_this.MAX_CAM_Y) - 0.5;
+                _this.listOfMarkersFound.push(marker);
+            });
+            this.line = -1;
+            var leftPoint = { x: this.LINE_RADIUS * Math.cos(left), y: this.LINE_RADIUS * Math.sin(left) };
+            var rightPoint = { x: this.LINE_RADIUS * Math.cos(right), y: this.LINE_RADIUS * Math.sin(right) };
+            var pixYWidth = Math.abs(rightPoint.y - leftPoint.y);
+            var pixXWidth = Math.abs(rightPoint.x - leftPoint.x);
+            var redPixOld = this.calculatePix(uCtx.getImageData(leftPoint.x + myPose.x, leftPoint.y + myPose.y, 1, 1).data);
+            if (pixYWidth > pixXWidth) {
+                if (leftPoint.x > 0) {
+                    for (var i = leftPoint.y + this.ry; i <= rightPoint.y + this.ry; i += 0.5) {
+                        var a = (this.LINE_RADIUS) * (this.LINE_RADIUS) - (i - this.ry) * (i - this.ry);
+                        var xi = Math.sqrt(a) + this.rx;
+                        var redPix = this.calculatePix(uCtx.getImageData(xi, i, 1, 1).data);
+                        if (Math.abs(redPix - redPixOld) > this.THRESHOLD) {
+                            this.line = Math.abs(i - leftPoint.y - this.ry) / pixYWidth - 0.5;
+                            break;
+                        }
+                        redPixOld = redPix;
+                    }
+                }
+                else {
+                    for (var i = leftPoint.y + this.ry; i >= rightPoint.y + this.ry; i -= 0.5) {
+                        var a = (this.LINE_RADIUS) * (this.LINE_RADIUS) - (i - this.ry) * (i - this.ry);
+                        var xi = -Math.sqrt(a) + this.rx;
+                        var redPix = this.calculatePix(uCtx.getImageData(xi, i, 1, 1).data);
+                        if (Math.abs(redPix - redPixOld) > this.THRESHOLD) {
+                            this.line = Math.abs(i - leftPoint.y - this.ry) / pixYWidth - 0.5;
+                            break;
+                        }
+                        redPixOld = redPix;
+                    }
+                }
+            }
+            else {
+                uCtx.fillStyle = '#00ff00';
+                if (leftPoint.y < 0) {
+                    for (var i = leftPoint.x + this.rx; i <= rightPoint.x + this.rx; i += 0.5) {
+                        var a = (this.LINE_RADIUS) * (this.LINE_RADIUS) - (i - this.rx) * (i - this.rx);
+                        var yi = -Math.sqrt(a);
+                        var redPix = this.calculatePix(uCtx.getImageData(i, yi + this.ry, 1, 1).data);
+                        if (Math.abs(redPix - redPixOld) > this.THRESHOLD) {
+                            this.line = Math.abs(i - leftPoint.x - this.rx) / pixXWidth - 0.5;
+                            break;
+                        }
+                    }
+                }
+                else {
+                    for (var i = leftPoint.x + this.rx; i >= rightPoint.x + this.rx; i -= 0.5) {
+                        var a = (this.LINE_RADIUS) * (this.LINE_RADIUS) - (i - this.rx) * (i - this.rx);
+                        var yi = Math.sqrt(a);
+                        var redPix = this.calculatePix(uCtx.getImageData(i, yi + this.ry, 1, 1).data);
+                        if (Math.abs(redPix - redPixOld) > this.THRESHOLD) {
+                            this.line = Math.abs(i - leftPoint.x - this.rx) / pixXWidth - 0.5;
+                            break;
+                        }
+                    }
+                }
+            }
+            values['marker'] = {};
+            values['marker'][C.INFO] = {};
+            for (var i = 0; i < 16; i++) {
+                values['marker'][C.INFO][i] = [-1, -1, 0];
+            }
+            if (this.listOfMarkersFound.length == 0) {
+                values['marker'][C.ID] = [-1];
+            }
+            else {
+                values['marker'][C.ID] = this.listOfMarkersFound.map(function (marker) { return marker.markerId; });
+                this.listOfMarkersFound.forEach(function (marker) {
+                    values['marker'][C.INFO][marker.markerId] = [marker.xRel, marker.yRel, 0];
+                });
+            }
+            values['camera'] = {};
+            values['camera'][C.LINE] = this.line;
+        };
+        CameraSensor.prototype.calculatePix = function (rawPix) {
+            var i = 3;
+            var pix = 0;
+            while (i--) {
+                pix += rawPix[i];
+            }
+            return pix / 3;
+        };
+        CameraSensor.prototype.checkVisibility = function (id, mP, personalObstacleList) {
+            var myIntersectionPoint;
+            var myLine = { x1: this.rx, y1: this.ry, x2: mP.x, y2: mP.y };
+            for (var i = 0; i < personalObstacleList.length - 1; i++) {
+                var obstacle = personalObstacleList[i];
+                if (obstacle instanceof robot_actuators_1.ChassisMobile && obstacle.id == id) {
+                    continue;
+                }
+                if (!(obstacle instanceof simulation_objects_1.CircleSimulationObject)) {
+                    var obstacleLines = obstacle.getLines();
+                    for (var j = 0; j < obstacleLines.length; j++) {
+                        myIntersectionPoint = SIMATH.getIntersectionPoint(myLine, obstacleLines[j]);
+                        if (myIntersectionPoint) {
+                            return myIntersectionPoint;
+                        }
+                    }
+                }
+                else {
+                    var myCircle = obstacle;
+                    myIntersectionPoint = SIMATH.getClosestIntersectionPointCircle(myLine, myCircle);
+                    if (myIntersectionPoint) {
+                        return myIntersectionPoint;
+                    }
+                }
+            }
+            return null;
+        };
+        return CameraSensor;
+    }());
+    exports.CameraSensor = CameraSensor;
 });

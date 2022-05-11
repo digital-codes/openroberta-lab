@@ -35,6 +35,7 @@ public class C {
     public static final String BUTTON_B = "B";
     public static final String BUTTON_LED_ACTION = "buttonLedAction";
     public static final String CALL = "call";
+    public static final String CAMERA = "camera";
     public static final String CAST_CHAR = "mathCastCharFunct";
     public static final String CAST_STRING = "mathCastStringFunct";
     public static final String CAST_STRING_NUMBER = "textStringCastNumberFunct";
@@ -115,6 +116,7 @@ public class C {
     public static final String GYRO_SENSOR_RESET = "createResetGyroSensor";
     public static final String HIGHTLIGHT_PLUS = "+";
     public static final String HIGHTLIGHT_MINUS = "-";
+    public static final String ID = "id";
     public static final String IF_RETURN = "createMethodIfReturn";
     public static final String IF_STMT = "IfStatement";
     public static final String IF_TRUE_STMT = "IfTrueStatement";
@@ -123,6 +125,7 @@ public class C {
     public static final String IMAGE_INVERT_ACTION = "ImageInvertAction";
     public static final String IMAGE_SHIFT_ACTION = "ImageShiftAction";
     public static final String IN = "in";
+    public static final String INFO = "info";
     public static final String INFRARED = "infrared";
     public static final String INITIATE_BLOCK = "INITIATE_BLOCK";
     public static final String INSERT = "insert";
@@ -152,6 +155,7 @@ public class C {
     public static final String LOOP_NUMBER = "loopNumber";
     public static final String LT = "LT";
     public static final String LTE = "LTE";
+    public static final String MARKER = "marker";
     public static final String MATH_CHANGE = "mathChange";
     public static final String MATH_CONST = "createMathConstant";
     public static final String MATH_ON_LIST = "createMathOnList";
@@ -217,6 +221,13 @@ public class C {
     public static final String PROGRAM_COUNTER = "pc";
     public static final String STEP = "step";
     public static final String END = "end";
+    public static final String ODOMETRY = "odometry";
+    public static final String ODOMETRY_SENSOR_RESET = "createOdometryReset";
+    public static final String OMNI_DRIVE = "omniDrive";
+    public static final String OMNI_DRIVE_DIST = "omniDriveDist";
+    public static final String OMNI_DRIVE_STOP = "omniDriveStop";
+    public static final String OMNI_DRIVE_TURN = "omniDriveTurn";
+    public static final String OMNI_DRIVE_POSITION = "omniDrivePosition";
     public static final String OPCODE = "opc";
     public static final String OR = "OR";
     public static final String ORANGE = "ORANGE";
@@ -302,6 +313,7 @@ public class C {
     public static final String TEXT_JOIN = "createTextJoin";
     public static final String THEN_LIST = "thenList";
     public static final String THEN_STMTS = "thenStmts";
+    public static final String THETA = "theta";
     public static final String TIME = "time";
     public static final String TIMER = "timer";
     public static final String TIMES = "TIMES";

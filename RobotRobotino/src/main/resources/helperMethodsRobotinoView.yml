@@ -1,0 +1,138 @@
+include: "classpath:/common.methods.yml"
+
+## FunctionNames
+
+OMNIDRIVESPEED:
+  PYTHON: |
+    def setSpeedOmnidrivePercent(x, y, z):
+        global currentSpeed
+        currentSpeed[0] = (1 / 100 * x) * MAXSPEED
+        currentSpeed[1] = (1 / 100 * y) * MAXSPEED
+        currentSpeed[2] = 1 / 100 * z * MAXSPEED
+
+POSTVEL:
+  PYTHON: |
+    def _postVel():
+        OMNIDRIVE_URL = "http://" + ROBOTINOIP + "/data/omnidrive"
+        r = requests.post(url = OMNIDRIVE_URL, params = PARAMS, json = currentSpeed )
+        if r.status_code != requests.codes.ok:
+            raise RuntimeError("Error: post to %s with params %s failed", OMNIDRIVE_URL, PARAMS)
+
+GETDISTANCE:
+  PYTHON: |
+    def _getDistance(port):
+        DISTANCES_URL = "http://" + ROBOTINOIP + "/data/distancesensorarray"
+        r = requests.get(url = DISTANCES_URL, params = PARAMS)
+        if r.status_code == requests.codes.ok:
+            data = r.json()
+            return data[port-1] * 100
+        else:
+            raise RuntimeError("Error: get from %s with params %s failed", DISTANCES_URL, PARAMS)
+
+ISBUMPED:
+  PYTHON: |
+    def _isBumped():
+        BUMPER_URL = "http://" + ROBOTINOIP + "/data/bumper"
+        r = requests.get(url = BUMPER_URL, params = PARAMS)
+        if r.status_code == requests.codes.ok:
+            data = r.json()
+            return data["value"]
+        else:
+            raise RuntimeError("Error: get from %s with params %s failed", BUMPER_URL, PARAMS)
+
+SETDIGITALPIN:
+  PYTHON: |
+    def _setDigitalPin(pos, value):
+        _digitalPinValues[pos-1] = int(value)
+        DIGITALPIN_URL = "http://" + ROBOTINOIP + "/data/digitaloutputstatus"
+            r = requests.post(url = DIGITALPIN_URL, params = PARAMS, json = _digitalPinValues )
+            if r.status_code != requests.codes.ok:
+                #print("Error: post to %s with params %s failed", OMNIDRIVE_URL, PARAMS)
+
+GETDIGITALPIN:
+  PYTHON: |
+    def _getDigitalPin(pos):
+        DIGITALPIN_URL = "http://" + ROBOTINOIP + "/data/digitalinputarray"
+        r = requests.get(url = DIGITALPIN_URL, params = PARAMS)
+        if r.status_code == requests.codes.ok:
+            data = r.json()
+            return data[pos-1]
+        else:
+            raise RuntimeError("Error: get from %s with params %s failed", DISTANCES_URL, PARAMS)
+
+GETANALOGPIN:
+  PYTHON: |
+    def _getAnalogPin(pos):
+        ANALOGPIN_URL = "http://" + ROBOTINOIP + "/data/analoginputarray"
+        r = requests.get(url = ANALOGPIN_URL, params = PARAMS)
+        if r.status_code == requests.codes.ok:
+            data = r.json()
+            return data[pos-1]
+        else:
+            raise RuntimeError("Error: get from %s with params %s failed", DISTANCES_URL, PARAMS)
+
+GETODOMETRY:
+  PYTHON: |
+    def _getOdometry(val):
+        ODOMETRY_URL = "http://" + ROBOTINOIP + "/data/odometry"
+        r = requests.get(url = ODOMETRY_URL, params = PARAMS)
+        if r.status_code == requests.codes.ok:
+            data = r.json()
+            #data: [x,y,rot,vx,vy,omega,seq]
+            if val == 'x':
+                return data[0]
+            elif val == 'y':
+                return data[1]
+            elif val == 'rot':
+                return data[2]
+            else:
+                return data
+        else:
+            raise RuntimeError("Error: get from %s with params %s failed", DISTANCES_URL, PARAMS)
+
+DRIVETOPOSITION:
+  PYTHON: |
+    def _driveToPosition(RV, x, y, speed):
+        global currentSpeed
+        RV.writeFloatVector(2, [x * 10, y * 10, RV.readFloatVector(1)[2], 1])
+        time.sleep(0.5)
+        while RV.readFloatVector(2)[3] != 1:
+            speedX = RV.readFloatVector(2)[0] * speed/100
+            speedY = RV.readFloatVector(2)[1] * speed/100
+            currentSpeed = [speedX , speedY, 0]
+            time.sleep(0.05)
+        currentSpeed = [0, 0, 0]
+
+DRIVEFORDISTANCE:
+  PYTHON: |
+    def _driveForDistance(RV, x, y, distance):
+        distance = distance
+        angle = math.atan2(y,  x)
+        targetX = RV.readFloatVector(1)[0] + distance * math.cos(angle)
+        targetY = RV.readFloatVector(1)[1] + distance * math.sin(angle)
+        resultingSpeed = math.sqrt(math.pow(x,2) + math.pow(y,2))
+        _driveToPosition(RV, targetX, targetY, resultingSpeed)
+
+TURNFORDEGREES:
+  PYTHON: |
+    def _turnForDegrees(RV, speed, degrees):
+        if degrees < 0:
+            speed = speed * -1
+        distance = abs(degrees)
+        lastOrientation = RV.readFloatVector(1)[2]
+        setSpeedOmnidrivePercent(0, 0, speed)
+        while distance > 0:
+            orientation = RV.readFloatVector(1)[2]
+            traveledDegrees = abs(orientation - lastOrientation)
+            if ((speed > 0 and lastOrientation > orientation) or (speed < 0 and lastOrientation < orientation)) and traveledDegrees > 300:
+                traveledDegrees = 360 - traveledDegrees
+            distance -= traveledDegrees
+            lastOrientation = orientation
+            time.sleep(0.05)
+        setSpeedOmnidrivePercent(0, 0, 0)
+
+GETMARKERINFO:
+  PYTHON: |
+    def _getMarkerInformation(id):
+        RV.writeFloat(3,id)
+        return RV.readFloatVector(4)

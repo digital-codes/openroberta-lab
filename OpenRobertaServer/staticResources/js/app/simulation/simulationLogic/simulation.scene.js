@@ -27,23 +27,26 @@ define(["require", "exports", "util", "jquery", "simulation.objects", "robot.bas
                 x: 0,
                 y: 0,
                 w: 0,
-                h: 0,
+                h: 0
             };
             this._colorAreaList = [];
             this._obstacleList = [];
+            this._markerList = [];
             this._redrawColorAreas = false;
             this._redrawObstacles = false;
+            this._redrawMarkers = false;
             this._redrawRuler = false;
             this._robots = [];
             this._uniqueObjectId = 1; // 0 is blocked by the standard obstacle, 1 is blocked by the ruler
             this.sim = sim;
             this.uCanvas = document.createElement('canvas');
-            this.uCtx = this.uCanvas.getContext('2d'); // unit context
+            this.uCtx = this.uCanvas.getContext('2d', { willReadFrequently: true }); // unit context
             this.udCanvas = document.createElement('canvas');
-            this.udCtx = this.udCanvas.getContext('2d'); // unit context
+            this.udCtx = this.udCanvas.getContext('2d', { willReadFrequently: true }); // unit context
             this.bCtx = $('#backgroundLayer')[0].getContext('2d'); // background context
             this.dCtx = $('#drawLayer')[0].getContext('2d'); // background context
             this.mCtx = $('#rulerLayer')[0].getContext('2d'); // ruler == *m*easurement context
+            this.aCtx = $('#arucoMarkerLayer')[0].getContext('2d'); // object context
             this.oCtx = $('#objectLayer')[0].getContext('2d'); // object context
             this.rCtx = $('#robotLayer')[0].getContext('2d'); // robot context
         }
@@ -89,6 +92,18 @@ define(["require", "exports", "util", "jquery", "simulation.objects", "robot.bas
             enumerable: false,
             configurable: true
         });
+        Object.defineProperty(SimulationScene.prototype, "markerList", {
+            get: function () {
+                return this._markerList;
+            },
+            set: function (value) {
+                this.clearList(this._markerList);
+                this._markerList = value;
+                this.redrawMarkers = true;
+            },
+            enumerable: false,
+            configurable: true
+        });
         Object.defineProperty(SimulationScene.prototype, "redrawObstacles", {
             get: function () {
                 return this._redrawObstacles;
@@ -105,6 +120,16 @@ define(["require", "exports", "util", "jquery", "simulation.objects", "robot.bas
             },
             set: function (value) {
                 this._redrawColorAreas = value;
+            },
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(SimulationScene.prototype, "redrawMarkers", {
+            get: function () {
+                return this._redrawMarkers;
+            },
+            set: function (value) {
+                this._redrawMarkers = value;
             },
             enumerable: false,
             configurable: true
@@ -157,7 +182,7 @@ define(["require", "exports", "util", "jquery", "simulation.objects", "robot.bas
             this.addSimulationObject(this.obstacleList, shape, simulation_objects_1.SimObjectType.Obstacle);
             this.redrawObstacles = true;
         };
-        SimulationScene.prototype.addSimulationObject = function (list, shape, type) {
+        SimulationScene.prototype.addSimulationObject = function (list, shape, type, markerId) {
             var $robotLayer = $('#robotLayer');
             $robotLayer.attr('tabindex', 0);
             $robotLayer.trigger('focus');
@@ -165,8 +190,11 @@ define(["require", "exports", "util", "jquery", "simulation.objects", "robot.bas
             var y = Math.random() * (this.ground['h'] - 200) + 100;
             var newObject = simulation_objects_1.SimObjectFactory.getSimObject(this.uniqueObjectId, this, this.sim.selectionListener, shape, type, {
                 x: x,
-                y: y,
+                y: y
             });
+            if (shape == simulation_objects_1.SimObjectShape.Marker && markerId) {
+                newObject.markerId = markerId;
+            }
             list.push(newObject);
             newObject.selected = true;
         };
@@ -206,13 +234,14 @@ define(["require", "exports", "util", "jquery", "simulation.objects", "robot.bas
                 }
                 return false;
             }
-            if (!findAndDelete(this.obstacleList)) {
-                if (findAndDelete(this.colorAreaList)) {
-                    this.redrawColorAreas = true;
-                }
-            }
-            else {
+            if (findAndDelete(this.obstacleList)) {
                 this.redrawObstacles = true;
+            }
+            else if (findAndDelete(this.colorAreaList)) {
+                this.redrawColorAreas = true;
+            }
+            else if (findAndDelete(this.markerList)) {
+                this.redrawMarkers = true;
             }
         };
         SimulationScene.prototype.draw = function (dt, interpreterRunning) {
@@ -240,6 +269,10 @@ define(["require", "exports", "util", "jquery", "simulation.objects", "robot.bas
             if (this.redrawObstacles) {
                 this.drawObstacles();
                 this.redrawObstacles = false;
+            }
+            if (this.redrawMarkers) {
+                this.drawMarkers();
+                this.redrawMarkers = false;
             }
             if (this.redrawRuler) {
                 this.drawRuler();
@@ -269,6 +302,14 @@ define(["require", "exports", "util", "jquery", "simulation.objects", "robot.bas
             this.oCtx.scale(this.sim.scale, this.sim.scale);
             this.oCtx.clearRect(this.ground.x - 10, this.ground.y - 10, this.ground.w + 20, this.ground.h + 20);
             this.obstacleList.forEach(function (obstacle) { return obstacle.draw(_this.oCtx, _this.uCtx, _this.mCtx); });
+        };
+        SimulationScene.prototype.drawMarkers = function () {
+            var _this = this;
+            this.aCtx.restore();
+            this.aCtx.save();
+            this.aCtx.scale(this.sim.scale, this.sim.scale);
+            this.aCtx.clearRect(this.ground.x - 10, this.ground.y - 10, this.ground.w + 20, this.ground.h + 20);
+            this.markerList.forEach(function (marker) { return marker.draw(_this.aCtx, _this.uCtx, _this.mCtx); });
         };
         SimulationScene.prototype.drawPattern = function (ctx) {
             if (this.images && this.images['pattern']) {
@@ -444,7 +485,7 @@ define(["require", "exports", "util", "jquery", "simulation.objects", "robot.bas
                             catch (e) {
                                 localStorage.setItem('customBackground', JSON.stringify({
                                     image: customBackground,
-                                    timestamp: new Date().getTime(),
+                                    timestamp: new Date().getTime()
                                 }));
                                 customBackground = localStorage.getItem('customBackground');
                             }
@@ -505,6 +546,10 @@ define(["require", "exports", "util", "jquery", "simulation.objects", "robot.bas
                     this.colorAreaList.push(newObject);
                     this.redrawColorAreas = true;
                 }
+                else if (this.objectToCopy.type === simulation_objects_1.SimObjectType.Marker) {
+                    this.markerList.push(newObject);
+                    this.redrawMarkers = true;
+                }
             }
         };
         SimulationScene.prototype.resetAllCanvas = function (opt_img) {
@@ -521,7 +566,7 @@ define(["require", "exports", "util", "jquery", "simulation.objects", "robot.bas
             if ($('#simDiv').hasClass('shifting') && $('#simDiv').hasClass('rightActive')) {
                 $('#canvasDiv').css({
                     top: top + 'px',
-                    left: left + 'px',
+                    left: left + 'px'
                 });
             }
             var scene = this;
@@ -535,6 +580,8 @@ define(["require", "exports", "util", "jquery", "simulation.objects", "robot.bas
             this.bCtx.canvas.height = h;
             this.mCtx.canvas.width = w;
             this.mCtx.canvas.height = h;
+            this.aCtx.canvas.width = w;
+            this.aCtx.canvas.height = h;
             if (resetUnified) {
                 this.uCanvas.width = this.backgroundImg.width + 20;
                 this.uCanvas.height = this.backgroundImg.height + 20;
@@ -551,6 +598,7 @@ define(["require", "exports", "util", "jquery", "simulation.objects", "robot.bas
             this.dCtx.drawImage(this.udCanvas, 0, 0, this.backgroundImg.width + 20, this.backgroundImg.height + 20, 0, 0, w, h);
             this.drawColorAreas();
             this.drawObstacles();
+            this.drawMarkers();
             if (this.currentBackground == 2) {
                 this.redrawRuler = true;
             }
@@ -571,7 +619,7 @@ define(["require", "exports", "util", "jquery", "simulation.objects", "robot.bas
                 var top_1 = (this.playground.h - (this.backgroundImg.height + 20) * this.sim.scale) / 2.0;
                 $('#canvasDiv').css({
                     top: top_1 + 'px',
-                    left: left + 'px',
+                    left: left + 'px'
                 });
                 this.resetAllCanvas();
             }
@@ -623,8 +671,9 @@ define(["require", "exports", "util", "jquery", "simulation.objects", "robot.bas
             var personalObstacleList = this.obstacleList.slice();
             this.robots.forEach(function (robot) { return personalObstacleList.push(robot.chassis); });
             personalObstacleList.push(this.ground);
+            var myMarkerList = this.markerList.slice();
             this.robots.forEach(function (robot) { return robot.updateActions(robot, dt, interpreterRunning); });
-            this.robots.forEach(function (robot) { return robot.updateSensors(interpreterRunning, dt, _this.uCtx, _this.udCtx, personalObstacleList); });
+            this.robots.forEach(function (robot) { return robot.updateSensors(interpreterRunning, dt, _this.uCtx, _this.udCtx, personalObstacleList, _this.markerList); });
             this.draw(dt, interpreterRunning);
         };
         SimulationScene.prototype.toggleTrail = function () {
@@ -638,6 +687,10 @@ define(["require", "exports", "util", "jquery", "simulation.objects", "robot.bas
             this.robots.forEach(function (robot) { return robot.resetPose(); });
             this.dCtx.canvas.width = this.dCtx.canvas.width;
             this.udCtx.canvas.width = this.udCtx.canvas.width;
+        };
+        SimulationScene.prototype.addMarker = function (markerId) {
+            this.addSimulationObject(this.markerList, simulation_objects_1.SimObjectShape.Marker, simulation_objects_1.SimObjectType.Marker, markerId);
+            this._redrawMarkers = true;
         };
         return SimulationScene;
     }());
