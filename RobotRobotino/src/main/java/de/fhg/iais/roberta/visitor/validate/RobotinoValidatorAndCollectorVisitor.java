@@ -1,4 +1,4 @@
-package de.fhg.iais.roberta.visitor;
+package de.fhg.iais.roberta.visitor.validate;
 
 import java.util.Map;
 
@@ -27,10 +27,11 @@ import de.fhg.iais.roberta.syntax.sensor.robotino.MarkerInformation;
 import de.fhg.iais.roberta.syntax.sensor.robotino.OdometrySensor;
 import de.fhg.iais.roberta.syntax.sensor.robotino.OdometrySensorReset;
 import de.fhg.iais.roberta.util.syntax.SC;
-import de.fhg.iais.roberta.visitor.validate.MotorValidatorAndCollectorVisitor;
+import de.fhg.iais.roberta.visitor.IRobotinoVisitor;
+import de.fhg.iais.roberta.visitor.RobotinoMethods;
 
 
-public class RobotinoValidatorAndCollectorVisitor extends MotorValidatorAndCollectorVisitor implements IRobotinoVisitor<Void> {
+public abstract class RobotinoValidatorAndCollectorVisitor extends MotorValidatorAndCollectorVisitor implements IRobotinoVisitor<Void> {
 
     public RobotinoValidatorAndCollectorVisitor(ConfigurationAst robotConfiguration, ClassToInstanceMap<IProjectBean.IBuilder> beanBuilders) {
         super(robotConfiguration, beanBuilders);
@@ -50,24 +51,19 @@ public class RobotinoValidatorAndCollectorVisitor extends MotorValidatorAndColle
 
     @Override
     public Void visitOmnidriveAction(OmnidriveAction omnidriveAction) {
-        addMotorMethodsAndHardware();
 
+        usedHardwareBuilder.addUsedActor(new UsedActor(getConfigPort(RobotinoConstants.OMNIDRIVE), RobotinoConstants.OMNIDRIVE));
         requiredComponentVisited(omnidriveAction, omnidriveAction.xVel, omnidriveAction.yVel);
         requiredComponentVisited(omnidriveAction, omnidriveAction.thetaVel);
-
         return null;
     }
 
     @Override
     public Void visitOmnidriveDistanceAction(OmnidriveDistanceAction omnidriveDistanceAction) {
-        addMotorMethodsAndHardware();
-
         requiredComponentVisited(omnidriveDistanceAction, omnidriveDistanceAction.xVel, omnidriveDistanceAction.yVel);
         requiredComponentVisited(omnidriveDistanceAction, omnidriveDistanceAction.distance);
         usedHardwareBuilder.addUsedSensor(new UsedSensor(getConfigPort(RobotinoConstants.ODOMETRY), RobotinoConstants.ODOMETRY, null));
-        usedMethodBuilder.addUsedMethod(RobotinoMethods.DRIVEFORDISTANCE);
-        usedMethodBuilder.addUsedMethod(RobotinoMethods.GETPOSITION);
-
+        usedHardwareBuilder.addUsedActor(new UsedActor(getConfigPort(RobotinoConstants.OMNIDRIVE), RobotinoConstants.OMNIDRIVE));
 
         checkIfBothZeroSpeed(omnidriveDistanceAction);
         return null;
@@ -76,43 +72,19 @@ public class RobotinoValidatorAndCollectorVisitor extends MotorValidatorAndColle
     @Override
     public Void visitTurnAction(TurnAction turnAction) {
         requiredComponentVisited(turnAction, turnAction.param.getSpeed(), turnAction.param.getDuration().getValue());
+
         usedHardwareBuilder.addUsedSensor(new UsedSensor(getConfigPort(RobotinoConstants.ODOMETRY), RobotinoConstants.ODOMETRY, null));
-        addMotorMethodsAndHardware();
-        usedMethodBuilder.addUsedMethod(RobotinoMethods.GETORIENTATION);
-        usedMethodBuilder.addUsedMethod(RobotinoMethods.TURNFORDEGREES);
-        return null;
-    }
-
-    @Override
-    public Void visitMarkerInformation(MarkerInformation markerInformation) {
-        requiredComponentVisited(markerInformation, markerInformation.markerId);
-        return null;
-    }
-
-    @Override
-    public Void visitDetectMarkSensor(DetectMarkSensor detectMarkSensor) {
-        return null;
-    }
-
-    @Override
-    public Void visitCameraSensor(CameraSensor cameraSensor) {
+        usedHardwareBuilder.addUsedActor(new UsedActor(getConfigPort(RobotinoConstants.OMNIDRIVE), RobotinoConstants.OMNIDRIVE));
         return null;
     }
 
 
     @Override
     public Void visitOmnidrivePositionAction(OmnidrivePositionAction omnidrivePositionAction) {
-        requiredComponentVisited(omnidrivePositionAction, omnidrivePositionAction.x,
-            omnidrivePositionAction.y, omnidrivePositionAction.power);
+        requiredComponentVisited(omnidrivePositionAction, omnidrivePositionAction.x, omnidrivePositionAction.y, omnidrivePositionAction.power);
 
         usedHardwareBuilder.addUsedSensor(new UsedSensor(getConfigPort(RobotinoConstants.ODOMETRY), RobotinoConstants.ODOMETRY, null));
-
-        addMotorMethodsAndHardware();
-
-        usedMethodBuilder.addUsedMethod(RobotinoMethods.GETORIENTATION);
-        usedMethodBuilder.addUsedMethod(RobotinoMethods.DRIVETOPOSITION);
-        usedMethodBuilder.addUsedMethod(RobotinoMethods.GETDIRECTION);
-        usedMethodBuilder.addUsedMethod(RobotinoMethods.GETPOSITION);
+        usedHardwareBuilder.addUsedActor(new UsedActor(getConfigPort(RobotinoConstants.OMNIDRIVE), RobotinoConstants.OMNIDRIVE));
 
         checkForZeroSpeed(omnidrivePositionAction, omnidrivePositionAction.power);
         return null;
@@ -121,8 +93,7 @@ public class RobotinoValidatorAndCollectorVisitor extends MotorValidatorAndColle
     private void checkIfBothZeroSpeed(OmnidriveDistanceAction omnidriveDistanceAction) {
         if ( omnidriveDistanceAction.xVel.getKind().hasName("NUM_CONST") && omnidriveDistanceAction.yVel.getKind().hasName("NUM_CONST") ) {
 
-            if ( Math.abs(Double.parseDouble(((NumConst) omnidriveDistanceAction.xVel).value)) < DOUBLE_EPS
-                && Math.abs(Double.parseDouble(((NumConst) omnidriveDistanceAction.yVel).value)) < DOUBLE_EPS ) {
+            if ( Math.abs(Double.parseDouble(((NumConst) omnidriveDistanceAction.xVel).value)) < DOUBLE_EPS && Math.abs(Double.parseDouble(((NumConst) omnidriveDistanceAction.yVel).value)) < DOUBLE_EPS ) {
                 addWarningToPhrase(omnidriveDistanceAction, "MOTOR_SPEED_0");
             }
         }
@@ -138,21 +109,12 @@ public class RobotinoValidatorAndCollectorVisitor extends MotorValidatorAndColle
     @Override
     public Void visitOdometrySensor(OdometrySensor odometrySensor) {
         usedHardwareBuilder.addUsedSensor(new UsedSensor(odometrySensor.getUserDefinedPort(), RobotinoConstants.ODOMETRY, odometrySensor.getSlot()));
-        if ( odometrySensor.getSlot().equals("THETA") ) {
-            usedMethodBuilder.addUsedMethod(RobotinoMethods.GETORIENTATION);
-        }
         return null;
     }
 
     @Override
     public Void visitOdometrySensorReset(OdometrySensorReset odometrySensorReset) {
         usedHardwareBuilder.addUsedSensor(new UsedSensor(odometrySensorReset.getUserDefinedPort(), RobotinoConstants.ODOMETRY, odometrySensorReset.slot));
-        if ( !odometrySensorReset.slot.equals("THETA") ) {
-            usedMethodBuilder.addUsedMethod(RobotinoMethods.GETORIENTATION);
-        }
-        if ( !odometrySensorReset.slot.equals("ALL") ) {
-            usedMethodBuilder.addUsedMethod(RobotinoMethods.RESETODOMETRY);
-        }
         return null;
     }
 
@@ -165,8 +127,8 @@ public class RobotinoValidatorAndCollectorVisitor extends MotorValidatorAndColle
             addErrorToPhrase(pinWriteValueAction, "CONFIGURATION_ERROR_ACTOR_MISSING");
         }
 
-        usedHardwareBuilder.addUsedActor(new UsedActor(getConfigPort(pinWriteValueAction.port), SC.DIGITAL_PIN));
         usedMethodBuilder.addUsedMethod(RobotinoMethods.SETDIGITALPIN);
+        usedHardwareBuilder.addUsedActor(new UsedActor(getConfigPort(pinWriteValueAction.port), SC.DIGITAL_PIN));
         return null;
     }
 
@@ -187,14 +149,8 @@ public class RobotinoValidatorAndCollectorVisitor extends MotorValidatorAndColle
 
     @Override
     public Void visitMotorDriveStopAction(MotorDriveStopAction stopAction) {
-        addMotorMethodsAndHardware();
-        return null;
-    }
-
-    private void addMotorMethodsAndHardware() {
-        usedMethodBuilder.addUsedMethod(RobotinoMethods.OMNIDRIVESPEED);
-        usedMethodBuilder.addUsedMethod(RobotinoMethods.PUBLISHVEL);
         usedHardwareBuilder.addUsedActor(new UsedActor(getConfigPort(RobotinoConstants.OMNIDRIVE), RobotinoConstants.OMNIDRIVE));
+        return null;
     }
 
     private String getConfigPort(String name) {
@@ -205,5 +161,20 @@ public class RobotinoValidatorAndCollectorVisitor extends MotorValidatorAndColle
             }
         }
         return "";
+    }
+
+    @Override
+    public Void visitMarkerInformation(MarkerInformation markerInformation) {
+        return null;
+    }
+
+    @Override
+    public Void visitDetectMarkSensor(DetectMarkSensor detectMarkSensor) {
+        return null;
+    }
+
+    @Override
+    public Void visitCameraSensor(CameraSensor cameraSensor) {
+        return null;
     }
 }

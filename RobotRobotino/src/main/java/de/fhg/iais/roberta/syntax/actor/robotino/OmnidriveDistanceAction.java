@@ -15,7 +15,7 @@ import de.fhg.iais.roberta.util.syntax.WithUserDefinedPort;
 
 
 @NepoPhrase(category = "ACTOR", blocklyNames = {"robActions_motorOmni_curve_for"}, name = "MOTOR_OMNIDRIVE_DISTANCE_ACTION")
-public final class OmnidriveDistanceAction<V> extends Action implements WithUserDefinedPort<V> {
+public final class OmnidriveDistanceAction extends Action implements WithUserDefinedPort {
     @NepoValue(name = BlocklyConstants.X, type = BlocklyType.NUMBER)
     public final Expr xVel;
     @NepoValue(name = BlocklyConstants.Y, type = BlocklyType.NUMBER)
