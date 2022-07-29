@@ -599,6 +599,8 @@ public class ArduinoCppVisitor extends AbstractCommonArduinoCppVisitor implement
                 case SC.HTS221:
                     headerFiles.add("#include <Arduino_HTS221.h>");
                     break;
+                case "AIFES":
+                    break;
                 default:
                     throw new DbcException("Sensor is not supported: " + usedConfigurationBlock.componentType);
             }
@@ -749,6 +751,8 @@ public class ArduinoCppVisitor extends AbstractCommonArduinoCppVisitor implement
                 case SC.HTS221:
                     this.sb.append("HTS").append(".begin();");
                     nlIndent();
+                    break;
+                case "AIFES":
                     break;
                 default:
                     throw new DbcException("Sensor is not supported: " + usedConfigurationBlock.componentType);
@@ -929,6 +933,8 @@ public class ArduinoCppVisitor extends AbstractCommonArduinoCppVisitor implement
                     break;
                 case SC.LPS22HB:
                 case SC.HTS221:
+                    break;
+                case "AIFES":
                     break;
                 default:
                     throw new DbcException("Configuration block is not supported: " + cc.componentType);
