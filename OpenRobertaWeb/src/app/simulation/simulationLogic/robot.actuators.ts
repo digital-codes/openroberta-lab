@@ -10,18 +10,89 @@ import * as $ from 'jquery';
 import * as Blockly from 'blockly';
 import { ISensor } from './robot.sensors';
 
-export abstract class ChassisDiffDrive implements IUpdateAction, ISensor, IDrawable, IReset, ISimulationObstacle {
+export abstract class ChassisMobile implements IUpdateAction, ISensor, IDrawable, IReset, ISimulationObstacle {
     abstract backLeft: PointRobotWorldBumped;
-    abstract backMiddle: PointRobotWorld;
     abstract backRight: PointRobotWorldBumped;
     abstract frontLeft: PointRobotWorldBumped;
-    abstract frontMiddle: PointRobotWorld;
     abstract frontRight: PointRobotWorldBumped;
     abstract geom: Geometry;
     id: number;
+    abstract topView: string;
+    protected angle: number;
+    protected distance: number;
+    protected MAXPOWER: number;
+    public readonly drawPriority: number = 0;
+
+    protected constructor(id: number) {
+        this.id = id;
+    }
+
+    abstract draw(rCtx: CanvasRenderingContext2D, myRobot: RobotBaseMobile): void;
+
+    getLines(): Line[] {
+        return [
+            {
+                x1: this.backLeft.rx,
+                x2: this.frontLeft.rx,
+                y1: this.backLeft.ry,
+                y2: this.frontLeft.ry
+            },
+            {
+                x1: this.frontLeft.rx,
+                x2: this.frontRight.rx,
+                y1: this.frontLeft.ry,
+                y2: this.frontRight.ry
+            },
+            {
+                x1: this.frontRight.rx,
+                x2: this.backRight.rx,
+                y1: this.frontRight.ry,
+                y2: this.backRight.ry
+            },
+            {
+                x1: this.backRight.rx,
+                x2: this.backLeft.rx,
+                y1: this.backRight.ry,
+                y2: this.backLeft.ry
+            }
+        ];
+    }
+
+    abstract reset(): void;
+
+    transformNewPose(pose: Pose, chassis: ChassisMobile) {
+        SIMATH.transform(pose, chassis.frontRight);
+        SIMATH.transform(pose, chassis.frontLeft);
+        SIMATH.transform(pose, chassis.backRight);
+        SIMATH.transform(pose, chassis.backLeft);
+    }
+
+    updateSensor(
+        running: boolean,
+        dt: number,
+        myRobot: RobotBase,
+        values: object,
+        uCtx: CanvasRenderingContext2D,
+        udCtx: CanvasRenderingContext2D,
+        personalObstacleList: any[]
+    ): void {
+        this.checkCollisions(this.id, (myRobot as RobotBaseMobile).pose, dt, personalObstacleList);
+    }
+
+    abstract checkCollisions(myId: number, myPose: Pose, dt: number, personalObstacleList: ISimulationObstacle[]): void;
+
+    getTolerance(): number {
+        return 0;
+    }
+
+    abstract updateAction(myRobot: RobotBase, dt: number, interpreterRunning: boolean): void;
+}
+
+export abstract class ChassisDiffDrive extends ChassisMobile {
+    abstract backMiddle: PointRobotWorld;
+    abstract frontMiddle: PointRobotWorld;
     left: Motor = { port: '', speed: 0 };
     right: Motor = { port: '', speed: 0 };
-    abstract topView: string;
     abstract wheelBack: Geometry;
     wheelBackLeft: PointRobotWorldBumped = { bumped: false, rx: 0, ry: 0, x: 0, y: 0 };
     wheelBackRight: PointRobotWorldBumped = { bumped: false, rx: 0, ry: 0, x: 0, y: 0 };
@@ -37,14 +108,11 @@ export abstract class ChassisDiffDrive implements IUpdateAction, ISensor, IDrawa
         rightAngle: 0,
         leftAngle: 0
     };
-    protected MAXPOWER: number;
     private readonly TRACKWIDTH: number;
     protected readonly WHEELDIAMETER: number;
-    private angle: number;
-    private distance: number;
 
-    protected constructor(id: number, configuration: {}) {
-        this.id = id;
+    constructor(id: number, configuration: object) {
+        super(id);
         this.TRACKWIDTH = configuration['TRACKWIDTH'] * 3;
         this.WHEELDIAMETER = configuration['WHEELDIAMETER'];
         this.ENC = 360.0 / (3.0 * Math.PI * this.WHEELDIAMETER);
@@ -106,51 +174,14 @@ export abstract class ChassisDiffDrive implements IUpdateAction, ISensor, IDrawa
         rCtx.restore();
     }
 
-    public readonly drawPriority: number = 0;
-
-    getLines(): Line[] {
-        return [
-            {
-                x1: this.backLeft.rx,
-                x2: this.frontLeft.rx,
-                y1: this.backLeft.ry,
-                y2: this.frontLeft.ry
-            },
-            {
-                x1: this.frontLeft.rx,
-                x2: this.frontRight.rx,
-                y1: this.frontLeft.ry,
-                y2: this.frontRight.ry
-            },
-            {
-                x1: this.frontRight.rx,
-                x2: this.backRight.rx,
-                y1: this.frontRight.ry,
-                y2: this.backRight.ry
-            },
-            {
-                x1: this.backRight.rx,
-                x2: this.backLeft.rx,
-                y1: this.backRight.ry,
-                y2: this.backLeft.ry
-            }
-        ];
-    }
-
-    getTolerance(): number {
+    override getTolerance(): number {
         return Math.max(Math.abs(this.right.speed), Math.abs(this.left.speed) || 0);
     }
 
-    abstract reset(): void;
-
-    transformNewPose(pose: Pose, chassis: ChassisDiffDrive) {
-        SIMATH.transform(pose, chassis.frontRight);
-        SIMATH.transform(pose, chassis.frontLeft);
+    override transformNewPose(pose: Pose, chassis: ChassisDiffDrive) {
+        super.transformNewPose(pose, chassis);
         SIMATH.transform(pose, chassis.frontMiddle);
-        SIMATH.transform(pose, chassis.backRight);
-        SIMATH.transform(pose, chassis.backLeft);
         SIMATH.transform(pose, chassis.backMiddle);
-        SIMATH.transform(pose, chassis.wheelFrontRight);
         SIMATH.transform(pose, chassis.wheelFrontRight);
         SIMATH.transform(pose, chassis.wheelBackRight);
         SIMATH.transform(pose, chassis.wheelFrontLeft);
@@ -313,19 +344,7 @@ export abstract class ChassisDiffDrive implements IUpdateAction, ISensor, IDrawa
         this.transformNewPose(myRobot.pose, this);
     }
 
-    updateSensor(
-        running: boolean,
-        dt: number,
-        myRobot: RobotBase,
-        values: object,
-        uCtx: CanvasRenderingContext2D,
-        udCtx: CanvasRenderingContext2D,
-        personalObstacleList: any[]
-    ): void {
-        this.checkCollisions(this.id, dt, personalObstacleList);
-    }
-
-    private checkCollisions(myId: number, dt: number, personalObstacleList: ISimulationObstacle[]): void {
+    checkCollisions(myId: number, myPose: Pose, dt: number, personalObstacleList: ISimulationObstacle[]): void {
         let ground = personalObstacleList.slice(-1)[0] as any; // ground is always the last element in the personal obstacle list
         function checkGround(p: PointRobotWorldBumped): void {
             if (p.rx < ground.x || p.rx > ground.x + ground.w || p.ry < ground.y || p.ry > ground.y + ground.h) {
@@ -348,7 +367,7 @@ export abstract class ChassisDiffDrive implements IUpdateAction, ISensor, IDrawa
         });
         for (let i = 0; i < personalObstacleList.length - 1; i++) {
             let myObstacle: any = personalObstacleList[i];
-            if (myObstacle instanceof ChassisDiffDrive && myObstacle.id == myId) {
+            if (myObstacle instanceof ChassisMobile && myObstacle.id == myId) {
                 // never check if you are bumping yourself ;-)
                 continue;
             }
@@ -368,7 +387,7 @@ export abstract class ChassisDiffDrive implements IUpdateAction, ISensor, IDrawa
                     [this.wheelFrontLeft, this.wheelBackLeft]
                 ];
                 let p: Point = { x: 0, y: 0 };
-                let thisTolerance = Math.max(Math.abs(this.right['SPEED']), Math.abs(this.left['SPEED']));
+                let thisTolerance = Math.max(Math.abs(this.right.speed), Math.abs(this.left.speed));
                 if (!(myObstacle instanceof CircleSimulationObject)) {
                     const obstacleLines = myObstacle.getLines();
                     myCheckLines.forEach((checkLine) => {
@@ -410,8 +429,251 @@ export abstract class ChassisDiffDrive implements IUpdateAction, ISensor, IDrawa
                 this.frontLeft.bumped = this.frontLeft.bumped || this.frontMiddle.bumped;
                 this.frontRight.bumped = this.frontRight.bumped || this.frontMiddle.bumped;
                 this.backLeft.bumped = this.backLeft.bumped || this.backMiddle.bumped || this.wheelBackLeft.bumped;
-                this.backRight.bumped = this.backRight.bumped || this.backMiddle.bumped || this.wheelFrontRight.bumped;
+                this.backRight.bumped = this.backRight.bumped || this.backMiddle.bumped || this.wheelBackRight.bumped;
             }
+        }
+    }
+}
+
+export class RobotinoChassis extends ChassisMobile {
+    readonly RADIUS: number = 45 / 2;
+    readonly MAXROTATION: number;
+    geom: Geometry = {
+        x: -68,
+        y: -68,
+        w: 136,
+        h: 136,
+        radius: 68,
+        color: '#DDDDDD'
+    };
+    topView: string;
+    bumpedAngle: number;
+    xDiff: number = 0;
+    yDiff: number = 0;
+    thetaDiff: number = 0;
+    private xVel: number = 0;
+    private yVel: number = 0;
+    private thetaVel: number = 0;
+
+    backLeft: PointRobotWorldBumped = {
+        x: -68,
+        y: -68,
+        rx: 0,
+        ry: 0,
+        bumped: false
+    };
+    backRight: PointRobotWorldBumped = {
+        x: -68,
+        y: 68,
+        rx: 0,
+        ry: 0,
+        bumped: false
+    };
+    frontLeft: PointRobotWorldBumped = {
+        x: 68,
+        y: -68,
+        rx: 0,
+        ry: 0,
+        bumped: false
+    };
+    frontRight: PointRobotWorldBumped = {
+        x: 68,
+        y: 68,
+        rx: 0,
+        ry: 0,
+        bumped: false
+    };
+    img = new Image();
+
+    constructor(id: number, pose: Pose) {
+        super(id);
+        this.MAXPOWER = 1 * 3; // approx. 1 m/s
+        this.MAXROTATION = this.MAXPOWER / this.RADIUS / 3;
+        this.transformNewPose(pose, this);
+        this.img.src = '../../css/img/simulator/robotino.png';
+    }
+
+    reset(): void {
+        this.xVel = 0;
+        this.yVel = 0;
+        this.thetaVel = 0;
+        this.xDiff = 0;
+        this.yDiff = 0;
+        this.thetaDiff = 0;
+        $('#display' + this.id).html('');
+    }
+
+    checkCollisions(myId: number, myPose: Pose, dt: number, personalObstacleList: ISimulationObstacle[]): void {
+        let ground = personalObstacleList.slice(-1)[0] as any; // ground is always the last element in the personal obstacle list
+        let closestX = 0;
+        let closestY = 0;
+        if (ground.x > myPose.x - this.geom.radius) {
+            closestX = ground.x;
+        } else if (ground.x + ground.w < myPose.x + this.geom.radius) {
+            closestX = ground.x + ground.w;
+        } else {
+            closestX = myPose.x;
+        }
+        if (ground.y > myPose.y - this.geom.radius) {
+            closestY = ground.y;
+        } else if (ground.y + ground.h < myPose.y + this.geom.radius) {
+            closestY = ground.y + ground.h;
+        } else {
+            closestY = myPose.y;
+        }
+        if (closestX !== myPose.x || closestY !== myPose.y) {
+            this.bumpedAngle = Math.atan2(closestY - myPose.y, closestX - myPose.x);
+        } else {
+            this.bumpedAngle = 999;
+        }
+
+        for (let i = 0; i < personalObstacleList.length - 1; i++) {
+            let myObstacle: any = personalObstacleList[i];
+            if (this.bumpedAngle < 999) {
+                break;
+            }
+            if (myObstacle instanceof ChassisMobile && myObstacle.id == myId) {
+                // never check if you are bumping yourself ;-)
+                continue;
+            }
+            this.bumpedAngle = this.checkCollision(myPose, myObstacle);
+        }
+    }
+
+    updateAction(myRobot: RobotBase, dt: number, interpreterRunning: boolean): void {
+        let robot: RobotBaseMobile = myRobot as RobotBaseMobile;
+        const omniDrive = myRobot.interpreter.getRobotBehaviour().getActionState('omniDrive', true);
+        if (omniDrive) {
+            if (omniDrive[C.X + C.SPEED] !== undefined) {
+                this.xVel = omniDrive[C.X + C.SPEED] * this.MAXPOWER;
+            }
+            if (omniDrive[C.Y + C.SPEED] !== undefined) {
+                this.yVel = omniDrive[C.Y + C.SPEED] * this.MAXPOWER;
+            }
+            if (omniDrive[C.ANGLE + C.SPEED] !== undefined) {
+                this.thetaVel = omniDrive[C.ANGLE + C.SPEED] * this.MAXROTATION;
+            }
+            if (omniDrive[C.DISTANCE] !== undefined) {
+                this.distance = Math.abs(omniDrive[C.DISTANCE]) * 3;
+            }
+            if (omniDrive[C.ANGLE] !== undefined) {
+                this.angle = SIMATH.toRadians(Math.abs(omniDrive[C.ANGLE]));
+            }
+            if (omniDrive[C.X] !== undefined && omniDrive[C.Y] !== undefined && omniDrive[C.POWER] !== undefined) {
+                let x = omniDrive[C.X] * 3;
+                let y = omniDrive[C.Y] * 3;
+                let power = omniDrive[C.POWER] * this.MAXPOWER;
+                this.distance = Math.sqrt(x * x + y * y);
+                let q = power / this.distance;
+                this.xVel = x * q;
+                this.yVel = y * q;
+            }
+        }
+        this.xVel = interpreterRunning ? this.xVel : 0;
+        this.yVel = interpreterRunning ? this.yVel : 0;
+        this.thetaVel = interpreterRunning ? this.thetaVel : 0;
+        let tempXVel = this.xVel * dt;
+        let tempYVel = -this.yVel * dt;
+        let tempThetaVel = this.thetaVel * dt;
+        let mX = Math.cos(robot.pose.theta) * tempXVel - Math.sin(robot.pose.theta) * tempYVel;
+        let mY = Math.sin(robot.pose.theta) * tempXVel + Math.cos(robot.pose.theta) * tempYVel;
+
+        if (this.bumpedAngle < 999) {
+            let l = Math.sqrt(mX * mX + mY * mY);
+            let x = l * Math.cos(this.bumpedAngle);
+            let y = l * Math.sin(this.bumpedAngle);
+            mX -= x;
+            mY -= y;
+        }
+        robot.pose.x += mX;
+        robot.pose.y += mY;
+        robot.pose.theta += tempThetaVel;
+        robot.thetaDiff = tempThetaVel;
+        this.xDiff = mX;
+        this.yDiff = -mY;
+        this.transformNewPose(robot.pose, this);
+
+        /*        function resetSpeed() {
+                    this.xVel = 0;
+                    this.yVel = 0;
+                    this.thetaVel = 0;
+                }*/
+        if (this.distance) {
+            let dist = Math.sqrt(Math.pow(robot.pose.x - robot.pose.xOld, 2) + Math.pow(robot.pose.y - robot.pose.yOld, 2));
+            this.distance -= dist;
+            let div = (Math.abs(this.xVel) + Math.abs(this.yVel)) / 10;
+            if (this.distance < dist / div) {
+                this.distance = null;
+                robot.interpreter.getRobotBehaviour().setBlocking(false);
+                this.reset();
+            }
+        }
+        if (this.angle) {
+            if (robot.thetaDiff >= 0) {
+                this.angle -= robot.thetaDiff;
+            } else {
+                this.angle += robot.thetaDiff;
+            }
+            if (this.angle < Math.abs(robot.thetaDiff) / this.thetaVel / 10) {
+                this.angle = null;
+                robot.interpreter.getRobotBehaviour().setBlocking(false);
+                this.reset();
+            }
+        }
+    }
+
+    draw(rCtx: CanvasRenderingContext2D, myRobot: RobotBaseMobile): void {
+        rCtx.save();
+        if (this.bumpedAngle < 999) {
+            rCtx.fillStyle = '#ff0000';
+            rCtx.beginPath();
+            rCtx.arc(0, 0, this.geom.radius + 3, 0, Math.PI * 2);
+            rCtx.fill();
+        }
+        rCtx.shadowBlur = 5;
+        rCtx.shadowColor = 'black';
+        this.img.width;
+        rCtx.drawImage(this.img, 0, 0, this.img.width, this.img.height, this.geom.x, this.geom.y, this.geom.w, this.geom.h);
+        rCtx.restore();
+    }
+
+    private checkCollision(circle, rect): number {
+        rect.angle = 0;
+        circle.radius = 70;
+        rect.centerY = rect.y + rect.h / 2;
+        rect.centerX = rect.x + rect.w / 2;
+        let unrotatedCircleX = Math.cos(rect.angle) * (circle.x - rect.centerX) - Math.sin(rect.angle) * (circle.y - rect.centerY) + rect.centerX;
+        let unrotatedCircleY = Math.sin(rect.angle) * (circle.x - rect.centerX) + Math.cos(rect.angle) * (circle.y - rect.centerY) + rect.centerY;
+        // Closest point in the rectangle to the center of circle rotated backwards(unrotated)
+        let closestX, closestY;
+
+        if (unrotatedCircleX < rect.x) {
+            closestX = rect.x;
+        } else if (unrotatedCircleX > rect.x + rect.w) {
+            closestX = rect.x + rect.w;
+        } else {
+            closestX = unrotatedCircleX;
+        }
+
+        if (unrotatedCircleY < rect.y) {
+            closestY = rect.y;
+        } else if (unrotatedCircleY > rect.y + rect.h) {
+            closestY = rect.y + rect.h;
+        } else {
+            closestY = unrotatedCircleY;
+        }
+
+        let findDistance = function(fromX, fromY, toX, toY) {
+            let a = Math.abs(fromX - toX);
+            let b = Math.abs(fromY - toY);
+            return a * a + b * b;
+        };
+        let distance = findDistance(unrotatedCircleX, unrotatedCircleY, closestX, closestY);
+        let angle;
+        if (distance < circle.radius * circle.radius) {
+            return Math.atan2(closestY - unrotatedCircleY, closestX - unrotatedCircleX);
+        } else {
+            return 999;
         }
     }
 }
@@ -802,7 +1064,7 @@ export class ThymioChassis extends ChassisDiffDrive {
         bumped: false
     };
     frontMiddle: PointRobotWorld = {
-        x: 34,
+        x: 26,
         y: 0,
         rx: 0,
         ry: 0

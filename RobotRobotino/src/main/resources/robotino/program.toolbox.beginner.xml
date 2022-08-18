@@ -50,11 +50,11 @@
     </category>
     <category name="TOOLBOX_SENSOR" svg="true">
         <block type="robSensors_touch_getSample"></block>
-        <block type="robSensors_timer_getSample"></block>
-        <block type="robSensors_timer_reset"></block>
         <block type="robSensors_infrared_getSample"></block>
         <block type="robSensors_odometry_getSample"></block>
         <block type="robSensors_odometry_reset"></block>
+        <block type="robSensors_timer_getSample"></block>
+        <block type="robSensors_timer_reset"></block>
     </category>
     <category name="TOOLBOX_CONTROL" svg="true">
         <block type="robControls_if"/>
@@ -78,10 +78,10 @@
             <value name="WAIT0">
                 <block type="logic_compare">
                     <value name="A">
-                        <block type="robSensors_touch_getSample"></block>
+                        <block type="robSensors_getSample"/>
                     </value>
                     <value name="B">
-                        <block type="logic_boolean"></block>
+                        <block type="logic_boolean"/>
                     </value>
                 </block>
             </value>

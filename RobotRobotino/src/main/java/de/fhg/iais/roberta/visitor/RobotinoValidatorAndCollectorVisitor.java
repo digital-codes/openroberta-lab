@@ -1,6 +1,9 @@
 package de.fhg.iais.roberta.visitor;
 
+import java.util.Map;
+
 import com.google.common.collect.ClassToInstanceMap;
+
 import de.fhg.iais.roberta.bean.IProjectBean;
 import de.fhg.iais.roberta.components.ConfigurationAst;
 import de.fhg.iais.roberta.components.UsedActor;
@@ -18,12 +21,10 @@ import de.fhg.iais.roberta.syntax.sensor.generic.InfraredSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.PinGetValueSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.TimerSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.TouchSensor;
-import de.fhg.iais.roberta.syntax.sensor.robotino.OdometryPosition;
-import de.fhg.iais.roberta.syntax.sensor.robotino.OdometryReset;
+import de.fhg.iais.roberta.syntax.sensor.robotino.OdometrySensor;
+import de.fhg.iais.roberta.syntax.sensor.robotino.OdometrySensorReset;
 import de.fhg.iais.roberta.util.syntax.SC;
 import de.fhg.iais.roberta.visitor.validate.MotorValidatorAndCollectorVisitor;
-
-import java.util.Map;
 
 
 public class RobotinoValidatorAndCollectorVisitor extends MotorValidatorAndCollectorVisitor implements IRobotinoVisitor<Void> {
@@ -83,7 +84,7 @@ public class RobotinoValidatorAndCollectorVisitor extends MotorValidatorAndColle
     @Override
     public Void visitOmnidrivePositionAction(OmnidrivePositionAction omnidrivePositionAction) {
         requiredComponentVisited(omnidrivePositionAction, omnidrivePositionAction.x,
-                omnidrivePositionAction.y, omnidrivePositionAction.power);
+            omnidrivePositionAction.y, omnidrivePositionAction.power);
 
         usedHardwareBuilder.addUsedSensor(new UsedSensor(getConfigPort(RobotinoConstants.ODOMETRY), RobotinoConstants.ODOMETRY, null));
 
@@ -99,10 +100,10 @@ public class RobotinoValidatorAndCollectorVisitor extends MotorValidatorAndColle
     }
 
     private void checkIfBothZeroSpeed(OmnidriveDistanceAction omnidriveDistanceAction) {
-        if (omnidriveDistanceAction.xVel.getKind().hasName("NUM_CONST") && omnidriveDistanceAction.yVel.getKind().hasName("NUM_CONST")) {
+        if ( omnidriveDistanceAction.xVel.getKind().hasName("NUM_CONST") && omnidriveDistanceAction.yVel.getKind().hasName("NUM_CONST") ) {
 
-            if (Math.abs(Double.parseDouble(((NumConst) omnidriveDistanceAction.xVel).value)) < DOUBLE_EPS
-                    && Math.abs(Double.parseDouble(((NumConst) omnidriveDistanceAction.yVel).value)) < DOUBLE_EPS) {
+            if ( Math.abs(Double.parseDouble(((NumConst) omnidriveDistanceAction.xVel).value)) < DOUBLE_EPS
+                && Math.abs(Double.parseDouble(((NumConst) omnidriveDistanceAction.yVel).value)) < DOUBLE_EPS ) {
                 addWarningToPhrase(omnidriveDistanceAction, "MOTOR_SPEED_0");
             }
         }
@@ -116,21 +117,21 @@ public class RobotinoValidatorAndCollectorVisitor extends MotorValidatorAndColle
     }
 
     @Override
-    public Void visitOdometryPosition(OdometryPosition odometryPosition) {
-        usedHardwareBuilder.addUsedSensor(new UsedSensor(odometryPosition.getUserDefinedPort(), RobotinoConstants.ODOMETRY, odometryPosition.slot));
-        if (odometryPosition.slot.equals("THETA")) {
+    public Void visitOdometrySensor(OdometrySensor odometrySensor) {
+        usedHardwareBuilder.addUsedSensor(new UsedSensor(odometrySensor.getUserDefinedPort(), RobotinoConstants.ODOMETRY, odometrySensor.getSlot()));
+        if ( odometrySensor.getSlot().equals("THETA") ) {
             usedMethodBuilder.addUsedMethod(RobotinoMethods.GETORIENTATION);
         }
         return null;
     }
 
     @Override
-    public Void visitOdometryReset(OdometryReset odometryReset) {
-        usedHardwareBuilder.addUsedSensor(new UsedSensor(odometryReset.getUserDefinedPort(), RobotinoConstants.ODOMETRY, odometryReset.slot));
-        if (!odometryReset.slot.equals("THETA")) {
+    public Void visitOdometrySensorReset(OdometrySensorReset odometrySensorReset) {
+        usedHardwareBuilder.addUsedSensor(new UsedSensor(odometrySensorReset.getUserDefinedPort(), RobotinoConstants.ODOMETRY, odometrySensorReset.slot));
+        if ( !odometrySensorReset.slot.equals("THETA") ) {
             usedMethodBuilder.addUsedMethod(RobotinoMethods.GETORIENTATION);
         }
-        if (!odometryReset.slot.equals("ALL")) {
+        if ( !odometrySensorReset.slot.equals("ALL") ) {
             usedMethodBuilder.addUsedMethod(RobotinoMethods.RESETODOMETRY);
         }
         return null;
@@ -141,7 +142,7 @@ public class RobotinoValidatorAndCollectorVisitor extends MotorValidatorAndColle
         requiredComponentVisited(pinWriteValueAction, pinWriteValueAction.value);
 
         ConfigurationComponent usedConfigurationBlock = this.robotConfiguration.optConfigurationComponent(pinWriteValueAction.port);
-        if (usedConfigurationBlock == null) {
+        if ( usedConfigurationBlock == null ) {
             addErrorToPhrase(pinWriteValueAction, "CONFIGURATION_ERROR_ACTOR_MISSING");
         }
 
@@ -153,13 +154,13 @@ public class RobotinoValidatorAndCollectorVisitor extends MotorValidatorAndColle
     @Override
     public Void visitPinGetValueSensor(PinGetValueSensor pinGetValueSensor) {
         ConfigurationComponent usedConfigurationBlock = this.robotConfiguration.optConfigurationComponent(pinGetValueSensor.getUserDefinedPort());
-        if (usedConfigurationBlock == null) {
+        if ( usedConfigurationBlock == null ) {
             addErrorToPhrase(pinGetValueSensor, "CONFIGURATION_ERROR_SENSOR_MISSING");
         }
 
-        if (pinGetValueSensor.getMode().equals(SC.ANALOG)) {
+        if ( pinGetValueSensor.getMode().equals(SC.ANALOG) ) {
             usedHardwareBuilder.addUsedSensor(new UsedSensor(pinGetValueSensor.getUserDefinedPort(), SC.ANALOG_INPUT, pinGetValueSensor.getMode()));
-        } else if (pinGetValueSensor.getMode().equals(SC.DIGITAL)) {
+        } else if ( pinGetValueSensor.getMode().equals(SC.DIGITAL) ) {
             usedHardwareBuilder.addUsedSensor(new UsedSensor(pinGetValueSensor.getUserDefinedPort(), SC.DIGITAL_INPUT, pinGetValueSensor.getMode()));
         }
         return null;
@@ -179,8 +180,8 @@ public class RobotinoValidatorAndCollectorVisitor extends MotorValidatorAndColle
 
     private String getConfigPort(String name) {
         Map<String, ConfigurationComponent> configComponents = this.robotConfiguration.getConfigurationComponents();
-        for (ConfigurationComponent component : configComponents.values()) {
-            if (component.componentType.equals(name)) {
+        for ( ConfigurationComponent component : configComponents.values() ) {
+            if ( component.componentType.equals(name) ) {
                 return component.userDefinedPortName;
             }
         }

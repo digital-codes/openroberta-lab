@@ -983,6 +983,32 @@ define(["require", "exports", "jquery", "util", "simulation.roberta"], function 
         }
         Ground.prototype.getLines = function () {
             return UTIL.getLinesFromRectangle(this);
+            return [
+                {
+                    x1: this.x,
+                    x2: this.x,
+                    y1: this.y,
+                    y2: this.y + this.h,
+                },
+                {
+                    x1: this.x,
+                    x2: this.x + this.w,
+                    y1: this.y,
+                    y2: this.y,
+                },
+                {
+                    x1: this.x + this.w,
+                    x2: this.x,
+                    y1: this.y + this.h,
+                    y2: this.y + this.h,
+                },
+                {
+                    x1: this.x + this.w,
+                    x2: this.x + this.w,
+                    y1: this.y + this.h,
+                    y2: this.y,
+                },
+            ];
         };
         Ground.prototype.getTolerance = function () {
             return 0;

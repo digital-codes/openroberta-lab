@@ -217,6 +217,13 @@ public class C {
     public static final String PROGRAM_COUNTER = "pc";
     public static final String STEP = "step";
     public static final String END = "end";
+    public static final String ODOMETRY = "odometry";
+    public static final String ODOMETRY_SENSOR_RESET = "createOdometryReset";
+    public static final String OMNI_DRIVE = "omniDrive";
+    public static final String OMNI_DRIVE_DIST = "omniDriveDist";
+    public static final String OMNI_DRIVE_STOP = "omniDriveStop";
+    public static final String OMNI_DRIVE_TURN = "omniDriveTurn";
+    public static final String OMNI_DRIVE_POSITION = "omniDrivePosition";
     public static final String OPCODE = "opc";
     public static final String OR = "OR";
     public static final String ORANGE = "ORANGE";
@@ -302,6 +309,7 @@ public class C {
     public static final String TEXT_JOIN = "createTextJoin";
     public static final String THEN_LIST = "thenList";
     public static final String THEN_STMTS = "thenStmts";
+    public static final String THETA = "theta";
     public static final String TIME = "time";
     public static final String TIMER = "timer";
     public static final String TIMES = "TIMES";

@@ -1,6 +1,10 @@
 package de.fhg.iais.roberta.visitor;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.google.common.collect.ClassToInstanceMap;
+
 import de.fhg.iais.roberta.bean.CodeGeneratorSetupBean;
 import de.fhg.iais.roberta.bean.IProjectBean;
 import de.fhg.iais.roberta.bean.UsedHardwareBean;
@@ -25,14 +29,11 @@ import de.fhg.iais.roberta.syntax.sensor.generic.InfraredSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.PinGetValueSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.TimerSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.TouchSensor;
-import de.fhg.iais.roberta.syntax.sensor.robotino.OdometryPosition;
-import de.fhg.iais.roberta.syntax.sensor.robotino.OdometryReset;
+import de.fhg.iais.roberta.syntax.sensor.robotino.OdometrySensor;
+import de.fhg.iais.roberta.syntax.sensor.robotino.OdometrySensorReset;
 import de.fhg.iais.roberta.util.dbc.DbcException;
 import de.fhg.iais.roberta.util.syntax.SC;
 import de.fhg.iais.roberta.visitor.lang.codegen.prog.AbstractPythonVisitor;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * This class is implementing {@link IVisitor}. All methods are implemented and they append a human-readable Python code representation of a phrase to a
@@ -48,7 +49,7 @@ public final class RobotinoROSPythonVisitor extends AbstractPythonVisitor implem
      * @param programPhrases to generate the code from
      */
     public RobotinoROSPythonVisitor(
-            List<List<Phrase>> programPhrases, ClassToInstanceMap<IProjectBean> beans, ConfigurationAst configurationAst) {
+        List<List<Phrase>> programPhrases, ClassToInstanceMap<IProjectBean> beans, ConfigurationAst configurationAst) {
         super(programPhrases, beans);
         this.configurationAst = configurationAst;
     }
@@ -68,44 +69,44 @@ public final class RobotinoROSPythonVisitor extends AbstractPythonVisitor implem
         generatePublishers();
         generateTimerVariables();
         nlIndent();
-        if (!this.getBean(CodeGeneratorSetupBean.class).getUsedMethods().isEmpty()) {
+        if ( !this.getBean(CodeGeneratorSetupBean.class).getUsedMethods().isEmpty() ) {
             String helperMethodImpls =
-                    this.getBean(CodeGeneratorSetupBean.class)
-                            .getHelperMethodGenerator()
-                            .getHelperMethodDefinitions(this.getBean(CodeGeneratorSetupBean.class).getUsedMethods());
+                this.getBean(CodeGeneratorSetupBean.class)
+                    .getHelperMethodGenerator()
+                    .getHelperMethodDefinitions(this.getBean(CodeGeneratorSetupBean.class).getUsedMethods());
             this.sb.append(helperMethodImpls);
         }
     }
 
     private void generateImports() {
-        if (this.getBean(UsedHardwareBean.class).isActorUsed(RobotinoConstants.OMNIDRIVE) || this.getBean(UsedHardwareBean.class).isSensorUsed(SC.TOUCH)) {
+        if ( this.getBean(UsedHardwareBean.class).isActorUsed(RobotinoConstants.OMNIDRIVE) || this.getBean(UsedHardwareBean.class).isSensorUsed(SC.TOUCH) ) {
             this.sb.append("from std_msgs.msg import Bool");
             nlIndent();
         }
-        if (this.getBean(UsedHardwareBean.class).isActorUsed(RobotinoConstants.OMNIDRIVE)) {
+        if ( this.getBean(UsedHardwareBean.class).isActorUsed(RobotinoConstants.OMNIDRIVE) ) {
             this.sb.append("from geometry_msgs.msg import Twist");
             nlIndent();
         }
-        if (this.getBean(UsedHardwareBean.class).isSensorUsed(SC.INFRARED)) {
+        if ( this.getBean(UsedHardwareBean.class).isSensorUsed(SC.INFRARED) ) {
             this.sb.append("from sensor_msgs.msg import PointCloud");
             nlIndent();
         }
-        if (this.getBean(UsedHardwareBean.class).isActorUsed(SC.DIGITAL_PIN) || this.getBean(UsedHardwareBean.class).isSensorUsed(SC.DIGITAL_INPUT)) {
+        if ( this.getBean(UsedHardwareBean.class).isActorUsed(SC.DIGITAL_PIN) || this.getBean(UsedHardwareBean.class).isSensorUsed(SC.DIGITAL_INPUT) ) {
             this.sb.append("from std_msgs.msg import Int8MultiArray");
             nlIndent();
         }
-        if (this.getBean(UsedHardwareBean.class).isSensorUsed(SC.ANALOG_INPUT) || this.getBean(UsedHardwareBean.class).isSensorUsed(RobotinoConstants.ODOMETRY)) {
+        if ( this.getBean(UsedHardwareBean.class).isSensorUsed(SC.ANALOG_INPUT) || this.getBean(UsedHardwareBean.class).isSensorUsed(RobotinoConstants.ODOMETRY) ) {
             this.sb.append("from std_msgs.msg import Float32MultiArray");
             nlIndent();
         }
-        if (this.getBean(UsedHardwareBean.class).isSensorUsed(RobotinoConstants.ODOMETRY)) {
+        if ( this.getBean(UsedHardwareBean.class).isSensorUsed(RobotinoConstants.ODOMETRY) ) {
             this.sb.append("from nav_msgs.msg import Odometry");
             nlIndent();
         }
     }
 
     private void generatePublishers() {
-        if (this.getBean(UsedHardwareBean.class).isActorUsed(RobotinoConstants.OMNIDRIVE)) {
+        if ( this.getBean(UsedHardwareBean.class).isActorUsed(RobotinoConstants.OMNIDRIVE) ) {
             this.sb.append("_motorPub = rospy.Publisher('cmd_vel', Twist, queue_size=10)");
             nlIndent();
             this.sb.append("_speed = Twist()\n_safetySetting = True\n");
@@ -113,21 +114,21 @@ public final class RobotinoROSPythonVisitor extends AbstractPythonVisitor implem
             this.sb.append("_weight = " + Double.parseDouble(getOmnidrive().getComponentProperties().get("WEIGHT_KG")));
             nlIndent();
         }
-        if (this.getBean(UsedHardwareBean.class).isActorUsed(SC.DIGITAL_PIN)) {
+        if ( this.getBean(UsedHardwareBean.class).isActorUsed(SC.DIGITAL_PIN) ) {
             this.sb.append("_digitalPinPub = rospy.Publisher('set_digital_output', Int8MultiArray, queue_size=10)");
             nlIndent();
             this.sb.append("_digitalPinValues = [0 for i in range(8)]");
             nlIndent();
         }
-        if (this.getBean(UsedHardwareBean.class).isSensorUsed(RobotinoConstants.ODOMETRY)) {
+        if ( this.getBean(UsedHardwareBean.class).isSensorUsed(RobotinoConstants.ODOMETRY) ) {
             this.sb.append("_resetOdomPub = rospy.Publisher('reset_odometry', Float32MultiArray, queue_size=10)");
             nlIndent();
         }
     }
 
     private ConfigurationComponent getOmnidrive() {
-        for (ConfigurationComponent component : this.configurationAst.getConfigurationComponents().values()) {
-            if (component.componentType.equals(RobotinoConstants.OMNIDRIVE)) {
+        for ( ConfigurationComponent component : this.configurationAst.getConfigurationComponents().values() ) {
+            if ( component.componentType.equals(RobotinoConstants.OMNIDRIVE) ) {
                 return component;
             }
         }
@@ -156,7 +157,7 @@ public final class RobotinoROSPythonVisitor extends AbstractPythonVisitor implem
 
     private void generateGlobalVariables() {
         //add usermade global variables
-        if (!this.usedGlobalVarInFunctions.isEmpty()) {
+        if ( !this.usedGlobalVarInFunctions.isEmpty() ) {
             nlIndent();
             this.sb.append("global ").append(String.join(", ", this.usedGlobalVarInFunctions));
         }
@@ -164,11 +165,11 @@ public final class RobotinoROSPythonVisitor extends AbstractPythonVisitor implem
     }
 
     private void generateInitializers() {
-        if (this.getBean(UsedHardwareBean.class).isActorUsed(RobotinoConstants.OMNIDRIVE)) {
+        if ( this.getBean(UsedHardwareBean.class).isActorUsed(RobotinoConstants.OMNIDRIVE) ) {
             this.sb.append("_omnidrive = rospy.Timer(rospy.Duration(0.1),_publishVel)");
             nlIndent();
         }
-        if (this.getBean(UsedHardwareBean.class).isSensorUsed(RobotinoConstants.ODOMETRY)) {
+        if ( this.getBean(UsedHardwareBean.class).isSensorUsed(RobotinoConstants.ODOMETRY) ) {
             this.sb.append("rospy.sleep(0.3)");
             nlIndent();
             this.sb.append("_resetOdomPub.publish(Float32MultiArray())");
@@ -178,7 +179,7 @@ public final class RobotinoROSPythonVisitor extends AbstractPythonVisitor implem
 
     @Override
     protected void generateProgramSuffix(boolean withWrapping) {
-        if (!withWrapping) {
+        if ( !withWrapping ) {
             return;
         }
         decrIndentation(); // everything is still indented from main program
@@ -208,18 +209,18 @@ public final class RobotinoROSPythonVisitor extends AbstractPythonVisitor implem
     }
 
     private void generateFinally() {
-        if (this.getBean(UsedHardwareBean.class).isActorUsed(RobotinoConstants.OMNIDRIVE) || this.getBean(UsedHardwareBean.class).isActorUsed(SC.DIGITAL_PIN)) {
+        if ( this.getBean(UsedHardwareBean.class).isActorUsed(RobotinoConstants.OMNIDRIVE) || this.getBean(UsedHardwareBean.class).isActorUsed(SC.DIGITAL_PIN) ) {
             this.sb.append("finally:");
         }
         incrIndentation();
         incrIndentation();
 
         nlIndent();
-        if (this.getBean(UsedHardwareBean.class).isActorUsed(RobotinoConstants.OMNIDRIVE)) {
+        if ( this.getBean(UsedHardwareBean.class).isActorUsed(RobotinoConstants.OMNIDRIVE) ) {
             this.sb.append("_setSpeedOmnidrive(0, 0, 0, False)");
             nlIndent();
         }
-        if (this.getBean(UsedHardwareBean.class).isActorUsed(SC.DIGITAL_PIN)) {
+        if ( this.getBean(UsedHardwareBean.class).isActorUsed(SC.DIGITAL_PIN) ) {
             this.sb.append("int8Array = Int8MultiArray()");
             nlIndent();
             this.sb.append("int8Array.data = [0 for i in range(0, 8)]");
@@ -237,7 +238,7 @@ public final class RobotinoROSPythonVisitor extends AbstractPythonVisitor implem
 
     @Override
     public Void visitTimerSensor(TimerSensor timerSensor) {
-        switch (timerSensor.getMode()) {
+        switch ( timerSensor.getMode() ) {
             case SC.DEFAULT:
             case SC.VALUE:
                 this.sb.append("((rospy.get_time() - _timer").append(timerSensor.getUserDefinedPort()).append(")*1000)");
@@ -253,16 +254,16 @@ public final class RobotinoROSPythonVisitor extends AbstractPythonVisitor implem
 
     private void generateTimerVariables() {
         this.getBean(UsedHardwareBean.class)
-                .getUsedSensors()
-                .stream()
-                .filter(usedSensor -> usedSensor.getType().equals(SC.TIMER))
-                .collect(Collectors.groupingBy(UsedSensor::getPort))
-                .keySet()
-                .forEach(port -> {
-                    this.usedGlobalVarInFunctions.add("_timer" + port);
-                    this.sb.append("_timer").append(port).append(" = rospy.get_time()");
-                    nlIndent();
-                });
+            .getUsedSensors()
+            .stream()
+            .filter(usedSensor -> usedSensor.getType().equals(SC.TIMER))
+            .collect(Collectors.groupingBy(UsedSensor::getPort))
+            .keySet()
+            .forEach(port -> {
+                this.usedGlobalVarInFunctions.add("_timer" + port);
+                this.sb.append("_timer").append(port).append(" = rospy.get_time()");
+                nlIndent();
+            });
     }
 
     @Override
@@ -289,7 +290,7 @@ public final class RobotinoROSPythonVisitor extends AbstractPythonVisitor implem
         this.sb.append(", ");
         omnidriveAction.thetaVel.accept(this);
         this.sb.append(", ");
-        if (this.getBean(UsedHardwareBean.class).isSensorUsed(SC.TOUCH)) {
+        if ( this.getBean(UsedHardwareBean.class).isSensorUsed(SC.TOUCH) ) {
             this.sb.append("False");
         } else {
             this.sb.append("True");
@@ -334,8 +335,8 @@ public final class RobotinoROSPythonVisitor extends AbstractPythonVisitor implem
     @Override
     public Void visitTurnAction(TurnAction turnAction) {
         this.sb.append(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(RobotinoMethods.TURNFORDEGREES))
-                .append("(");
-        if (turnAction.direction == TurnDirection.RIGHT) {
+            .append("(");
+        if ( turnAction.direction == TurnDirection.RIGHT ) {
             this.sb.append("-");
         }
         turnAction.param.getSpeed().accept(this);
@@ -346,41 +347,41 @@ public final class RobotinoROSPythonVisitor extends AbstractPythonVisitor implem
     }
 
     @Override
-    public Void visitOdometryPosition(OdometryPosition odometryPosition) {
-        if (odometryPosition.slot.equals("THETA")) {
+    public Void visitOdometrySensor(OdometrySensor odometrySensor) {
+        if ( odometrySensor.getSlot().equals("THETA") ) {
             this.sb.append("(")
-                    .append(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(RobotinoMethods.GETORIENTATION))
-                    .append("() * 180 / math.pi)");
+                .append(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(RobotinoMethods.GETORIENTATION))
+                .append("() * 180 / math.pi)");
         } else {
             this.sb.append("rospy.wait_for_message(\"odom\", Odometry).pose.pose.position.")
-                    .append(odometryPosition.slot.toLowerCase());
+                .append(odometrySensor.getSlot().toLowerCase());
         }
         return null;
     }
 
     @Override
-    public Void visitOdometryReset(OdometryReset odometryReset) {
-        switch (odometryReset.slot) {
+    public Void visitOdometrySensorReset(OdometrySensorReset odometrySensorReset) {
+        switch ( odometrySensorReset.slot ) {
             case "ALL":
                 this.sb.append("_resetOdomPub.publish(Float32MultiArray())");
                 break;
             case "X":
                 this.sb.append("_resetOdometry(")
-                        .append("0, ")
-                        .append("rospy.wait_for_message(\"odom\", Odometry).pose.pose.position.y, ")
-                        .append("_getOrientation())");
+                    .append("0, ")
+                    .append("rospy.wait_for_message(\"odom\", Odometry).pose.pose.position.y, ")
+                    .append("_getOrientation())");
                 break;
             case "Y":
                 this.sb.append("_resetOdometry(")
-                        .append("rospy.wait_for_message(\"odom\", Odometry).pose.pose.position.x, ")
-                        .append("0, ")
-                        .append("_getOrientation())");
+                    .append("rospy.wait_for_message(\"odom\", Odometry).pose.pose.position.x, ")
+                    .append("0, ")
+                    .append("_getOrientation())");
                 break;
             case "THETA":
                 this.sb.append("_resetOdometry(")
-                        .append("rospy.wait_for_message(\"odom\", Odometry).pose.pose.position.x, ")
-                        .append("rospy.wait_for_message(\"odom\", Odometry).pose.pose.position.y, ")
-                        .append("0)");
+                    .append("rospy.wait_for_message(\"odom\", Odometry).pose.pose.position.x, ")
+                    .append("rospy.wait_for_message(\"odom\", Odometry).pose.pose.position.y, ")
+                    .append("0)");
                 break;
             default:
                 throw new DbcException("Invalid Odometry Mode!");
@@ -392,9 +393,9 @@ public final class RobotinoROSPythonVisitor extends AbstractPythonVisitor implem
     @Override
     public Void visitPinGetValueSensor(PinGetValueSensor pinGetValueSensor) {
         this.sb.append("rospy.wait_for_message(");
-        if (pinGetValueSensor.getMode().equals(SC.DIGITAL)) {
+        if ( pinGetValueSensor.getMode().equals(SC.DIGITAL) ) {
             this.sb.append("\"digital_inputs\", Int8MultiArray");
-        } else if (pinGetValueSensor.getMode().equals(SC.ANALOG)) {
+        } else if ( pinGetValueSensor.getMode().equals(SC.ANALOG) ) {
             this.sb.append("\"analog_inputs\", Float32MultiArray");
         }
         this.sb.append(").data[").append(configurationAst.getConfigurationComponent(pinGetValueSensor.getUserDefinedPort()).getComponentProperties().get("OUTPUT")).append("-1]");
@@ -411,17 +412,17 @@ public final class RobotinoROSPythonVisitor extends AbstractPythonVisitor implem
     public Void visitInfraredSensor(InfraredSensor infraredSensor) {
         String port = infraredSensor.getUserDefinedPort();
         this.sb.append("_getDistance(")
-                .append(port)
-                .append(")");
+            .append(port)
+            .append(")");
         return null;
     }
 
     @Override
     public Void visitPinWriteValueAction(PinWriteValueAction pinWriteValueAction) {
         this.sb.append(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(RobotinoMethods.SETDIGITALPIN))
-                .append("(")
-                .append(configurationAst.getConfigurationComponent(pinWriteValueAction.port).getComponentProperties().get("INPUT"))
-                .append(", ");
+            .append("(")
+            .append(configurationAst.getConfigurationComponent(pinWriteValueAction.port).getComponentProperties().get("INPUT"))
+            .append(", ");
         pinWriteValueAction.value.accept(this);
         this.sb.append(")");
         return null;

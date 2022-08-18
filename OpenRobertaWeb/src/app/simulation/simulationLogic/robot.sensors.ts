@@ -1,7 +1,8 @@
 import { RobotBaseMobile } from 'robot.base.mobile';
+import * as C from 'interpreter.constants';
 import * as SIMATH from 'simulation.math';
 import * as UTIL from 'util';
-import { ChassisDiffDrive, WebAudio } from 'robot.actuators';
+import { ChassisMobile, RobotinoChassis, WebAudio } from 'robot.actuators';
 import { IDrawable, ILabel, IReset, IUpdateAction, RobotBase } from 'robot.base';
 import { CircleSimulationObject } from 'simulation.objects';
 // @ts-ignore
@@ -10,6 +11,7 @@ import * as Blockly from 'blockly';
 import * as VolumeMeter from 'volume-meter';
 import * as $ from 'jquery';
 import { SimulationRoberta } from 'simulation.roberta';
+import RobotRobotino from './robot.robotino';
 
 export interface ISensor {
     updateSensor(
@@ -128,7 +130,7 @@ export abstract class DistanceSensor implements IExternalSensor, IDrawable {
     u: Point[] = [];
     wave: number = 0;
 
-    constructor(port: string, x: number, y: number, theta: number, maxDistance: number, color?: string) {
+    constructor(port: string, x: number, y: number, theta: number, maxDistance: number) {
         this.port = port;
         this.labelPriority = Number(this.port.replace('ORT_', ''));
         this.x = x;
@@ -136,7 +138,6 @@ export abstract class DistanceSensor implements IExternalSensor, IDrawable {
         this.theta = theta;
         this.maxDistance = maxDistance;
         this.maxLength = 3 * maxDistance;
-        this.color = color || this.color;
     }
 
     draw(rCtx: CanvasRenderingContext2D, myRobot: RobotBaseMobile): void {
@@ -231,7 +232,7 @@ export abstract class DistanceSensor implements IExternalSensor, IDrawable {
             const uDis = [this.maxLength, this.maxLength, this.maxLength, this.maxLength, this.maxLength];
             for (let i = 0; i < personalObstacleList.length; i++) {
                 let myObstacle: any = personalObstacleList[i];
-                if (myObstacle instanceof ChassisDiffDrive && myObstacle.id == robot.id) {
+                if (myObstacle instanceof ChassisMobile && myObstacle.id == robot.id) {
                     continue;
                 }
                 if (!(myObstacle instanceof CircleSimulationObject)) {
@@ -310,6 +311,13 @@ export class UltrasonicSensor extends DistanceSensor {
 }
 
 export class InfraredSensor extends DistanceSensor {
+    private relative = true;
+
+    constructor(port: string, x: number, y: number, theta: number, maxDistance: number, relative?: boolean) {
+        super(port, x, y, theta, maxDistance);
+        this.relative = relative !== undefined ? relative : this.relative;
+    }
+
     getLabel(): string {
         return (
             '<div><label>' +
@@ -335,21 +343,32 @@ export class InfraredSensor extends DistanceSensor {
         const distance = this.distance / 3.0;
         values['infrared'] = values['infrared'] || {};
         values['infrared'][this.port] = {};
-        if (distance < 70) {
-            values['infrared'][this.port].distance = (100.0 / 70.0) * distance;
+        if (this.relative) {
+            if (distance < this.maxDistance) {
+                values['infrared'][this.port].distance = (100.0 / this.maxDistance) * distance;
+            } else {
+                values['infrared'][this.port].distance = 100.0;
+            }
         } else {
-            values['infrared'][this.port].distance = 100.0;
+            if (distance < this.maxDistance) {
+                values['infrared'][this.port].distance = distance;
+            } else {
+                values['infrared'][this.port].distance = this.maxDistance;
+            }
         }
         values['infrared'][this.port].presence = false;
     }
 }
 
-export class ThymioInfraredSensor extends DistanceSensor {
-    constructor(port: string, x: number, y: number, theta: number, maxDistance: number, color?: string) {
-        super(port, x, y, theta, maxDistance, color);
+export class ThymioInfraredSensor extends InfraredSensor {
+    name: string = '';
+
+    constructor(port: string, x: number, y: number, theta: number, maxDistance: number, name?: string) {
+        super(port, x, y, theta, maxDistance, true);
+        this.name = name !== undefined ? name : this.name;
     }
 
-    getLabel(): string {
+    override getLabel(): string {
         let distance = this.distance / 3.0;
         if (distance < this.maxDistance) {
             distance *= 100.0 / this.maxDistance;
@@ -357,7 +376,7 @@ export class ThymioInfraredSensor extends DistanceSensor {
             distance = 100.0;
         }
         distance = UTIL.round(distance, 0);
-        return '<div><label>&nbsp;-&nbsp;' + this.color + '</label><span>' + UTIL.roundUltraSound(distance, 0) + ' %</span></div>';
+        return '<div><label>&nbsp;-&nbsp;' + this.name + '</label><span>' + UTIL.roundUltraSound(distance, 0) + ' %</span></div>';
     }
 
     override updateSensor(
@@ -739,6 +758,74 @@ export class MbotInfraredSensor implements IExternalSensor, IDrawable, ILabel {
     }
 }
 
+export class RobotinoInfraredSensor implements ISensor, IDrawable, ILabel {
+    drawPriority: number;
+    labelPriority: number;
+    infraredSensorArray: DistanceSensor[] = [];
+
+    constructor() {
+        this.infraredSensorArray[0] = new InfraredSensor('1', 68 * Math.cos(0), 68 * Math.sin(0), 0, 30, false);
+        this.infraredSensorArray[1] = new InfraredSensor(
+            '2',
+            68 * Math.cos((-Math.PI * 2) / 9),
+            68 * Math.sin((-Math.PI * 2) / 9),
+            (-Math.PI * 2) / 9,
+            30,
+            false
+        );
+        this.infraredSensorArray[2] = new InfraredSensor(
+            '3',
+            68 * Math.cos((-Math.PI * 4) / 9),
+            68 * Math.sin((-Math.PI * 4) / 9),
+            (-Math.PI * 4) / 9,
+            30,
+            false
+        );
+        this.infraredSensorArray[3] = new InfraredSensor(
+            '4',
+            68 * Math.cos((-Math.PI * 6) / 9),
+            68 * Math.sin((-Math.PI * 6) / 9),
+            (-Math.PI * 6) / 9,
+            30,
+            false
+        );
+        this.infraredSensorArray[4] = new InfraredSensor(
+            '5',
+            68 * Math.cos((-Math.PI * 8) / 9),
+            68 * Math.sin((-Math.PI * 8) / 9),
+            (-Math.PI * 8) / 9,
+            30,
+            false
+        );
+        this.infraredSensorArray[9] = new InfraredSensor('9', 68 * Math.cos((Math.PI * 2) / 9), 68 * Math.sin((Math.PI * 2) / 9), (Math.PI * 2) / 9, 30, false);
+        this.infraredSensorArray[8] = new InfraredSensor('8', 68 * Math.cos((Math.PI * 4) / 9), 68 * Math.sin((Math.PI * 4) / 9), (Math.PI * 4) / 9, 30, false);
+        this.infraredSensorArray[7] = new InfraredSensor('7', 68 * Math.cos((Math.PI * 6) / 9), 68 * Math.sin((Math.PI * 6) / 9), (Math.PI * 6) / 9, 30, false);
+        this.infraredSensorArray[6] = new InfraredSensor('6', 68 * Math.cos((Math.PI * 8) / 9), 68 * Math.sin((Math.PI * 8) / 9), (Math.PI * 8) / 9, 30, false);
+    }
+
+    draw(rCtx: CanvasRenderingContext2D, myRobot: RobotBase): void {
+        this.infraredSensorArray.forEach((sensor) => sensor.draw(rCtx, myRobot as RobotBaseMobile));
+    }
+
+    getLabel(): string {
+        let myLabel: string = '';
+        this.infraredSensorArray.forEach((sensor) => (myLabel += sensor.getLabel()));
+        return myLabel;
+    }
+
+    updateSensor(
+        running: boolean,
+        dt: number,
+        myRobot: RobotBase,
+        values: object,
+        uCtx: CanvasRenderingContext2D,
+        udCtx: CanvasRenderingContext2D,
+        personalObstacleList: any[]
+    ): void {
+        this.infraredSensorArray.forEach((sensor) => sensor.updateSensor(running, dt, myRobot, values, uCtx, udCtx, personalObstacleList));
+    }
+}
+
 export class TouchSensor implements IExternalSensor, IDrawable, ILabel {
     readonly color: string = '#FF69B4';
     readonly port: string;
@@ -811,6 +898,32 @@ export class TapSensor implements ISensor {
             (myRobot as RobotBaseMobile).chassis.backLeft.bumped ||
             (myRobot as RobotBaseMobile).chassis.backRight.bumped;
         values['touch'] = touch ? 1 : 0;
+    }
+}
+
+export class RobotinoTouchSensor implements ISensor, ILabel {
+    bumped: boolean = false;
+
+    public readonly drawPriority: number = 4;
+
+    getLabel(): string {
+        return '<div><label>' + Blockly.Msg['SENSOR_TOUCH'] + '</label><span>' + this.bumped + '</span></div>';
+    }
+
+    public readonly labelPriority: number;
+
+    updateSensor(
+        running: boolean,
+        dt: number,
+        myRobot: RobotBase,
+        values: object,
+        uCtx: CanvasRenderingContext2D,
+        udCtx: CanvasRenderingContext2D,
+        personalObstacleList: any[]
+    ): void {
+        values['touch'] = values['touch'] || {};
+        values['touch'] = this.bumped =
+            ((myRobot as RobotRobotino).chassis as RobotinoChassis).bumpedAngle !== 999 || (myRobot as RobotBaseMobile).chassis.frontRight.bumped;
     }
 }
 
@@ -1835,4 +1948,68 @@ function createSlider($slider: JQuery<HTMLElement>, $range: JQuery<HTMLElement>,
             number: false
         }
     });
+}
+
+export class OdometrySensor implements ISensor, ILabel, IReset, IUpdateAction {
+    x: number = 0;
+    y: number = 0;
+    theta: number = 0;
+
+    labelPriority: number = 7;
+
+    getLabel(): string {
+        let myLabel: string = '<div><label>' + Blockly.Msg['SENSOR_ODOMETRY'] + '</label></div>';
+        myLabel += '<div><label>&nbsp;-&nbsp;x</label><span>' + UTIL.round(this.x, 1) + ' cm</span></div>';
+        myLabel += '<div><label>&nbsp;-&nbsp;y</label><span>' + UTIL.round(this.y, 1) + ' cm</span></div>';
+        myLabel += '<div><label>&nbsp;-&nbsp;θ</label><span>' + UTIL.round(this.theta, 0) + ' °</span></div>';
+        return myLabel;
+    }
+
+    reset(): void {
+        this.x = 0;
+        this.y = 0;
+        this.theta = 0;
+    }
+
+    updateSensor(
+        running: boolean,
+        dt: number,
+        myRobot: RobotBase,
+        values: object,
+        uCtx: CanvasRenderingContext2D,
+        udCtx: CanvasRenderingContext2D,
+        personalObstacleList: any[]
+    ): void {
+        values['odometry'] = values['odometry'] || {};
+        this.theta += SIMATH.toDegree((myRobot as RobotBaseMobile).thetaDiff);
+        values['odometry'][C.THETA] = this.theta;
+        this.x += (myRobot as RobotBaseMobile).chassis['xDiff'] / 3;
+        values['odometry'][C.X] = this.x;
+        this.y += (myRobot as RobotBaseMobile).chassis['yDiff'] / 3;
+        values['odometry'][C.Y] = this.y;
+    }
+
+    updateAction(myRobot: RobotBase, dt: number, interpreterRunning: boolean): void {
+        if (interpreterRunning) {
+            let odometry = myRobot.interpreter.getRobotBehaviour().getActionState('odometry', true);
+            if (odometry && odometry.reset) {
+                switch (odometry.reset) {
+                    case C.X:
+                        this.x = 0;
+                        break;
+                    case C.Y:
+                        this.y = 0;
+                        break;
+                    case C.THETA:
+                        this.theta = 0;
+                        break;
+                    case 'all':
+                        this.reset();
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    }
 }

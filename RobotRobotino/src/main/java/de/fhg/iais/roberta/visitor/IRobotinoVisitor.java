@@ -9,8 +9,8 @@ import de.fhg.iais.roberta.syntax.action.robotino.OmnidrivePositionAction;
 import de.fhg.iais.roberta.syntax.sensor.generic.InfraredSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.PinGetValueSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.TouchSensor;
-import de.fhg.iais.roberta.syntax.sensor.robotino.OdometryPosition;
-import de.fhg.iais.roberta.syntax.sensor.robotino.OdometryReset;
+import de.fhg.iais.roberta.syntax.sensor.robotino.OdometrySensor;
+import de.fhg.iais.roberta.syntax.sensor.robotino.OdometrySensorReset;
 import de.fhg.iais.roberta.visitor.hardware.sensor.ISensorVisitor;
 
 /**
@@ -29,13 +29,13 @@ public interface IRobotinoVisitor<V> extends ISensorVisitor<V> {
 
     V visitOmnidrivePositionAction(OmnidrivePositionAction omnidrivePositionAction);
 
-    V visitOdometryPosition(OdometryPosition odometryPosition);
+    V visitOdometrySensor(OdometrySensor odometrySensor);
 
     V visitPinGetValueSensor(PinGetValueSensor pinGetValueSensor);
 
     V visitInfraredSensor(InfraredSensor infraredSensor);
 
-    V visitOdometryReset(OdometryReset odometryReset);
+    V visitOdometrySensorReset(OdometrySensorReset odometrySensorReset);
 
     V visitPinWriteValueAction(PinWriteValueAction pinWriteValueAction);
 

@@ -11,7 +11,7 @@ import de.fhg.iais.roberta.util.syntax.BlocklyConstants;
 import de.fhg.iais.roberta.util.syntax.WithUserDefinedPort;
 
 @NepoPhrase(category = "SENSOR", blocklyNames = {"robSensors_odometry_reset"}, name = "ODOMETRY_RESET")
-public class OdometryReset extends Sensor implements WithUserDefinedPort {
+public class OdometrySensorReset extends Sensor implements WithUserDefinedPort {
     @NepoField(name = BlocklyConstants.SENSORPORT, value = BlocklyConstants.EMPTY_PORT)
     public final String port;
     @NepoField(name = BlocklyConstants.SLOT, value = BlocklyConstants.EMPTY_SLOT)
@@ -19,7 +19,7 @@ public class OdometryReset extends Sensor implements WithUserDefinedPort {
     @NepoHide
     public final Hide hide;
 
-    public OdometryReset(BlocklyProperties properties, String port, String slot, Hide hide) {
+    public OdometrySensorReset(BlocklyProperties properties, String port, String slot, Hide hide) {
         super(properties);
         Assert.nonEmptyString(port);
         this.port = port;
