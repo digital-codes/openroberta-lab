@@ -1,8 +1,8 @@
 DIFFDRIVE:
   ASEBA: |
     sub diffdrive
-        motor.left.target = MOTOR_MAX / 100 * speedL 
-        motor.right.target =  MOTOR_MAX / 100 * speedR
+        motor.left.target = MOTOR_MAX * speedL 
+        motor.right.target =  MOTOR_MAX * speedR
 
 STOP:
   ASEBA: |

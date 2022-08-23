@@ -31,6 +31,7 @@ import de.fhg.iais.roberta.syntax.action.thymio.YellowLedOnAction;
 import de.fhg.iais.roberta.syntax.configuration.ConfigurationComponent;
 import de.fhg.iais.roberta.syntax.lang.blocksequence.MainTask;
 import de.fhg.iais.roberta.syntax.lang.expr.ColorConst;
+import de.fhg.iais.roberta.syntax.lang.expr.Expr;
 import de.fhg.iais.roberta.syntax.lang.expr.ExprList;
 import de.fhg.iais.roberta.syntax.lang.expr.RgbColor;
 import de.fhg.iais.roberta.syntax.lang.stmt.RepeatStmt;
@@ -46,6 +47,7 @@ import de.fhg.iais.roberta.syntax.sensor.generic.LightSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.SoundSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.TimerSensor;
 import de.fhg.iais.roberta.util.dbc.DbcException;
+import de.fhg.iais.roberta.util.syntax.MotorDuration;
 import de.fhg.iais.roberta.util.syntax.SC;
 
 public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IThymioVisitor<Void> {
@@ -82,161 +84,15 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
 
     @Override
     public Void visitCurveAction(CurveAction curveAction) {
-        String stateVar = this.isFunc ? "_funcstate" : this.isLoop ? "_loopstate" : "_state";
-        int counter = this.isFunc ? this.funcCounter : this.isLoop ? this.loopCounter : this.stateCounter;
         String multiplier = curveAction.direction.toString().equals(SC.FOREWARD) ? "" : "-";
-        String ifElseif = counter == 0 ? "if " : "elseif ";
-        boolean shouldStop = false;
-        this.sb.append(ifElseif).append(stateVar).append(" == ").append(counter).append(" then");
-        incrIndentation();
-        nlIndent();
-        if ( curveAction.paramRight.getDuration() != null ) {
-            shouldStop = true;
-            this.sb.append("speedL = ").append(multiplier);
-            curveAction.paramLeft.getSpeed().accept(this);
-            nlIndent();
-            this.sb.append("speedR = ").append(multiplier);
-            curveAction.paramRight.getSpeed().accept(this);
-            nlIndent();
-            this.sb.append("callsub diffdrive");
-            nlIndent();
-            this.sb.append("__time++");
-            nlIndent();
-            this.sb.append("if __time == ");
-            curveAction.paramRight.getDuration().getValue().accept(this);
-            this.sb.append("/timer.period[0] then");
-            incrIndentation();
-            nlIndent();
-            this.sb.append("__time = 0");
-            nlIndent();
-            this.sb.append(stateVar).append("++");
-            decrIndentation();
-            nlIndent();
-            this.sb.append("end");
-            decrIndentation();
-            nlIndent();
-        } else {
-            this.sb.append("motor.left.target = ").append(multiplier);
-            curveAction.paramLeft.getSpeed().accept(this);
-            nlIndent();
-            this.sb.append("motor.right.target = ").append(multiplier);
-            curveAction.paramRight.getSpeed().accept(this);
-            nlIndent();
-            this.sb.append(stateVar).append("++");
-            decrIndentation();
-            nlIndent();
-        }
-//        decrIndentation();
-        nlIndent();
-        this.sb.append("elseif ").append(stateVar).append(" == ").append(++counter).append(" then");
-        incrIndentation();
-        nlIndent();
-        if ( shouldStop ) {
-            this.sb.append("callsub diffdrive_stop");
-            nlIndent();
-        }
-        this.sb.append(stateVar).append("++");
-        if ( isFunc ) {
-            this.funcCounter += 2;
-        } else if ( isLoop ) {
-            this.loopCounter += 2;
-        } else {
-            this.stateCounter += 2;
-        }
-        decrIndentation();
-        nlIndent();
-        if ( !isLoop && counter == 2 * this.noOfStates - 1 ) {
-            this.sb.append("end");
-        } else if ( isLoop && counter == 2 * this.noOfLoopStates + 1 ) {
-            nlIndent();
-            this.sb.append("elseif ").append(stateVar).append(" == ").append(this.loopCounter).append(" then");
-            incrIndentation();
-            nlIndent();
-            this.sb.append(stateVar).append(" = 0");
-            decrIndentation();
-            nlIndent();
-            this.sb.append("end");
-        }
+        move(curveAction.paramRight.getDuration(), curveAction.paramLeft.getSpeed(), curveAction.paramRight.getSpeed(), multiplier, multiplier);
         return null;
     }
 
     @Override
     public Void visitDriveAction(DriveAction driveAction) {
-        String stateVar = this.isFunc ? "_funcstate" : this.isLoop ? "_loopstate" : "_state";
-        int counter = this.isFunc ? this.funcCounter : this.isLoop ? this.loopCounter : this.stateCounter;
         String multiplier = driveAction.direction.toString().equals(SC.FOREWARD) ? "" : "-";
-        String ifElseif = counter == 0 ? "if " : "elseif ";
-        boolean shouldStop = false;
-        this.sb.append(ifElseif).append(stateVar).append(" == ").append(counter).append(" then");
-        incrIndentation();
-        nlIndent();
-        if ( driveAction.param.getDuration() != null ) {
-            shouldStop = true;
-            this.sb.append("speedL = ").append(multiplier);
-            driveAction.param.getSpeed().accept(this);
-            nlIndent();
-            this.sb.append("speedR = ").append(multiplier);
-            driveAction.param.getSpeed().accept(this);
-            nlIndent();
-            this.sb.append("callsub diffdrive");
-            nlIndent();
-            this.sb.append("__time++");
-            nlIndent();
-            this.sb.append("if __time == ");
-            driveAction.param.getDuration().getValue().accept(this);
-            this.sb.append("/timer.period[0] then");
-            incrIndentation();
-            nlIndent();
-            this.sb.append("__time = 0");
-            nlIndent();
-            this.sb.append(stateVar).append("++");
-            decrIndentation();
-            nlIndent();
-            this.sb.append("end");
-            decrIndentation();
-            nlIndent();
-        } else {
-            this.sb.append("motor.left.target = ").append(multiplier);
-            driveAction.param.getSpeed().accept(this);
-            nlIndent();
-            this.sb.append("motor.right.target = ").append(multiplier);
-            driveAction.param.getSpeed().accept(this);
-            nlIndent();
-            this.sb.append(stateVar).append("++");
-            decrIndentation();
-            nlIndent();
-        }
-//        decrIndentation();
-        nlIndent();
-        this.sb.append("elseif ").append(stateVar).append(" == ").append(++counter).append(" then");
-        incrIndentation();
-        nlIndent();
-        if ( shouldStop ) {
-            this.sb.append("callsub diffdrive_stop");
-            nlIndent();
-        }
-        this.sb.append(stateVar).append("++");
-        if ( isFunc ) {
-            this.funcCounter += 2;
-        } else if ( isLoop ) {
-            this.loopCounter += 2;
-        } else {
-            this.stateCounter += 2;
-        }
-        decrIndentation();
-        nlIndent();
-        if ( !isLoop && counter == 2 * this.noOfStates - 1 ) {
-            this.sb.append("end");
-        } else if ( isLoop && counter == 2 * this.noOfLoopStates + 1 ) {
-            nlIndent();
-            this.sb.append("elseif ").append(stateVar).append(" == ").append(this.loopCounter).append(" then");
-            incrIndentation();
-            nlIndent();
-            this.sb.append(stateVar).append(" = 0");
-//            decrIndentation();
-//            nlIndent();
-//            this.sb.append("end");
-        }
+        move(driveAction.param.getDuration(), driveAction.param.getSpeed(), driveAction.param.getSpeed(), multiplier, multiplier);
         return null;
     }
 
@@ -255,7 +111,7 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
 //        this.sb.append(" == 1 then");
 //        incrIndentation();
 //        nlIndent();
-//        this.sb.append("_state++");
+//        this.sb.append("_state = ").append(this.stateCounter);
 //        decrIndentation();
 //        nlIndent();
 //        this.sb.append("else");
@@ -322,16 +178,20 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
                 this.noOfLoopStates = ((RepeatStmt) p).list.get().size();
             });
         this.noOfLoopStates--;
-        this.sb.append("timer.period[0] = 10\n" +
-            "\n" +
-            "onevent timer0");
+        this.sb.append("timer.period[0] = 10");
+        nlIndent();
+        nlIndent();
+        this.sb.append("onevent timer0");
+        incrIndentation();
+        nlIndent();
+        this.sb.append("if _state == 0 then");
+        incrIndentation();
         return null;
     }
 
     @Override
     public Void visitMotorDriveStopAction(MotorDriveStopAction stopAction) {
         this.sb.append("callsub diffdrive_stop");
-        nlIndent();
         return null;
     }
 
@@ -343,25 +203,60 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
     @Override
     public Void visitMotorOnAction(MotorOnAction motorOnAction) {
         String motorSide = motorOnAction.port.toLowerCase();
-
-        this.sb.append("motor.").append(motorSide).append(".target = MOTOR_MAX / 100 * ");
-        motorOnAction.param.getSpeed().accept(this);
-        nlIndent();
-
-        if ( motorOnAction.param.getDuration() != null ) {
-            this.sb.append("timer.period[0] = ");
-            motorOnAction.param.getDuration().getValue().accept(this);
+        if ( motorOnAction.getDurationValue() != null ) {
+            if ( !this.newState ) {
+                this.stateCounter++;
+                this.sb.append("_state = ").append(this.stateCounter);
+                decrIndentation();
+                nlIndent();
+                this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
+                incrIndentation();
+                nlIndent();
+            } else {
+                newState = false;
+            }
+            this.sb.append("__time = 0");
             nlIndent();
+            this.sb.append("motor.").append(motorSide).append(".target = MOTOR_MAX * ");
+            motorOnAction.param.getSpeed().accept(this);
             nlIndent();
-            this.sb.append("onevent timer0");
+            this.sb.append("_state = ").append(this.stateCounter);
+            decrIndentation();
+            nlIndent();
+            this.stateCounter++;
+            this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
+            incrIndentation();
+            nlIndent();
+            this.sb.append("if __time == ");
+            motorOnAction.getDurationValue().accept(this);
+            this.sb.append("/timer.period[0] then");
             incrIndentation();
             nlIndent();
             this.sb.append("motor.").append(motorSide).append(".target = 0");
+            nlIndent();
+            ;
+            this.sb.append("_state = ").append(this.stateCounter);
             decrIndentation();
             nlIndent();
+            this.sb.append("else");
+            incrIndentation();
+            nlIndent();
+            this.sb.append("__time++");
+            decrIndentation();
+            nlIndent();
+            this.sb.append("end");
+            decrIndentation();
+            nlIndent();
+            this.stateCounter++;
+            this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
+            incrIndentation();
+        } else {
+            this.sb.append("motor.").append(motorSide).append(".target = MOTOR_MAX * ");
+            motorOnAction.param.getSpeed().accept(this);
         }
         return null;
     }
+
 
     @Override
     public Void visitMotorSetPowerAction(MotorSetPowerAction motorSetPowerAction) {
@@ -371,9 +266,7 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
     @Override
     public Void visitMotorStopAction(MotorStopAction motorStopAction) {
         String motorSide = motorStopAction.port.toLowerCase();
-
         this.sb.append("motor.").append(motorSide).append(".target = 0");
-        nlIndent();
         return null;
     }
 
@@ -410,14 +303,47 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
 
     @Override
     public Void visitPlayNoteAction(PlayNoteAction playNoteAction) {
+        if ( !this.newState ) {
+            this.stateCounter++;
+            this.sb.append("_state = ").append(this.stateCounter);
+            decrIndentation();
+            nlIndent();
+            this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
+            incrIndentation();
+            nlIndent();
+        } else {
+            newState = false;
+        }
+        this.sb.append("__time = 0");
+        nlIndent();
+        this.sb.append("call sound.freq(").append(
+            playNoteAction.frequency).append(", ").append(playNoteAction.duration).append("/16)");
+        nlIndent();
+        this.sb.append("_state = ").append(this.stateCounter);
+        decrIndentation();
+        nlIndent();
+        this.stateCounter++;
+        this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
         incrIndentation();
         nlIndent();
-        this.sb.append("if _loopstate == ").append(loopCounter).append(" then");
+        this.sb.append("if __time == ").append(playNoteAction.duration).append("/timer.period[0] then");
         incrIndentation();
         nlIndent();
-        this.sb.append("call sound.freq( ").append(playNoteAction.frequency.split("\\.")[0]);
-        this.sb.append(", ").append(playNoteAction.duration).append("/16 )");
+        this.sb.append("_state = ").append(this.stateCounter);
+        decrIndentation();
         nlIndent();
+        this.sb.append("else");
+        incrIndentation();
+        nlIndent();
+        this.sb.append("__time++");
+        decrIndentation();
+        nlIndent();
+        this.sb.append("end");
+        decrIndentation();
+        nlIndent();
+        this.stateCounter++;
+        this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
+        incrIndentation();
         return null;
     }
 
@@ -428,15 +354,7 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
 
     @Override
     public Void visitRedLedOnAction(RedLedOnAction redLedOnAction) {
-//        incrIndentation();
-//        nlIndent();
-        String stateVar = this.isFunc ? "_funcstate" : this.isLoop ? "_loopstate" : "_state";
-        int counter = this.isFunc ? this.funcCounter : this.isLoop ? this.loopCounter : this.stateCounter;
-        String ifElseif = counter == 0 ? "if " : "elseif ";
-        this.sb.append(ifElseif).append(stateVar).append(" == ").append(counter).append(" then");
-        incrIndentation();
-        nlIndent();
-        this.sb.append("call leds.buttons( ");
+        this.sb.append("call leds.buttons(");
         redLedOnAction.led1.accept(this);
         this.sb.append("/COLOR_INTENSITY_REMAP, ");
         redLedOnAction.led2.accept(this);
@@ -444,25 +362,7 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
         redLedOnAction.led3.accept(this);
         this.sb.append("/COLOR_INTENSITY_REMAP, ");
         redLedOnAction.led4.accept(this);
-        this.sb.append("/COLOR_INTENSITY_REMAP )");
-        nlIndent();
-        this.sb.append("timer.period[0] = 10");
-        nlIndent();
-        this.sb.append(stateVar).append("++");
-        if ( isFunc ) {
-            this.funcCounter++;
-        } else if ( isLoop ) {
-            this.loopCounter++;
-        } else {
-            this.stateCounter++;
-        }
-        decrIndentation();
-        nlIndent();
-        if ( this.noOfStates == counter ) {
-            this.sb.append("end");
-            nlIndent();
-        }
-//        decrIndentation();
+        this.sb.append("/COLOR_INTENSITY_REMAP)");
         return null;
     }
 
@@ -507,94 +407,126 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
 
     @Override
     public Void visitToneAction(ToneAction toneAction) {
-        this.sb.append("call sound.freq( ");
+        if ( !this.newState ) {
+            this.stateCounter++;
+            this.sb.append("_state = ").append(this.stateCounter);
+            decrIndentation();
+            nlIndent();
+            this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
+            incrIndentation();
+            nlIndent();
+        } else {
+            newState = false;
+        }
+        this.sb.append("__time = 0");
+        nlIndent();
+        this.sb.append("call sound.freq(");
         toneAction.frequency.accept(this);
         this.sb.append(", ");
         toneAction.duration.accept(this);
-        this.sb.append("/16 )");
-//        nlIndent();
+        this.sb.append("/16)");
+        nlIndent();
+        this.sb.append("_state = ").append(this.stateCounter);
+        decrIndentation();
+        nlIndent();
+        this.stateCounter++;
+        this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
+        incrIndentation();
+        nlIndent();
+        this.sb.append("if __time == ");
+        toneAction.duration.accept(this);
+        this.sb.append("/timer.period[0] then");
+        incrIndentation();
+        nlIndent();
+        this.sb.append("_state = ").append(this.stateCounter);
+        decrIndentation();
+        nlIndent();
+        this.sb.append("else");
+        incrIndentation();
+        nlIndent();
+        this.sb.append("__time++");
+        decrIndentation();
+        nlIndent();
+        this.sb.append("end");
+        decrIndentation();
+        nlIndent();
+        this.stateCounter++;
+        this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
+        incrIndentation();
         return null;
     }
 
     @Override
     public Void visitTurnAction(TurnAction turnAction) {
-        String stateVar = this.isFunc ? "_funcstate" : this.isLoop ? "_loopstate" : "_state";
-        int counter = this.isFunc ? this.funcCounter : this.isLoop ? this.loopCounter : this.stateCounter;
         String multiplierRight = turnAction.direction.toString().equals(SC.RIGHT) ? "-" : "";
         String multiplierLeft = turnAction.direction.toString().equals(SC.LEFT) ? "-" : "";
-        String ifElseif = counter == 0 ? "if " : "elseif ";
-        boolean shouldStop = false;
-        this.sb.append(ifElseif).append(stateVar).append(" == ").append(counter).append(" then");
-        incrIndentation();
-        nlIndent();
-        if ( turnAction.param.getDuration() != null ) {
-            shouldStop = true;
-            this.sb.append("speedL = ").append(multiplierLeft);
-            turnAction.param.getSpeed().accept(this);
+        move(turnAction.param.getDuration(), turnAction.param.getSpeed(), turnAction.param.getSpeed(), multiplierRight, multiplierLeft);
+        return null;
+    }
+
+    private void move(MotorDuration duration, Expr speedLeft, Expr speedRight, String multLeft, String multRight) {
+        if ( duration != null ) {
+            if ( !this.newState ) {
+                this.stateCounter++;
+                this.sb.append("_state = ").append(this.stateCounter);
+                decrIndentation();
+                nlIndent();
+                this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
+                incrIndentation();
+                nlIndent();
+            } else {
+                newState = true;
+            }
+            this.sb.append("__time = 0");
             nlIndent();
-            this.sb.append("speedR = ").append(multiplierRight);
-            turnAction.param.getSpeed().accept(this);
+            this.sb.append("speedL = ").append(multLeft);
+            speedLeft.accept(this);
+            this.sb.append(" * MOTOR_MAX");
+            nlIndent();
+            this.sb.append("speedR = ").append(multRight);
+            speedLeft.accept(this);
+            this.sb.append(" * MOTOR_MAX");
             nlIndent();
             this.sb.append("callsub diffdrive");
             nlIndent();
-            this.sb.append("__time++");
+            this.stateCounter++;
+            this.sb.append("_state = ").append(this.stateCounter);
+            decrIndentation();
+            nlIndent();
+            this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
+            incrIndentation();
             nlIndent();
             this.sb.append("if __time == ");
-            turnAction.param.getDuration().getValue().accept(this);
+            duration.getValue().accept(this);
             this.sb.append("/timer.period[0] then");
             incrIndentation();
             nlIndent();
-            this.sb.append("__time = 0");
-            nlIndent();
-            this.sb.append(stateVar).append("++");
-            decrIndentation();
-            nlIndent();
-            this.sb.append("end");
-            decrIndentation();
-            nlIndent();
-        } else {
-            this.sb.append("motor.left.target = ").append(multiplierLeft);
-            turnAction.param.getSpeed().accept(this);
-            nlIndent();
-            this.sb.append("motor.right.target = ").append(multiplierRight);
-            turnAction.param.getSpeed().accept(this);
-            nlIndent();
-            this.sb.append(stateVar).append("++");
-            decrIndentation();
-            nlIndent();
-        }
-//        decrIndentation();
-        nlIndent();
-        this.sb.append("elseif ").append(stateVar).append(" == ").append(++counter).append(" then");
-        incrIndentation();
-        nlIndent();
-        if ( shouldStop ) {
             this.sb.append("callsub diffdrive_stop");
             nlIndent();
-        }
-        this.sb.append(stateVar).append("++");
-        if ( isFunc ) {
-            this.funcCounter += 2;
-        } else if ( isLoop ) {
-            this.loopCounter += 2;
-        } else {
-            this.stateCounter += 2;
-        }
-        decrIndentation();
-        nlIndent();
-        if ( !isLoop && counter == 2 * this.noOfStates - 1 ) {
-            this.sb.append("end");
-        } else if ( isLoop && counter == 2 * this.noOfLoopStates + 1 ) {
+            this.stateCounter++;
+            this.sb.append("_state = ").append(this.stateCounter);
+            decrIndentation();
             nlIndent();
-            this.sb.append("elseif ").append(stateVar).append(" == ").append(this.loopCounter).append(" then");
+            this.sb.append("else");
             incrIndentation();
             nlIndent();
-            this.sb.append(stateVar).append(" = 0");
+            this.sb.append("__time++");
             decrIndentation();
             nlIndent();
             this.sb.append("end");
+            decrIndentation();
+            nlIndent();
+            this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
+            incrIndentation();
+        } else {
+            this.sb.append("motor.left.target = ").append(multLeft);
+            speedLeft.accept(this);
+            this.sb.append(" * MOTOR_MAX");
+            nlIndent();
+            this.sb.append("motor.right.target = ").append(multRight);
+            speedRight.accept(this);
+            this.sb.append(" * MOTOR_MAX");
         }
-        return null;
     }
 
     @Override
@@ -604,8 +536,13 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
 
     @Override
     public Void visitWaitStmt(WaitStmt waitStmt) {
-//        incrIndentation();
-//        nlIndent();
+        this.stateCounter++;
+        this.sb.append("_state = ").append(this.stateCounter);
+        decrIndentation();
+        nlIndent();
+        this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
+        incrIndentation();
+        nlIndent();
         String stateVar = this.isFunc ? "_funcstate" : this.isLoop ? "_loopstate" : "_state";
         int counter = this.isFunc ? this.funcCounter : this.isLoop ? this.loopCounter : this.stateCounter;
         String ifElseif = counter == 0 ? "if " : "elseif ";
@@ -631,23 +568,52 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
 
     @Override
     public Void visitWaitTimeStmt(WaitTimeStmt waitTimeStmt) {
-        this.sb.append("time.sleep(");
+        if ( !this.newState ) {
+            this.stateCounter++;
+            this.sb.append("_state = ").append(this.stateCounter);
+            decrIndentation();
+            nlIndent();
+            this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
+            incrIndentation();
+            nlIndent();
+        } else {
+            newState = false;
+        }
+        this.sb.append("__time = 0");
+        nlIndent();
+        this.stateCounter++;
+        this.sb.append("_state = ").append(this.stateCounter);
+        decrIndentation();
+        nlIndent();
+        this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
+        incrIndentation();
+        nlIndent();
+        this.sb.append("if __time == ");
         waitTimeStmt.time.accept(this);
-        this.sb.append("/1000)");
+        this.sb.append("/timer.period[0] then");
+        incrIndentation();
+        nlIndent();
+        this.stateCounter++;
+        this.sb.append("_state = ").append(this.stateCounter);
+        decrIndentation();
+        nlIndent();
+        this.sb.append("else");
+        incrIndentation();
+        nlIndent();
+        this.sb.append("__time++");
+        decrIndentation();
+        nlIndent();
+        this.sb.append("end");
+        decrIndentation();
+        nlIndent();
+        this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
+        incrIndentation();
         return null;
     }
 
     @Override
     public Void visitYellowLedOnAction(YellowLedOnAction yellowLedOnAction) {
-//        incrIndentation();
-//        nlIndent();
-        String stateVar = this.isFunc ? "_funcstate" : this.isLoop ? "_loopstate" : "_state";
-        int counter = this.isFunc ? this.funcCounter : this.isLoop ? this.loopCounter : this.stateCounter;
-        String ifElseif = counter == 0 ? "if " : "elseif ";
-        this.sb.append(ifElseif).append(stateVar).append(" == ").append(counter).append(" then");
-        incrIndentation();
-        nlIndent();
-        this.sb.append("call leds.circle( ");
+        this.sb.append("call leds.circle(");
         yellowLedOnAction.led1.accept(this);
         this.sb.append("/COLOR_INTENSITY_REMAP, ");
         yellowLedOnAction.led2.accept(this);
@@ -663,25 +629,7 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
         yellowLedOnAction.led7.accept(this);
         this.sb.append("/COLOR_INTENSITY_REMAP, ");
         yellowLedOnAction.led8.accept(this);
-        this.sb.append("/COLOR_INTENSITY_REMAP )");
-        nlIndent();
-        this.sb.append("timer.period[0] = 10");
-        nlIndent();
-        this.sb.append(stateVar).append("++");
-        if ( isFunc ) {
-            this.funcCounter++;
-        } else if ( isLoop ) {
-            this.loopCounter++;
-        } else {
-            this.stateCounter++;
-        }
-        decrIndentation();
-        nlIndent();
-        if ( this.noOfStates == counter ) {
-            this.sb.append("end");
-            nlIndent();
-        }
-//        decrIndentation();
+        this.sb.append("/COLOR_INTENSITY_REMAP)");
         return null;
     }
 
@@ -695,7 +643,7 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
         nlIndent();
         this.sb.append("<network>");
         nlIndent();
-        this.sb.append("<constant value=\"500\" name=\"MOTOR_MAX\"/>");
+        this.sb.append("<constant value=\"5\" name=\"MOTOR_MAX\"/>");
         nlIndent();
         this.sb.append("<constant value=\"8\" name=\"LED_REMAP\"/>");
         nlIndent();
@@ -713,6 +661,14 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
 
     @Override
     protected void generateProgramSuffix(boolean withWrapping) {
+        nlIndent();
+        this.sb.append("timer.period[0] = 0");
+        decrIndentation();
+        nlIndent();
+        this.sb.append("end");
+        decrIndentation();
+        decrIndentation();
+        nlIndent();
         if ( !withWrapping ) {
             return;
         }

@@ -84,6 +84,7 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
     protected int funcCounter = 0;
     protected boolean isLoop = false;
     protected boolean isFunc = false;
+    protected boolean newState = true;
 
     protected AbstractAsebaVisitor(List<List<Phrase>> programPhrases, ClassToInstanceMap<IProjectBean> beans) {
         super(programPhrases, beans);
@@ -980,33 +981,74 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
     @Override
     protected void generateCodeFromIfElse(IfStmt ifStmt) {
         int stmtSize = ifStmt.expr.size();
-        for ( int i = 0; i < stmtSize; i++ ) {
+        int statesSize = stmtSize + 1 + (ifStmt.elseList.get().isEmpty() ? 0 : 1);
+        int[] states = new int[statesSize];
+        int i = 0;
+        for ( ; i < stmtSize; i++ ) {
             if ( i == 0 ) {
                 generateCodeFromStmtCondition("if", ifStmt.expr.get(i));
+                incrIndentation();
+                nlIndent();
+                this.stateCounter++;
+                states[i] = this.stateCounter;
+                this.sb.append("_state = ").append(this.stateCounter);
+                decrIndentation();
             } else {
                 nlIndent();
                 generateCodeFromStmtCondition("elseif", ifStmt.expr.get(i));
+                incrIndentation();
+                nlIndent();
+                this.stateCounter++;
+                states[i] = this.stateCounter;
+                this.sb.append("_state = ").append(this.stateCounter);
+                decrIndentation();
             }
+        }
+        nlIndent();
+        this.sb.append("else");
+        incrIndentation();
+        nlIndent();
+        this.stateCounter++;
+        states[i] = this.stateCounter;
+        i++;
+        this.sb.append("_state = ").append(this.stateCounter);
+        decrIndentation();
+        if ( !ifStmt.elseList.get().isEmpty() ) {
+            this.stateCounter++;
+            states[i] = this.stateCounter;
+        }
+        nlIndent();
+        this.sb.append("end");
+        decrIndentation();
+        nlIndent();
+        for ( int j = 0; j < stmtSize; j++ ) {
+            this.sb.append("elseif _state == ").append(states[j]).append(" then");
             incrIndentation();
-            StmtList then = ifStmt.thenList.get(i);
+            StmtList then = ifStmt.thenList.get(j);
             if ( !then.get().isEmpty() ) {
                 then.accept(this);
             }
+            nlIndent();
+            this.sb.append("_state = ").append(states[statesSize - 1]);
             decrIndentation();
             nlIndent();
         }
+        if ( !ifStmt.elseList.get().isEmpty() ) {
+            this.sb.append("elseif _state == ").append(states[statesSize - 2]).append(" then");
+            incrIndentation();
+            ifStmt.elseList.accept(this);
+            nlIndent();
+            this.sb.append("_state = ").append(states[statesSize - 1]);
+            decrIndentation();
+            nlIndent();
+        }
+        this.sb.append("elseif _state == ").append(states[statesSize - 1]).append(" then");
+        incrIndentation();
     }
 
     @Override
     protected void generateCodeFromElse(IfStmt ifStmt) {
-        if ( !ifStmt.elseList.get().isEmpty() ) {
-            this.sb.append("else");
-            incrIndentation();
-            ifStmt.elseList.accept(this);
-            decrIndentation();
-            nlIndent();
-        }
-        this.sb.append("end");
+        // nothing to do, integrated in generateCodeFromIfElse()
     }
 
     @Override
