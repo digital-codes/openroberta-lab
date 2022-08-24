@@ -1,6 +1,5 @@
 package de.fhg.iais.roberta.visitor;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -78,12 +77,6 @@ import de.fhg.iais.roberta.visitor.lang.codegen.AbstractLanguageVisitor;
 public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
     protected Set<String> usedGlobalVarInFunctions = new OrderedHashSet<>();
     protected int stateCounter = 0;
-    protected int noOfStates = 0;
-    protected int noOfLoopStates = 0; // TODO should be arrays to accommodate nested loops
-    protected int loopCounter = 0; // TODO should be arrays to accommodate nested loops
-    protected int funcCounter = 0;
-    protected boolean isLoop = false;
-    protected boolean isFunc = false;
     protected boolean newState = true;
 
     protected AbstractAsebaVisitor(List<List<Phrase>> programPhrases, ClassToInstanceMap<IProjectBean> beans) {
@@ -645,33 +638,8 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
 
     @Override
     public Void visitMethodCall(MethodCall methodCall) {
-        String stateVar = this.isFunc ? "_funcstate" : this.isLoop ? "_loopstate" : "_state";
-        int counter = this.isFunc ? this.funcCounter : this.isLoop ? this.loopCounter : this.stateCounter;
-        String ifElseif = counter == 0 ? "if " : "elseif ";
-        incrIndentation();
-        nlIndent();
-        if ( !isLoop ) {
-            this.sb.append(ifElseif).append(stateVar).append(" == ").append(counter).append(" then");
-            incrIndentation();
-            nlIndent();
-        }
         this.sb.append("callsub ").append(methodCall.getMethodName());
-        if ( isFunc ) {
-            this.funcCounter++;
-        } else if ( isLoop ) {
-            this.loopCounter++;
-        } else {
-            this.stateCounter++;
-        }
-        decrIndentation();
-//        nlIndent();
-        if ( this.noOfStates == counter + 1 ) {
-            nlIndent();
-            this.sb.append("end");
-            nlIndent();
-        }
-        decrIndentation();
-//        nlIndent();
+        nlIndent();
         return null;
     }
 
@@ -690,31 +658,12 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
 
     @Override
     public Void visitMethodReturn(MethodReturn methodReturn) {
-        nlIndent();
-        this.sb.append("def ").append(methodReturn.getMethodName()).append('(');
-        List<String> paramList = new ArrayList<>();
-        for ( Expr l : methodReturn.getParameters().get() ) {
-            paramList.add(((VarDeclaration) l).getCodeSafeName());
-        }
-        this.sb.append(String.join(", ", paramList));
-        this.sb.append("):");
-        incrIndentation();
-        if ( !this.usedGlobalVarInFunctions.isEmpty() ) {
-            nlIndent();
-            this.sb.append("global " + String.join(", ", this.usedGlobalVarInFunctions));
-        }
-        methodReturn.body.accept(this);
-        nlIndent();
-        this.sb.append("return ");
-        methodReturn.returnValue.accept(this);
-        decrIndentation();
-        return null;
+        throw new DbcException("Operation not supported");
     }
 
     @Override
     public Void visitMethodVoid(MethodVoid methodVoid) {
         nlIndent();
-        this.isFunc = true;
         this.sb.append("sub ").append(methodVoid.getMethodName());
         incrIndentation();
         boolean isMethodBodyEmpty = methodVoid.body.get().isEmpty();
@@ -725,15 +674,6 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
             methodVoid.body.accept(this);
         }
         nlIndent();
-        this.sb.append("elseif _funcstate == ").append(this.funcCounter).append(" then");
-        incrIndentation();
-        nlIndent();
-        String stateVar = this.isLoop ? "_loopstate" : "_state";
-        this.funcCounter = 0;
-        this.sb.append("_funcstate = 0");
-        nlIndent();
-        this.sb.append(stateVar).append("++");
-        this.isFunc = false;
         decrIndentation();
         nlIndent();
         this.sb.append("end");
@@ -748,57 +688,30 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
 
     @Override
     public Void visitRepeatStmt(RepeatStmt repeatStmt) {
-        String stateVar = this.isFunc ? "_funcstate" : this.isLoop ? "_loopstate" : "_state";
-        int counter = this.isFunc ? this.funcCounter : this.isLoop ? this.loopCounter : this.stateCounter;
-        String ifElseif = counter == 0 ? "if " : "elseif ";
+        int[] states = new int[3];
+        this.stateCounter++;
+        this.sb.append("_state = ").append(this.stateCounter);
+        decrIndentation();
+        nlIndent();
+        this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
+        incrIndentation();
+        nlIndent();
+        newState = true;
+
+        states[0] = this.stateCounter;
         switch ( repeatStmt.mode ) {
             case FOREVER:
-                this.sb.append(ifElseif).append(stateVar).append(" == ").append(counter).append(" then");
-//                this.sb.append("if _state == ").append(this.stateCounter).append(" then");
-                incrIndentation();
-                nlIndent();
                 generateCodeFromStmtCondition("if", repeatStmt.expr);
-//                incrIndentation();
-//                nlIndent();
-                if ( isFunc ) {
-                    this.funcCounter++;
-                }
-                if ( isLoop ) {
-                    this.loopCounter++;
-                } else {
-                    this.stateCounter++;
-                }
-                this.isLoop = true;
                 break;
             case UNTIL:
                 generateCodeFromStmtCondition("if", repeatStmt.expr);
                 break;
             case WHILE:
-                this.sb.append("if _loopstate == ").append(this.loopCounter).append(" then");
-                incrIndentation();
-                nlIndent();
                 generateCodeFromStmtCondition("if", repeatStmt.expr);
-                decrIndentation();
-                nlIndent();
-                this.loopCounter++;
                 break;
             case TIMES:
             case FOR:
-                this.sb.append(ifElseif).append(stateVar).append(" == ").append(counter).append(" then");
-                incrIndentation();
-                nlIndent();
                 generateCodeFromStmtConditionFor("if", repeatStmt.expr, false);
-//                decrIndentation();
-//                nlIndent();
-                if ( isFunc ) {
-                    this.funcCounter++;
-                }
-                if ( isLoop ) {
-                    this.loopCounter++;
-                } else {
-                    this.stateCounter++;
-                }
-                this.isLoop = true;
                 break;
             case WAIT:
                 generateCodeFromStmtCondition("if", repeatStmt.expr);
@@ -810,38 +723,40 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
                 throw new DbcException("Invalid Repeat Statement!");
         }
         incrIndentation();
-        if ( repeatStmt.list.sl.isEmpty() ) {
-            nlIndent();
-            this.sb.append(stateVar).append("++");
-            decrIndentation();
-            nlIndent();
-            this.sb.append("end");
-//            incrIndentation();
-//            nlIndent();
-//            this.sb.append("timer.period[0] = 10");
-        } else {
-            repeatStmt.list.accept(this);
-            decrIndentation();
-            nlIndent();
-//            this.sb.append("timer.period[0] = 100");
-            if ( repeatStmt.mode == RepeatStmt.Mode.FOR ||
-                repeatStmt.mode == RepeatStmt.Mode.TIMES ) {
-                generateCodeFromStmtConditionFor("if", repeatStmt.expr, true);
-            } else if ( repeatStmt.mode == RepeatStmt.Mode.FOREVER ) {
-                this.sb.append("end");
-            }
-            decrIndentation();
-            nlIndent();
-            this.sb.append("end");
-        }
+        nlIndent();
+        this.stateCounter++;
+        states[1] = this.stateCounter;
+        this.sb.append("_state = ").append(this.stateCounter);
+        decrIndentation();
+        nlIndent();
+        this.sb.append("else");
+        incrIndentation();
+        nlIndent();
+        this.stateCounter++;
+        states[2] = this.stateCounter;
+        this.sb.append("_state = ").append(this.stateCounter);
         decrIndentation();
         nlIndent();
         this.sb.append("end");
-//        if ( isLoop ) {
-//            this.loopCounter++;
-//        }
         decrIndentation();
         nlIndent();
+        this.sb.append("elseif _state == ").append(states[1]).append(" then");
+        this.newState = true;
+        incrIndentation();
+        repeatStmt.list.accept(this);
+        nlIndent();
+        if ( repeatStmt.mode.equals(RepeatStmt.Mode.TIMES) || repeatStmt.mode.equals(RepeatStmt.Mode.FOR) ) {
+            ((ExprList) repeatStmt.expr).get().get(0).accept(this);
+            this.sb.append(" += ");
+            ((ExprList) repeatStmt.expr).get().get(3).accept(this);
+            nlIndent();
+        }
+        this.sb.append("_state = ").append(states[0]);
+        decrIndentation();
+        nlIndent();
+        this.stateCounter++;
+        this.sb.append("elseif _state == ").append(states[2]).append(" then");
+        incrIndentation();
         return null;
     }
 
@@ -1059,12 +974,10 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
     protected void generateCodeFromStmtCondition(String stmtType, Expr expr) {
         this.sb.append(stmtType).append(whitespace());
         if ( expr.getKind().getName().equals("BOOL_CONST") || expr.getKind().getName().equals("VAR") ) {
-//            String loop = stmtType.equals("while") ? "___loop == " : "";
             this.sb.append("___true == ");
         }
         expr.accept(this);
-        String thenOrDo = stmtType.contains("if") ? " then" : " do";
-        this.sb.append(thenOrDo);
+        this.sb.append(" then");
     }
 
     protected void generateCodeFromStmtConditionFor(String stmtType, Expr expr, boolean inc) {
@@ -1090,22 +1003,13 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
             decrIndentation();
             nlIndent();
             this.sb.append("end");
-            this.loopCounter++;
             return;
         }
-//        incrIndentation();
-//        nlIndent();
         this.sb.append(stmtType).append(whitespace());
         expressions.get().get(0).accept(this);
         this.sb.append(whitespace()).append("< ");
         expressions.get().get(2).accept(this);
-//        this.sb.append(":");
-//        expressions.get().get(2).accept(this);
-//        this.sb.append(" step").append(whitespace());
-//        expressions.get().get(3).accept(this);
         this.sb.append(" then");
-//        incrIndentation();
-//        nlIndent();
     }
 
     @Override

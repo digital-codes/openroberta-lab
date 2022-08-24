@@ -6,9 +6,7 @@ import com.google.common.collect.ClassToInstanceMap;
 
 import de.fhg.iais.roberta.bean.CodeGeneratorSetupBean;
 import de.fhg.iais.roberta.bean.IProjectBean;
-import de.fhg.iais.roberta.components.Category;
 import de.fhg.iais.roberta.components.ConfigurationAst;
-import de.fhg.iais.roberta.constants.ThymioConstants;
 import de.fhg.iais.roberta.syntax.Phrase;
 import de.fhg.iais.roberta.syntax.action.display.ClearDisplayAction;
 import de.fhg.iais.roberta.syntax.action.display.ShowTextAction;
@@ -28,7 +26,6 @@ import de.fhg.iais.roberta.syntax.action.sound.VolumeAction;
 import de.fhg.iais.roberta.syntax.action.thymio.PlayRecordingAction;
 import de.fhg.iais.roberta.syntax.action.thymio.RedLedOnAction;
 import de.fhg.iais.roberta.syntax.action.thymio.YellowLedOnAction;
-import de.fhg.iais.roberta.syntax.configuration.ConfigurationComponent;
 import de.fhg.iais.roberta.syntax.lang.blocksequence.MainTask;
 import de.fhg.iais.roberta.syntax.lang.expr.ColorConst;
 import de.fhg.iais.roberta.syntax.lang.expr.Expr;
@@ -52,12 +49,9 @@ import de.fhg.iais.roberta.util.syntax.SC;
 
 public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IThymioVisitor<Void> {
 
-    private final ConfigurationAst configurationAst;
-
     public ThymioAsebaVisitor(
         List<List<Phrase>> programPhrases, ClassToInstanceMap<IProjectBean> beans, ConfigurationAst configurationAst) {
         super(programPhrases, beans);
-        this.configurationAst = configurationAst;
     }
 
     @Override
@@ -165,19 +159,10 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
     public Void visitMainTask(MainTask mainTask) {
         StmtList variables = mainTask.variables;
         variables.accept(this);
-        nlIndent();
-        this.programPhrases
-            .stream()
-            .filter(phrase -> phrase.getKind().getCategory() != Category.METHOD || phrase.getKind().hasName("METHOD_CALL"))
-            .forEach(p -> this.noOfStates++);
-        this.noOfStates--;
-        this.programPhrases
-            .stream()
-            .filter(phrase -> phrase.getKind().hasName("REPEAT_STMT"))
-            .forEach(p -> {
-                this.noOfLoopStates = ((RepeatStmt) p).list.get().size();
-            });
-        this.noOfLoopStates--;
+        if ( variables.sl.size() > 0 ) {
+            nlIndent();
+            nlIndent();
+        }
         this.sb.append("timer.period[0] = 10");
         nlIndent();
         nlIndent();
@@ -234,7 +219,6 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
             nlIndent();
             this.sb.append("motor.").append(motorSide).append(".target = 0");
             nlIndent();
-            ;
             this.sb.append("_state = ").append(this.stateCounter);
             decrIndentation();
             nlIndent();
@@ -249,6 +233,7 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
             nlIndent();
             this.stateCounter++;
             this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
+            this.newState = true;
             incrIndentation();
         } else {
             this.sb.append("motor.").append(motorSide).append(".target = MOTOR_MAX * ");
@@ -272,32 +257,8 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
 
     @Override
     public Void visitPlayFileAction(PlayFileAction playFileAction) {
-        incrIndentation();
-        nlIndent();
-        String stateVar = this.isFunc ? "_funcstate" : this.isLoop ? "_loopstate" : "_state";
-        int counter = this.isFunc ? this.funcCounter : this.isLoop ? this.loopCounter : this.stateCounter;
-        String ifElseif = counter == 0 ? "if " : "elseif ";
-        this.sb.append(ifElseif).append(stateVar).append(" == ").append(counter).append(" then");
-        incrIndentation();
-        nlIndent();
+        // TODO
         this.sb.append("call sound.system( ").append(playFileAction.fileName).append(" )");
-        nlIndent();
-        this.sb.append("timer.period[0] = 1000");
-        nlIndent();
-        this.sb.append(stateVar).append("++");
-        if ( isFunc ) {
-            this.funcCounter++;
-        } else if ( isLoop ) {
-            this.loopCounter++;
-        } else {
-            this.stateCounter++;
-        }
-        decrIndentation();
-        nlIndent();
-        if ( this.noOfStates == counter ) {
-            this.sb.append("end");
-            decrIndentation();
-        }
         return null;
     }
 
@@ -317,12 +278,12 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
         this.sb.append("__time = 0");
         nlIndent();
         this.sb.append("call sound.freq(").append(
-            playNoteAction.frequency).append(", ").append(playNoteAction.duration).append("/16)");
+            playNoteAction.frequency.split("\\.")[0]).append(", ").append(playNoteAction.duration).append("/16)");
         nlIndent();
+        this.stateCounter++;
         this.sb.append("_state = ").append(this.stateCounter);
         decrIndentation();
         nlIndent();
-        this.stateCounter++;
         this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
         incrIndentation();
         nlIndent();
@@ -343,6 +304,7 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
         nlIndent();
         this.stateCounter++;
         this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
+        this.newState = true;
         incrIndentation();
         return null;
     }
@@ -425,11 +387,11 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
         this.sb.append(", ");
         toneAction.duration.accept(this);
         this.sb.append("/16)");
+        this.stateCounter++;
         nlIndent();
         this.sb.append("_state = ").append(this.stateCounter);
         decrIndentation();
         nlIndent();
-        this.stateCounter++;
         this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
         incrIndentation();
         nlIndent();
@@ -452,6 +414,7 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
         nlIndent();
         this.stateCounter++;
         this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
+        this.newState = true;
         incrIndentation();
         return null;
     }
@@ -475,7 +438,7 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
                 incrIndentation();
                 nlIndent();
             } else {
-                newState = true;
+                newState = false;
             }
             this.sb.append("__time = 0");
             nlIndent();
@@ -517,6 +480,7 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
             decrIndentation();
             nlIndent();
             this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
+            this.newState = true;
             incrIndentation();
         } else {
             this.sb.append("motor.left.target = ").append(multLeft);
@@ -536,7 +500,7 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
 
     @Override
     public Void visitWaitStmt(WaitStmt waitStmt) {
-        this.stateCounter++;
+/*        this.stateCounter++;
         this.sb.append("_state = ").append(this.stateCounter);
         decrIndentation();
         nlIndent();
@@ -562,7 +526,7 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
         if ( this.noOfStates == counter + 1 ) {
             this.sb.append("end");
 //            decrIndentation();
-        }
+        }*/
         return null;
     }
 
@@ -607,6 +571,7 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
         decrIndentation();
         nlIndent();
         this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
+        this.newState = true;
         incrIndentation();
         return null;
     }
@@ -663,6 +628,7 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
     protected void generateProgramSuffix(boolean withWrapping) {
         nlIndent();
         this.sb.append("timer.period[0] = 0");
+        // TODO stop all
         decrIndentation();
         nlIndent();
         this.sb.append("end");
@@ -688,36 +654,12 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
     }
 
     private void appendRobotVariables() {
-//        ConfigurationComponent diffDrive = getDiffDrive();
-//        if ( diffDrive != null ) {
-//            nlIndent();
-//            double circumference = 6.5 * Math.PI;
-//            double trackWidth = 11.5;
-//            this.sb.append("var _trackWidth = ");
-//            this.sb.append((int) Math.floor(trackWidth));
-//            nlIndent();
-//            this.sb.append("var _circumference = ");
-//            this.sb.append((int) Math.floor(circumference));
         nlIndent();
         this.sb.append("var _result # to store potential results from function calls");
         nlIndent();
         this.sb.append("var _state = 0");
         nlIndent();
-        this.sb.append("var _loopstate = 0");
-        nlIndent();
-        this.sb.append("var _funcstate = 0");
-        nlIndent();
         this.sb.append("var __time = 0");
-//        }
-    }
-
-    private ConfigurationComponent getDiffDrive() {
-        for ( ConfigurationComponent component : this.configurationAst.getConfigurationComponents().values() ) {
-            if ( component.componentType.equals(ThymioConstants.DIFFERENTIALDRIVE) ) {
-                return component;
-            }
-        }
-        return null;
     }
 
     private void generateVariablesForUsage(List<Phrase> exprList) {
@@ -749,15 +691,6 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
                 }
             }
         }
-        if ( this.getBean(CodeGeneratorSetupBean.class).getUsedMethods().contains(ThymioMethods.DIFFDRIVE) ||
-            this.getBean(CodeGeneratorSetupBean.class).getUsedMethods().contains(ThymioMethods.STOP) ) {
-            if ( !isAppendedDrive ) {
-                this.sb.append("var speedL");
-                nlIndent();
-                this.sb.append("var speedR");
-                isAppendedDrive = true;
-            }
-        }
     }
 
     private boolean generateVariablesForLoops(boolean isAppended, RepeatStmt stmt) {
@@ -773,15 +706,12 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
                 break;
             case TIMES:
             case FOR:
-//                        List<Stmt> s = stmt.getList().get();
-//                for ( Stmt s : stmt.getList().get() ) {
-//                    LoggerFactory.getLogger(ThymioAsebaVisitor.class).info(s.toString());
                 ExprList expr = (ExprList) stmt.expr;
                 this.sb.append("var ");
                 expr.get().get(0).accept(this);
-                this.sb.append(" = 0");
+                this.sb.append(" = ");
+                expr.get().get(1).accept(this);
                 nlIndent();
-//                }
                 break;
             case WAIT:
                 this.sb.append(stmt.getKind()).append(stmt.mode).append(stmt.expr);
