@@ -78,11 +78,17 @@ import de.fhg.iais.roberta.visitor.lang.codegen.AbstractLanguageVisitor;
 public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
     protected Set<String> usedGlobalVarInFunctions = new OrderedHashSet<>();
     protected int stateCounter = 0;
-    protected int loopCounter = 0;
+    protected int loopCounter = -1;
     protected boolean newState = true;
-    List loopsStart = new ArrayList();
-    List loopsBody = new ArrayList();
-    List loopsEnd = new ArrayList();
+    List<Integer> loopsStart = new ArrayList();
+    List<Integer> loopsBody = new ArrayList();
+    List<Integer> loopsEnd = new ArrayList();
+    List<Integer> funcStart = new ArrayList();
+    protected int funcCounter = -1;
+
+    protected boolean ifOnce = false;
+
+    protected ArrayList myMethods;
 
 
     protected AbstractAsebaVisitor(List<List<Phrase>> programPhrases, ClassToInstanceMap<IProjectBean> beans) {
@@ -189,7 +195,7 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
 
     @Override
     public Void visitBinary(Binary binary) {
-        this.sb.append("( ");
+        //this.sb.append("( ");
         try {
             VarDeclaration variablePart = (VarDeclaration) binary.left;
             this.sb.append(variablePart.getCodeSafeName());
@@ -208,7 +214,7 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
                 break;
         }
         generateCodeRightExpression(binary, op);
-        this.sb.append(" )");
+        //this.sb.append(" )");
         return null;
     }
 
@@ -644,8 +650,15 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
 
     @Override
     public Void visitMethodCall(MethodCall methodCall) {
-        this.sb.append("callsub ").append(methodCall.getMethodName());
+        this.stateCounter++;
+        this.sb.append("_return_state = ").append(this.stateCounter);
         nlIndent();
+        this.sb.append("callsub ").append(methodCall.getMethodName());
+        decrIndentation();
+        nlIndent();
+        this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
+        this.newState = true;
+        incrIndentation();
         return null;
     }
 
@@ -669,22 +682,26 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
 
     @Override
     public Void visitMethodVoid(MethodVoid methodVoid) {
-        nlIndent();
-        this.sb.append("sub ").append(methodVoid.getMethodName());
+        this.funcCounter++;
+        this.sb.append(this.getIfElse()).append(" _state == ").append(this.funcStart.get(this.funcCounter)).append(" then");
         incrIndentation();
-        boolean isMethodBodyEmpty = methodVoid.body.get().isEmpty();
-        if ( isMethodBodyEmpty ) {
-            nlIndent();
-            this.sb.append(" ");
-        } else {
-            methodVoid.body.accept(this);
-        }
+        newState = true;
+        methodVoid.body.accept(this);
         nlIndent();
-        decrIndentation();
-        nlIndent();
-        this.sb.append("end");
+        this.sb.append("_state = _return_state");
         decrIndentation();
         return null;
+    }
+
+    String getIfElse() {
+        String ifElse = "";
+        if ( this.ifOnce ) {
+            ifElse = "elseif";
+        } else {
+            ifElse = "if";
+            this.ifOnce = true;
+        }
+        return ifElse;
     }
 
     @Override
@@ -746,7 +763,7 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
         this.sb.append("end");
         decrIndentation();
         nlIndent();
-        this.sb.append("elseif _state == ").append(this.loopsBody.get(this.loopCounter - 1)).append(" then");
+        this.sb.append("elseif _state == ").append(this.loopsBody.get(this.loopCounter)).append(" then");
         this.newState = true;
         incrIndentation();
         repeatStmt.list.accept(this);
@@ -757,11 +774,11 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
             ((ExprList) repeatStmt.expr).get().get(3).accept(this);
             nlIndent();
         }
-        this.sb.append("_state = ").append(this.loopsStart.get(this.loopCounter - 1));
+        this.sb.append("_state = ").append(this.loopsStart.get(this.loopCounter));
         decrIndentation();
         nlIndent();
         this.stateCounter++;
-        this.sb.append("elseif _state == ").append(this.loopsEnd.get(this.loopCounter - 1)).append(" then");
+        this.sb.append("elseif _state == ").append(this.loopsEnd.get(this.loopCounter)).append(" then");
         incrIndentation();
         loopCounter--;
         return null;
@@ -775,11 +792,11 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
     @Override
     public Void visitStmtFlowCon(StmtFlowCon stmtFlowCon) {
         if ( stmtFlowCon.flow.name().toLowerCase().equals(C.BREAK) ) {
-            this.sb.append("_state = ").append(this.loopsEnd.get(this.loopCounter - 1));
+            this.sb.append("_state = ").append(this.loopsEnd.get(this.loopCounter));
         } else if ( stmtFlowCon.flow.name().toLowerCase().equals(C.CONTINUE) ) {
-            this.sb.append("_state = ").append(this.loopsStart.get(this.loopCounter - 1));
+            this.sb.append("_state = ").append(this.loopsStart.get(this.loopCounter));
         } else {
-            throw new DbcException("Invalid flow controle statement!");
+            throw new DbcException("Invalid flow control statement!");
         }
         decrIndentation();
         nlIndent();

@@ -1,11 +1,13 @@
 package de.fhg.iais.roberta.visitor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.google.common.collect.ClassToInstanceMap;
 
 import de.fhg.iais.roberta.bean.CodeGeneratorSetupBean;
 import de.fhg.iais.roberta.bean.IProjectBean;
+import de.fhg.iais.roberta.components.Category;
 import de.fhg.iais.roberta.components.ConfigurationAst;
 import de.fhg.iais.roberta.syntax.Phrase;
 import de.fhg.iais.roberta.syntax.action.display.ClearDisplayAction;
@@ -32,6 +34,7 @@ import de.fhg.iais.roberta.syntax.lang.expr.ColorConst;
 import de.fhg.iais.roberta.syntax.lang.expr.Expr;
 import de.fhg.iais.roberta.syntax.lang.expr.ExprList;
 import de.fhg.iais.roberta.syntax.lang.expr.RgbColor;
+import de.fhg.iais.roberta.syntax.lang.methods.MethodVoid;
 import de.fhg.iais.roberta.syntax.lang.stmt.RepeatStmt;
 import de.fhg.iais.roberta.syntax.lang.stmt.Stmt;
 import de.fhg.iais.roberta.syntax.lang.stmt.StmtList;
@@ -50,6 +53,8 @@ import de.fhg.iais.roberta.util.syntax.MotorDuration;
 import de.fhg.iais.roberta.util.syntax.SC;
 
 public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IThymioVisitor<Void> {
+
+    private long numUserMethods = 0;
 
     public ThymioAsebaVisitor(
         List<List<Phrase>> programPhrases, ClassToInstanceMap<IProjectBean> beans, ConfigurationAst configurationAst) {
@@ -177,7 +182,14 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
         this.sb.append("onevent timer0");
         incrIndentation();
         nlIndent();
-        this.sb.append("if _state == 0 then");
+        this.programPhrases
+            .stream()
+            .filter(phrase -> phrase.getKind().getCategory() == Category.METHOD && phrase.getKind().hasName("METHOD_VOID"))
+            .forEach(e -> {
+                e.accept(this);
+                nlIndent();
+            });
+        this.sb.append(this.getIfElse()).append(" _state == ").append((this.funcStart.get(this.funcStart.size() - 1) + 1)).append(" then");
         incrIndentation();
         return null;
     }
@@ -227,6 +239,7 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
             nlIndent();
             this.sb.append("motor.").append(motorSide).append(".target = 0");
             nlIndent();
+            this.stateCounter++;
             this.sb.append("_state = ").append(this.stateCounter);
             decrIndentation();
             nlIndent();
@@ -239,7 +252,6 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
             this.sb.append("end");
             decrIndentation();
             nlIndent();
-            this.stateCounter++;
             this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
             this.newState = true;
             incrIndentation();
@@ -633,6 +645,13 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
         this.sb.append("<node name=\"thymio-II\">");
         nlIndent();
         nlIndent();
+        this.myMethods = new ArrayList();
+        this.programPhrases.stream().filter(phrase -> phrase.getKind().getCategory() == Category.METHOD && phrase.getKind().hasName("METHOD_VOID")).forEach(m -> this.myMethods.add(((MethodVoid) m).getMethodName()));
+        this.myMethods
+            .forEach(m -> {
+                this.funcStart.add(this.stateCounter);
+                this.stateCounter++;
+            });
         appendRobotVariables();
         nlIndent();
         generateVariablesForUsage(this.programPhrases);
@@ -652,7 +671,7 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
         if ( !withWrapping ) {
             return;
         }
-        generateUserDefinedMethods();
+        generateUserDefinedMethodsForThymio();
         if ( !this.getBean(CodeGeneratorSetupBean.class).getUsedMethods().isEmpty() ) {
             String helperMethodImpls =
                 this.getBean(CodeGeneratorSetupBean.class)
@@ -667,12 +686,33 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
         nlIndent();
     }
 
+    void generateUserDefinedMethodsForThymio() {
+        this.programPhrases
+            .stream()
+            .filter(phrase -> phrase.getKind().getCategory() == Category.METHOD && phrase.getKind().hasName("METHOD_VOID"))
+            .forEach(e -> {
+                String methodName = ((MethodVoid) e).getMethodName();
+                int funcIndex = this.myMethods.indexOf(methodName);
+                nlIndent();
+                this.sb.append("sub ").append(methodName);
+                incrIndentation();
+                nlIndent();
+                this.sb.append("_state = ").append(this.funcStart.get(funcIndex));
+                decrIndentation();
+                nlIndent();
+            });
+    }
+
     private void appendRobotVariables() {
         nlIndent();
         this.sb.append("var _result # to store potential results from function calls");
         nlIndent();
-        this.sb.append("var _state = 0");
+        this.sb.append("var _state = ").append(this.stateCounter);
         nlIndent();
+        if ( this.stateCounter > 0 ) {
+            this.sb.append("var _return_state = 0");
+            nlIndent();
+        }
         this.sb.append("var __time = 0");
     }
 
