@@ -1,5 +1,6 @@
 package de.fhg.iais.roberta.visitor;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -69,6 +70,7 @@ import de.fhg.iais.roberta.syntax.lang.stmt.WaitStmt;
 import de.fhg.iais.roberta.syntax.lang.stmt.WaitTimeStmt;
 import de.fhg.iais.roberta.syntax.sensor.generic.TimerSensor;
 import de.fhg.iais.roberta.typecheck.BlocklyType;
+import de.fhg.iais.roberta.util.basic.C;
 import de.fhg.iais.roberta.util.dbc.DbcException;
 import de.fhg.iais.roberta.util.syntax.FunctionNames;
 import de.fhg.iais.roberta.visitor.lang.codegen.AbstractLanguageVisitor;
@@ -76,7 +78,12 @@ import de.fhg.iais.roberta.visitor.lang.codegen.AbstractLanguageVisitor;
 public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
     protected Set<String> usedGlobalVarInFunctions = new OrderedHashSet<>();
     protected int stateCounter = 0;
+    protected int loopCounter = 0;
     protected boolean newState = true;
+    List loopsStart = new ArrayList();
+    List loopsBody = new ArrayList();
+    List loopsEnd = new ArrayList();
+
 
     protected AbstractAsebaVisitor(List<List<Phrase>> programPhrases, ClassToInstanceMap<IProjectBean> beans) {
         super(programPhrases, beans);
@@ -687,7 +694,7 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
 
     @Override
     public Void visitRepeatStmt(RepeatStmt repeatStmt) {
-        int[] states = new int[3];
+        loopCounter++;
         this.stateCounter++;
         this.sb.append("_state = ").append(this.stateCounter);
         decrIndentation();
@@ -697,7 +704,7 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
         nlIndent();
         newState = true;
 
-        states[0] = this.stateCounter;
+        this.loopsStart.add(this.stateCounter);
         switch ( repeatStmt.mode ) {
             case FOREVER:
                 generateCodeFromStmtCondition("if", repeatStmt.expr);
@@ -724,7 +731,7 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
         incrIndentation();
         nlIndent();
         this.stateCounter++;
-        states[1] = this.stateCounter;
+        this.loopsBody.add(this.stateCounter);
         this.sb.append("_state = ").append(this.stateCounter);
         decrIndentation();
         nlIndent();
@@ -732,14 +739,14 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
         incrIndentation();
         nlIndent();
         this.stateCounter++;
-        states[2] = this.stateCounter;
+        this.loopsEnd.add(this.stateCounter);
         this.sb.append("_state = ").append(this.stateCounter);
         decrIndentation();
         nlIndent();
         this.sb.append("end");
         decrIndentation();
         nlIndent();
-        this.sb.append("elseif _state == ").append(states[1]).append(" then");
+        this.sb.append("elseif _state == ").append(this.loopsBody.get(this.loopCounter - 1)).append(" then");
         this.newState = true;
         incrIndentation();
         repeatStmt.list.accept(this);
@@ -750,12 +757,13 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
             ((ExprList) repeatStmt.expr).get().get(3).accept(this);
             nlIndent();
         }
-        this.sb.append("_state = ").append(states[0]);
+        this.sb.append("_state = ").append(this.loopsStart.get(this.loopCounter - 1));
         decrIndentation();
         nlIndent();
         this.stateCounter++;
-        this.sb.append("elseif _state == ").append(states[2]).append(" then");
+        this.sb.append("elseif _state == ").append(this.loopsEnd.get(this.loopCounter - 1)).append(" then");
         incrIndentation();
+        loopCounter--;
         return null;
     }
 
@@ -766,13 +774,19 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
 
     @Override
     public Void visitStmtFlowCon(StmtFlowCon stmtFlowCon) {
-//        if ( this.getBean(UsedHardwareBean.class).getLoopsLabelContainer().get(this.currentLoop.getLast()) != null ) {
-//            if ( this.getBean(UsedHardwareBean.class).getLoopsLabelContainer().get(this.currentLoop.getLast()) ) {
-//                this.sb.append("raise " + (stmtFlowCon.flow == Flow.BREAK ? "BreakOutOfALoop" : "ContinueLoop"));
-//                return null;
-//            }
-//        }
-//        this.sb.append(stmtFlowCon.flow.toString().toLowerCase());
+        if ( stmtFlowCon.flow.name().toLowerCase().equals(C.BREAK) ) {
+            this.sb.append("_state = ").append(this.loopsEnd.get(this.loopCounter - 1));
+        } else if ( stmtFlowCon.flow.name().toLowerCase().equals(C.CONTINUE) ) {
+            this.sb.append("_state = ").append(this.loopsStart.get(this.loopCounter - 1));
+        } else {
+            throw new DbcException("Invalid flow controle statement!");
+        }
+        decrIndentation();
+        nlIndent();
+        this.stateCounter++;
+        this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
+        this.newState = true;
+        incrIndentation();
         return null;
     }
 

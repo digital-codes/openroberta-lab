@@ -14,7 +14,9 @@ import de.fhg.iais.roberta.syntax.action.display.ClearDisplayAction;
 import de.fhg.iais.roberta.syntax.action.display.ShowTextAction;
 import de.fhg.iais.roberta.syntax.action.light.LedsOffAction;
 import de.fhg.iais.roberta.syntax.action.light.LightAction;
+import de.fhg.iais.roberta.syntax.action.motor.MotorGetPowerAction;
 import de.fhg.iais.roberta.syntax.action.motor.MotorOnAction;
+import de.fhg.iais.roberta.syntax.action.motor.MotorSetPowerAction;
 import de.fhg.iais.roberta.syntax.action.motor.MotorStopAction;
 import de.fhg.iais.roberta.syntax.action.motor.differential.CurveAction;
 import de.fhg.iais.roberta.syntax.action.motor.differential.DriveAction;
@@ -40,10 +42,10 @@ import de.fhg.iais.roberta.util.dbc.Assert;
 import de.fhg.iais.roberta.util.syntax.BlocklyConstants;
 import de.fhg.iais.roberta.util.syntax.SC;
 import de.fhg.iais.roberta.util.syntax.WithUserDefinedPort;
-import de.fhg.iais.roberta.visitor.validate.DifferentialMotorValidatorAndCollectorVisitor;
+import de.fhg.iais.roberta.visitor.validate.CommonNepoValidatorAndCollectorVisitor;
 
 
-public class ThymioValidatorAndCollectorVisitor extends DifferentialMotorValidatorAndCollectorVisitor implements IThymioVisitor<Void> {
+public class ThymioValidatorAndCollectorVisitor extends CommonNepoValidatorAndCollectorVisitor implements IThymioVisitor<Void> {
     private static final Map<String, String> SENSOR_COMPONENT_TYPE_MAP = new HashMap<String, String>() {{
         put("SOUND_RECORD", SC.SOUND);
 //        put("QUAD_COLOR_SENSING", ThymioConstants.MBUILD_QUADRGB);
@@ -121,11 +123,21 @@ public class ThymioValidatorAndCollectorVisitor extends DifferentialMotorValidat
     }
 
     @Override
+    public Void visitMotorGetPowerAction(MotorGetPowerAction motorGetPowerAction) {
+        return null;
+    }
+
+    @Override
     public Void visitMotorOnAction(MotorOnAction motorOnAction) {
         requiredComponentVisited(motorOnAction, motorOnAction.param.getSpeed());
         if ( motorOnAction.param.getDuration() != null ) {
             requiredComponentVisited(motorOnAction, motorOnAction.param.getDuration().getValue());
         }
+        return null;
+    }
+
+    @Override
+    public Void visitMotorSetPowerAction(MotorSetPowerAction motorSetPowerAction) {
         return null;
     }
 
