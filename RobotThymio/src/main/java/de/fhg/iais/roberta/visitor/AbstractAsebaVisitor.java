@@ -10,7 +10,6 @@ import org.antlr.v4.runtime.misc.OrderedHashSet;
 
 import com.google.common.collect.ClassToInstanceMap;
 
-import de.fhg.iais.roberta.bean.CodeGeneratorSetupBean;
 import de.fhg.iais.roberta.bean.IProjectBean;
 import de.fhg.iais.roberta.inter.mode.general.IMode;
 import de.fhg.iais.roberta.mode.general.IndexLocation;
@@ -984,7 +983,6 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
         ExprList expressions = (ExprList) expr;
         if ( inc ) {
             incrIndentation();
-//            nlIndent();
             expressions.get().get(0).accept(this);
             this.sb.append("++");
             decrIndentation();
@@ -1020,25 +1018,6 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
     @Override
     protected String getUnaryOperatorSymbol(Unary.Op op) {
         return AbstractAsebaVisitor.unaryOpSymbols().get(op);
-    }
-
-    @Override
-    protected void generateProgramSuffix(boolean withWrapping) {
-        if ( !this.getBean(CodeGeneratorSetupBean.class).getUsedMethods().isEmpty() ) {
-            String helperMethodImpls =
-                this
-                    .getBean(CodeGeneratorSetupBean.class)
-                    .getHelperMethodGenerator()
-                    .getHelperMethodDefinitions(this.getBean(CodeGeneratorSetupBean.class).getUsedMethods());
-            this.sb.append(helperMethodImpls);
-        }
-
-        nlIndent();
-        this.sb.append("if __name__ == \"__main__\":");
-        incrIndentation();
-        nlIndent();
-        this.sb.append("main()");
-        decrIndentation();
     }
 
     private void generateCodeRightExpression(Binary binary, Binary.Op op) {

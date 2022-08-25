@@ -12,6 +12,7 @@ import de.fhg.iais.roberta.components.UsedActor;
 import de.fhg.iais.roberta.syntax.Phrase;
 import de.fhg.iais.roberta.syntax.action.display.ClearDisplayAction;
 import de.fhg.iais.roberta.syntax.action.display.ShowTextAction;
+import de.fhg.iais.roberta.syntax.action.light.LedsOffAction;
 import de.fhg.iais.roberta.syntax.action.light.LightAction;
 import de.fhg.iais.roberta.syntax.action.motor.MotorOnAction;
 import de.fhg.iais.roberta.syntax.action.motor.MotorStopAction;
@@ -198,6 +199,11 @@ public class ThymioValidatorAndCollectorVisitor extends DifferentialMotorValidat
 
     @Override
     public Void visitYellowLedOnAction(YellowLedOnAction yellowLedOnAction) {
+        return null;
+    }
+
+
+    public Void visitLedsOffAction(LedsOffAction ledsOffAction) {
         return null;
     }
 

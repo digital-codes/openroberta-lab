@@ -136,6 +136,7 @@ public class C {
     public static final String LEFT = "left";
     public static final String LIGHT = "light";
     public static final String LIGHT_ACTION = "lightAction";
+    public static final String LINE = "line";
     public static final String LIST = "list";
     public static final String LIST_OPERATION = "list_operation";
     public static final String LIST_GET_INDEX = "list_get_index";

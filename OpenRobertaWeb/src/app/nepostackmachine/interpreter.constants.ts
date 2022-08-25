@@ -134,6 +134,7 @@ export const LED_ON_ACTION: string = "ledOnAction";
 export const LEFT: string = "left";
 export const LIGHT: string = "light";
 export const LIGHT_ACTION: string = "lightAction";
+export const LINE: string = "line";
 export const LIST: string = "list";
 export const LIST_OPERATION: string = "list_operation";
 export const LIST_GET_INDEX: string = "list_get_index";

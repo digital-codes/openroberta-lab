@@ -10,6 +10,7 @@ import de.fhg.iais.roberta.components.ConfigurationAst;
 import de.fhg.iais.roberta.syntax.Phrase;
 import de.fhg.iais.roberta.syntax.action.display.ClearDisplayAction;
 import de.fhg.iais.roberta.syntax.action.display.ShowTextAction;
+import de.fhg.iais.roberta.syntax.action.light.LedsOffAction;
 import de.fhg.iais.roberta.syntax.action.light.LightAction;
 import de.fhg.iais.roberta.syntax.action.motor.MotorGetPowerAction;
 import de.fhg.iais.roberta.syntax.action.motor.MotorOnAction;
@@ -43,6 +44,7 @@ import de.fhg.iais.roberta.syntax.sensor.generic.KeysSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.LightSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.SoundSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.TimerSensor;
+import de.fhg.iais.roberta.util.basic.C;
 import de.fhg.iais.roberta.util.dbc.DbcException;
 import de.fhg.iais.roberta.util.syntax.MotorDuration;
 import de.fhg.iais.roberta.util.syntax.SC;
@@ -92,8 +94,14 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
 
     @Override
     public Void visitInfraredSensor(InfraredSensor infraredSensor) {
-        String mode = infraredSensor.getMode().equals("DISTANCE") ? "horizontal" : "ground.reflected";
-        this.sb.append("prox.").append(mode).append("[").append(infraredSensor.getSlot()).append("]");
+        String mode = infraredSensor.getMode().toLowerCase();
+        if ( mode.equals(C.DISTANCE) ) {
+            this.sb.append("prox.").append("horizontal").append("[").append(infraredSensor.getSlot()).append("]");
+        } else if ( mode.equals(C.LINE) ) {
+            this.sb.append("prox.").append("ground.reflected").append("[").append(infraredSensor.getSlot()).append("]");
+        } else {
+            throw new DbcException("Invalid infrared sensor mode!");
+        }
         return null;
     }
 
@@ -205,10 +213,10 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
             this.sb.append("motor.").append(motorSide).append(".target = MOTOR_MAX * ");
             motorOnAction.param.getSpeed().accept(this);
             nlIndent();
+            this.stateCounter++;
             this.sb.append("_state = ").append(this.stateCounter);
             decrIndentation();
             nlIndent();
-            this.stateCounter++;
             this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
             incrIndentation();
             nlIndent();
@@ -595,6 +603,12 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
         this.sb.append("/COLOR_INTENSITY_REMAP, ");
         yellowLedOnAction.led8.accept(this);
         this.sb.append("/COLOR_INTENSITY_REMAP)");
+        return null;
+    }
+
+    @Override
+    public Void visitLedsOffAction(LedsOffAction ledsOffAction) {
+        this.sb.append("call leds.").append(ledsOffAction.port.toLowerCase()).append("(0, 0, 0)");
         return null;
     }
 
