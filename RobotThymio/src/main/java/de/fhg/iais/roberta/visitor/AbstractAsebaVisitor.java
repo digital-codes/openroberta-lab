@@ -16,13 +16,13 @@ import de.fhg.iais.roberta.inter.mode.general.IMode;
 import de.fhg.iais.roberta.mode.general.IndexLocation;
 import static de.fhg.iais.roberta.mode.general.ListElementOperations.GET;
 import static de.fhg.iais.roberta.mode.general.ListElementOperations.GET_REMOVE;
-import static de.fhg.iais.roberta.mode.general.ListElementOperations.INSERT;
 import static de.fhg.iais.roberta.mode.general.ListElementOperations.REMOVE;
 import static de.fhg.iais.roberta.mode.general.ListElementOperations.SET;
 import de.fhg.iais.roberta.syntax.Phrase;
 import de.fhg.iais.roberta.syntax.action.serial.SerialWriteAction;
 import de.fhg.iais.roberta.syntax.lang.expr.Binary;
 import de.fhg.iais.roberta.syntax.lang.expr.BoolConst;
+import de.fhg.iais.roberta.syntax.lang.expr.ColorConst;
 import de.fhg.iais.roberta.syntax.lang.expr.ConnectConst;
 import de.fhg.iais.roberta.syntax.lang.expr.EmptyExpr;
 import de.fhg.iais.roberta.syntax.lang.expr.EmptyList;
@@ -32,6 +32,7 @@ import de.fhg.iais.roberta.syntax.lang.expr.FunctionExpr;
 import de.fhg.iais.roberta.syntax.lang.expr.ListCreate;
 import de.fhg.iais.roberta.syntax.lang.expr.MathConst;
 import de.fhg.iais.roberta.syntax.lang.expr.NullConst;
+import de.fhg.iais.roberta.syntax.lang.expr.RgbColor;
 import de.fhg.iais.roberta.syntax.lang.expr.Unary;
 import de.fhg.iais.roberta.syntax.lang.expr.VarDeclaration;
 import de.fhg.iais.roberta.syntax.lang.functions.GetSubFunct;
@@ -376,9 +377,32 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
 
     @Override
     public Void visitListGetIndex(ListGetIndex listGetIndex) {
-        if ( !listGetIndex.param.get(0).getVarType().toString().equals("ARRAY_COLOUR") ) {
-            listGetIndex.param.get(0).accept(this);
+        if ( listGetIndex.param.get(0).getVarType().toString().equals("ARRAY_COLOUR") ) {
+            if ( listGetIndex.mode == GET ) {
+                this.sb.append("_r = ");
+                listGetIndex.param.get(0).accept(this);
+                this.sb.append("_r");
+                this.sb.append("[");
+                listGetIndex.param.get(1).accept(this);
+                this.sb.append("]");
+                nlIndent();
+                this.sb.append("_g = ");
+                listGetIndex.param.get(0).accept(this);
+                this.sb.append("_g");
+                this.sb.append("[");
+                listGetIndex.param.get(1).accept(this);
+                this.sb.append("]");
+                nlIndent();
+                this.sb.append("_b = ");
+                listGetIndex.param.get(0).accept(this);
+                this.sb.append("_b");
+                this.sb.append("[");
+                listGetIndex.param.get(1).accept(this);
+                this.sb.append("]");
+            }
+            return null;
         }
+        listGetIndex.param.get(0).accept(this);
         if ( listGetIndex.mode == GET ) {
             this.sb.append("[");
         } else if ( listGetIndex.mode == REMOVE || listGetIndex.mode == GET_REMOVE ) {
@@ -425,40 +449,51 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
 
     @Override
     public Void visitListSetIndex(ListSetIndex listSetIndex) {
-        listSetIndex.param.get(0).accept(this);
-        if ( listSetIndex.mode == SET ) {
-            this.sb.append("[");
-        } else if ( listSetIndex.mode == INSERT ) {
-            this.sb.append(".insert(");
+        if ( listSetIndex.mode != SET ) {
+            return null;
         }
+        if ( listSetIndex.param.get(0).getVarType().toString().equals("ARRAY_COLOUR") ) {
+            //listSetIndex.param.get(0).accept(this);
+            this.sb.append("_color = ");
+            listSetIndex.param.get(1).accept(this);
+            nlIndent();
+            listSetIndex.param.get(0).accept(this);
+            this.sb.append("_r");
+            addSetIndex(listSetIndex);
+            this.sb.append("_color[0]");
+            nlIndent();
+            listSetIndex.param.get(0).accept(this);
+            this.sb.append("_g");
+            addSetIndex(listSetIndex);
+            this.sb.append("_color[1]");
+            nlIndent();
+            listSetIndex.param.get(0).accept(this);
+            this.sb.append("_b");
+            addSetIndex(listSetIndex);
+            this.sb.append("_color[2]");
+            return null;
+        }
+        listSetIndex.param.get(0).accept(this);
+        addSetIndex(listSetIndex);
+        listSetIndex.param.get(1).accept(this);
+        return null;
+    }
+
+
+    private void addSetIndex(ListSetIndex listSetIndex) {
+        this.sb.append("[");
         switch ( (IndexLocation) listSetIndex.location ) {
-            case RANDOM: // backwards compatibility
-                // TODO?
             case FIRST:
                 this.sb.append("0");
                 break;
             case FROM_END:
-                this.sb.append("-1 -");
-                listSetIndex.param.get(2).accept(this);
-                break;
             case FROM_START:
                 listSetIndex.param.get(2).accept(this);
-                break;
-            case LAST:
-                this.sb.append("-1");
                 break;
             default:
                 break;
         }
-        if ( listSetIndex.mode == SET ) {
-            this.sb.append("] = ");
-            listSetIndex.param.get(1).accept(this);
-        } else if ( listSetIndex.mode == INSERT ) {
-            this.sb.append(", ");
-            listSetIndex.param.get(1).accept(this);
-            this.sb.append(")");
-        }
-        return null;
+        this.sb.append("] = ");
     }
 
     @Override
@@ -879,9 +914,46 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
                     this.sb.append("[10]");
                     return null;
                 } else if ( ((ListCreate) var.value).typeVar.toString().equals("COLOR") ) {
-                    this.sb.append("[] = [255, 255, 255]");
+                    this.sb.append("_r[] = [");
+                    for ( int i = 0; i < 3; i++ ) {
+                        if ( ((ListCreate) var.value).exprList.get().get(i).getKind().hasName("COLOR_CONST") ) {
+                            this.sb.append(((ColorConst) ((ListCreate) var.value).exprList.get().get(i)).getRedChannelInt());
+                        } else if ( ((ListCreate) var.value).exprList.get().get(i).getKind().hasName("RGB_COLOR") ) {
+                            ((RgbColor) ((ListCreate) var.value).exprList.get().get(i)).R.accept(this);
+                        }
+                        if ( i != 2 ) {
+                            this.sb.append(", ");
+                        }
+                    }
+                    this.sb.append("]");
                     nlIndent();
-                    var.value.accept(this);
+                    this.sb.append("var ").append(var.getCodeSafeName());
+                    this.sb.append("_g[] = [");
+                    for ( int i = 0; i < 3; i++ ) {
+                        if ( ((ListCreate) var.value).exprList.get().get(i).getKind().hasName("COLOR_CONST") ) {
+                            this.sb.append(((ColorConst) ((ListCreate) var.value).exprList.get().get(i)).getGreenChannelInt());
+                        } else if ( ((ListCreate) var.value).exprList.get().get(i).getKind().hasName("RGB_COLOR") ) {
+                            ((RgbColor) ((ListCreate) var.value).exprList.get().get(i)).G.accept(this);
+                        }
+                        if ( i != 2 ) {
+                            this.sb.append(", ");
+                        }
+                    }
+                    this.sb.append("]");
+                    nlIndent();
+                    this.sb.append("var ").append(var.getCodeSafeName());
+                    this.sb.append("_b[] = [");
+                    for ( int i = 0; i < 3; i++ ) {
+                        if ( ((ListCreate) var.value).exprList.get().get(i).getKind().hasName("COLOR_CONST") ) {
+                            this.sb.append(((ColorConst) ((ListCreate) var.value).exprList.get().get(i)).getBlueChannelInt());
+                        } else if ( ((ListCreate) var.value).exprList.get().get(i).getKind().hasName("RGB_COLOR") ) {
+                            ((RgbColor) ((ListCreate) var.value).exprList.get().get(i)).B.accept(this);
+                        }
+                        if ( i != 2 ) {
+                            this.sb.append(", ");
+                        }
+                    }
+                    this.sb.append("]");
                     return null;
                 } else {
                     this.sb.append("[]");

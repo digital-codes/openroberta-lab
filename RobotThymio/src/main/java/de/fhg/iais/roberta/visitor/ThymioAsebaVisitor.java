@@ -34,6 +34,7 @@ import de.fhg.iais.roberta.syntax.lang.expr.ColorConst;
 import de.fhg.iais.roberta.syntax.lang.expr.Expr;
 import de.fhg.iais.roberta.syntax.lang.expr.ExprList;
 import de.fhg.iais.roberta.syntax.lang.expr.RgbColor;
+import de.fhg.iais.roberta.syntax.lang.expr.Var;
 import de.fhg.iais.roberta.syntax.lang.methods.MethodVoid;
 import de.fhg.iais.roberta.syntax.lang.stmt.RepeatStmt;
 import de.fhg.iais.roberta.syntax.lang.stmt.Stmt;
@@ -134,31 +135,36 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
 
     @Override
     public Void visitLightAction(LightAction lightAction) {
-        this.sb.append("call leds.").append(lightAction.port.toLowerCase()).append("( ");
         if ( lightAction.rgbLedColor.getClass().equals(ColorConst.class) ) {
+            this.sb.append("call leds.").append(lightAction.port.toLowerCase()).append("(");
             ColorConst color = (ColorConst) lightAction.rgbLedColor;
             this.sb
                 .append(color.getRedChannelInt()).append("/LED_REMAP, ")
                 .append(color.getGreenChannelInt()).append("/LED_REMAP, ")
-                .append(color.getBlueChannelInt()).append("/LED_REMAP )");
+                .append(color.getBlueChannelInt()).append("/LED_REMAP)");
         } else if ( lightAction.rgbLedColor.getClass().equals(RgbColor.class) ) {
+            this.sb.append("call leds.").append(lightAction.port.toLowerCase()).append("(");
             RgbColor color = (RgbColor) lightAction.rgbLedColor;
             color.R.accept(this);
             this.sb.append("/LED_REMAP, ");
             color.G.accept(this);
             this.sb.append("/LED_REMAP, ");
             color.B.accept(this);
-            this.sb.append("/LED_REMAP )");
+            this.sb.append("/LED_REMAP)");
+        } else if ( lightAction.rgbLedColor.getClass().equals(Var.class) ) {
+            this.sb.append("call leds.").append(lightAction.port.toLowerCase()).append("(");
+            Var color = (Var) lightAction.rgbLedColor;
+            color.accept(this);
+            this.sb.append("[0]/LED_REMAP, ");
+            color.accept(this);
+            this.sb.append("[1]/LED_REMAP, ");
+            color.accept(this);
+            this.sb.append("[2]/LED_REMAP)");
         } else {
-            this.sb.append("_r");
             lightAction.rgbLedColor.accept(this);
-            this.sb.append("/LED_REMAP, ").append("_g");
-            lightAction.rgbLedColor.accept(this);
-            this.sb.append("/LED_REMAP, ").append("_b");
-            lightAction.rgbLedColor.accept(this);
-            this.sb.append("/LED_REMAP )");
+            nlIndent();
+            this.sb.append("call leds.").append(lightAction.port.toLowerCase()).append("(_r/LED_REMAP, _g/LED_REMAP, _b/LED_REMAP)");
         }
-//        nlIndent();
         return null;
     }
 
@@ -189,7 +195,8 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
                 e.accept(this);
                 nlIndent();
             });
-        this.sb.append(this.getIfElse()).append(" _state == ").append((this.funcStart.get(this.funcStart.size() - 1) + 1)).append(" then");
+        int first = this.funcStart.size() > 0 ? this.funcStart.size() - 1 + 1 : 0;
+        this.sb.append(this.getIfElse()).append(" _state == ").append(first).append(" then");
         incrIndentation();
         return null;
     }
@@ -705,7 +712,15 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
 
     private void appendRobotVariables() {
         nlIndent();
-        this.sb.append("var _result # to store potential results from function calls");
+        this.sb.append("var _color[3]");
+        nlIndent();
+        this.sb.append("var _r = 0");
+        nlIndent();
+        this.sb.append("var _g = 0");
+        nlIndent();
+        this.sb.append("var _b = 0");
+        nlIndent();
+        this.sb.append("var _result");
         nlIndent();
         this.sb.append("var _state = ").append(this.stateCounter);
         nlIndent();

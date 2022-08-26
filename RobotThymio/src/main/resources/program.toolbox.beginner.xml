@@ -20,13 +20,6 @@
             </value>
         </block>
         <block type="robActions_motorDiff_stop"/>
-        <block type="robActions_motorDiff_turn">
-            <value name="POWER">
-                <block type="math_integer">
-                    <field name="NUM">30</field>
-                </block>
-            </value>
-        </block>
         <block type="robActions_motorDiff_turn_for">
             <value name="POWER">
                 <block type="math_integer">
@@ -39,13 +32,8 @@
                 </block>
             </value>
         </block>
-        <block type="robActions_motorDiff_curve">
-            <value name="POWER_LEFT">
-                <block type="math_integer">
-                    <field name="NUM">10</field>
-                </block>
-            </value>
-            <value name="POWER_RIGHT">
+        <block type="robActions_motorDiff_turn">
+            <value name="POWER">
                 <block type="math_integer">
                     <field name="NUM">30</field>
                 </block>
@@ -68,41 +56,19 @@
                 </block>
             </value>
         </block>
-        <block type="robActions_motor_on">
-            <value name="POWER">
+        <block type="robActions_motorDiff_curve">
+            <value name="POWER_LEFT">
+                <block type="math_integer">
+                    <field name="NUM">10</field>
+                </block>
+            </value>
+            <value name="POWER_RIGHT">
                 <block type="math_integer">
                     <field name="NUM">30</field>
                 </block>
             </value>
         </block>
-        <block type="robActions_motor_on_for">
-            <value name="POWER">
-                <block type="math_integer">
-                    <field name="NUM">30</field>
-                </block>
-            </value>
-            <value name="VALUE">
-                <block type="math_integer">
-                    <field name="NUM">1000</field>
-                </block>
-            </value>
-        </block>
-        <block type="robActions_motor_getPower">
-            <field name="MOTORPORT">LEFT</field>
-        </block>
-        <block type="robActions_motor_stop"/>
-        <block type='robActions_play_tone'>
-            <value name='FREQUENCE'>
-                <block type='math_integer'>
-                    <field name='NUM'>300</field>
-                </block>
-            </value>
-            <value name='DURATION'>
-                <block type='math_integer'>
-                    <field name='NUM'>100</field>
-                </block>
-            </value>
-        </block>
+        <block type='mbedActions_play_note'/>
         <block type='robActions_play_file'/>
         <block type='robActions_led_on'>
             <value name='COLOR'>
@@ -112,84 +78,13 @@
             </value>
         </block>
         <block type='robActions_leds_off'/>
-        <block type='robActions_red_led'>
-            <value name='LED1'>
-                <block type='math_integer'>
-                    <field name='NUM'>100</field>
-                </block>
-            </value>
-            <value name='LED2'>
-                <block type='math_integer'>
-                    <field name='NUM'>100</field>
-                </block>
-            </value>
-            <value name='LED3'>
-                <block type='math_integer'>
-                    <field name='NUM'>100</field>
-                </block>
-            </value>
-            <value name='LED4'>
-                <block type='math_integer'>
-                    <field name='NUM'>100</field>
-                </block>
-            </value>
-        </block>
-        <block type='robActions_yellow_led'>
-            <value name='LED1'>
-                <block type='math_integer'>
-                    <field name='NUM'>100</field>
-                </block>
-            </value>
-            <value name='LED2'>
-                <block type='math_integer'>
-                    <field name='NUM'>100</field>
-                </block>
-            </value>
-            <value name='LED3'>
-                <block type='math_integer'>
-                    <field name='NUM'>100</field>
-                </block>
-            </value>
-            <value name='LED4'>
-                <block type='math_integer'>
-                    <field name='NUM'>100</field>
-                </block>
-            </value>
-            <value name='LED5'>
-                <block type='math_integer'>
-                    <field name='NUM'>100</field>
-                </block>
-            </value>
-            <value name='LED6'>
-                <block type='math_integer'>
-                    <field name='NUM'>100</field>
-                </block>
-            </value>
-            <value name='LED7'>
-                <block type='math_integer'>
-                    <field name='NUM'>100</field>
-                </block>
-            </value>
-            <value name='LED8'>
-                <block type='math_integer'>
-                    <field name='NUM'>100</field>
-                </block>
-            </value>
-        </block>
     </category>
     <category name="TOOLBOX_SENSOR" svg="true">
+        <block type='robSensors_key_getSample'/>
         <block type='robSensors_infrared_getSample'/>
         <block type='robSensors_irhorizontal_getSample'/>
-        <block type='robSensors_key_getSample'/>
         <block type='robSensors_sound_getSample'/>
-        <block type='robSensors_record_start'>
-            <value name='FILENAME'>
-                <block type='math_integer'>
-                    <field name='NUM'>1</field>
-                </block>
-            </value>
-        </block>
-        <block type='robSensors_record_stop'/>
+        <block type='robSensors_tap_getSample'/>
         <block type='robSensors_temperature_getSample'/>
     </category>
     <category name="TOOLBOX_CONTROL" svg="true">
@@ -214,7 +109,6 @@
         <block type="math_arithmetic"/>
     </category>
     <category name="TOOLBOX_TEXT" svg="true">
-        <block type="text"/>
         <block type="text_comment"/>
     </category>
     <category name="TOOLBOX_COLOUR" svg="true">
