@@ -260,13 +260,13 @@
         <block type='robSensors_irhorizontal_getSample'/>
         <block type='robSensors_sound_getSample'/>
         <block type='robSensors_tap_getSample'/>
-        <block type='robSensors_record_start'>
-            <value name='FILENAME'>
-                <block type='math_integer'>
-                    <field name='NUM'>1</field>
-                </block>
-            </value>
-        </block>
+        <!--        <block type='robSensors_record_start'>
+                    <value name='FILENAME'>
+                        <block type='math_integer'>
+                            <field name='NUM'>1</field>
+                        </block>
+                    </value>
+                </block>-->
         <block type='robSensors_record_stop'/>
         <block type='robSensors_accelerometer_getSample'/>
         <block type='robSensors_temperature_getSample'/>

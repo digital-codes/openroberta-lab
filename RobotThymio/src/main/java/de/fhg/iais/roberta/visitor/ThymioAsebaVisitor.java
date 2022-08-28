@@ -96,21 +96,22 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
     @Override
     public Void visitInfraredSensor(InfraredSensor infraredSensor) {
         String mode = infraredSensor.getMode().toLowerCase();
-        String sensorMode = "";
         switch ( mode ) {
             case C.DISTANCE:
-                sensorMode = "horizontal";
+                this.sb.append("(100 - prox.").append("horizontal").append("[").append(infraredSensor.getSlot()).append("] / 45)");
                 break;
             case C.LINE:
-                sensorMode = "ground.reflected";
+                this.sb.append("(1500 - prox.").append("ground.reflected").append("[").append(infraredSensor.getSlot()).append("]) / 1000");
+                break;
+            case C.LIGHT:
+                this.sb.append("prox.").append("ground.reflected").append("[").append(infraredSensor.getSlot()).append("] / 45");
                 break;
             case C.AMBIENTLIGHT:
-                sensorMode = "ground.ambiant";
+                this.sb.append("prox.").append("ground.ambiant").append("[").append(infraredSensor.getSlot()).append("] / 2");
                 break;
             default:
                 throw new DbcException("Invalid infrared sensor mode!");
         }
-        this.sb.append("prox.").append(sensorMode).append("[").append(infraredSensor.getSlot()).append("]");
         return null;
     }
 
@@ -577,7 +578,7 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
 
     @Override
     public Void visitTapSensor(TapSensor tapSensor) {
-        this.sb.append("(abs(acc[0]) > THRESHOLD or abs(acc[1]) > THRESHOLD or abs(acc[2]) > THRESHOLD)");
+        this.sb.append("(29 + acc[1]) / 32");
         return null;
     }
 

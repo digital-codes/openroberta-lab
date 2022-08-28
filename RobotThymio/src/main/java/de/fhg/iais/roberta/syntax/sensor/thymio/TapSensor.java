@@ -7,7 +7,7 @@ import de.fhg.iais.roberta.util.ast.BlocklyProperties;
 import de.fhg.iais.roberta.util.ast.ExternalSensorBean;
 
 @NepoExpr(name = "TAP_SENSING", category = "SENSOR", blocklyNames = {"robSensors_tap_getSample"},
-    sampleValues = {@F2M(field = "TAP_SHOCK", mode = "SHOCK")})
+    sampleValues = {@F2M(field = "TAP_VALUE", mode = "VALUE")})
 public final class TapSensor extends ExternalSensor {
 
     public TapSensor(BlocklyProperties properties, ExternalSensorBean externalSensorBean) {
