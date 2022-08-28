@@ -259,6 +259,7 @@
         <block type='robSensors_infrared_getSample'/>
         <block type='robSensors_irhorizontal_getSample'/>
         <block type='robSensors_sound_getSample'/>
+        <block type='robSensors_tap_getSample'/>
         <block type='robSensors_record_start'>
             <value name='FILENAME'>
                 <block type='math_integer'>
@@ -268,7 +269,6 @@
         </block>
         <block type='robSensors_record_stop'/>
         <block type='robSensors_accelerometer_getSample'/>
-        <block type='robSensors_tap_getSample'/>
         <block type='robSensors_temperature_getSample'/>
     </category>
     <category name="TOOLBOX_CONTROL" svg="true">
@@ -289,7 +289,7 @@
             <block type="robControls_for">
                 <value name="FROM">
                     <block type="math_integer">
-                        <field name="NUM">1</field>
+                        <field name="NUM">0</field>
                     </block>
                 </value>
                 <value name="TO">
@@ -321,7 +321,9 @@
                             <block type="robSensors_getSample"/>
                         </value>
                         <value name="B">
-                            <block type="logic_boolean"/>
+                            <block type="math_integer">
+                                <field name="NUM">1</field>
+                            </block>
                         </value>
                     </block>
                 </value>

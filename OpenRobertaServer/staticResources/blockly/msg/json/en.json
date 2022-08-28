@@ -1,7 +1,7 @@
 {
 	"@metadata": {
 		"author": "Ellen Spertus <ellen.spertus@gmail.com>",
-		"lastupdated": "2022-08-16 19:41:30.036104",
+		"lastupdated": "2022-08-27 21:27:48.552350",
 		"locale": "en",
 		"messagedocumentation" : "qqq"
 	},
@@ -580,11 +580,11 @@
 	"SENSOR_IS_TOUCHED": "touched?",
 	"SENSOR_IS_TILTED": "tilted?",
 	"SENSOR_PARTICLE": "SDS011 particle sensor",
-	"SENSOR_TAP": "accelerometer",
+	"SENSOR_TAP": "tap sensor",
 	"PARTICLE_TOOLTIP": "Represents SDS011 particle sensor.",
 	"SENSOR_PARTICLE_PM25_GETSAMPLE_TOOLTIP": "Reads the current value of PM2.5 from the particle sensor.",
 	"SENSOR_PARTICLE_PM10_GETSAMPLE_TOOLTIP": "Reads the current value of PM10 from the particle sensor.",
-	"SENSOR_TAP_GETSAMPLE_TOOLTIP": "Reads the current accelerometer values resulting from a tap/shock event.",
+	"SENSOR_TAP_GETSAMPLE_TOOLTIP": "Returns 1 if a tap is detected else 0.",
 	"PITCH": "pitch",
 	"ROLL": "roll",
 	"YAW": "yaw",
@@ -1400,7 +1400,6 @@
 	"INFRARED_PRESENCE_GETSAMPLE_TOOLTIP": "Returns an array of measurements for the presence of a beacon.",
 	"SENSOR_ACCELEROMETER": "accelerometer",
 	"SENSOR_PINTOUCH": "pin",
-	"MODE_SHOCK": "shock",
 	"MODE_ANALOG": "analog value",
 	"MODE_DIGITAL": "digital value",
 	"MODE_PULSELOW": "pulse time LOW",
@@ -1422,7 +1421,6 @@
 	"SENSOR_RSSI": "signal strength",
 	"SENSOR_RSSI_VALUE_GETSAMPLE_TOOLTIP": "Gets the signal strength from the last received message.",
 	"SENSOR_ACCELEROMETER_GETSAMPLE_TOOLTIP": "Returns the acceleration value on the given axis in g",
-	"SENSOR_ACCELEROMETER_GETSHOCK_TOOLTIP": "Returns the acceleration value in g in the event of a tap/shock.",
 	"SENSOR_ACCELEROMETER_X_GETSAMPLE_TOOLTIP_ARDUINO": "Returns the acceleration value on the X axis in g. Can be in range from -4 g to 4 g.",
 	"SENSOR_ACCELEROMETER_Y_GETSAMPLE_TOOLTIP_ARDUINO": "Returns the acceleration value on the Y axis in g. Can be in range from -4 g to 4 g.",
 	"SENSOR_ACCELEROMETER_Z_GETSAMPLE_TOOLTIP_ARDUINO": "Returns the acceleration value on the Z axis in g. Can be in range from -4 g to 4 g.",

@@ -1,13 +1,14 @@
 package de.fhg.iais.roberta.visitor;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import com.google.common.collect.ClassToInstanceMap;
 
 import de.fhg.iais.roberta.bean.CodeGeneratorSetupBean;
 import de.fhg.iais.roberta.bean.IProjectBean;
-import de.fhg.iais.roberta.components.Category;
+import de.fhg.iais.roberta.bean.UsedHardwareBean;
 import de.fhg.iais.roberta.components.ConfigurationAst;
 import de.fhg.iais.roberta.syntax.Phrase;
 import de.fhg.iais.roberta.syntax.action.display.ClearDisplayAction;
@@ -32,14 +33,9 @@ import de.fhg.iais.roberta.syntax.action.thymio.YellowLedOnAction;
 import de.fhg.iais.roberta.syntax.lang.blocksequence.MainTask;
 import de.fhg.iais.roberta.syntax.lang.expr.ColorConst;
 import de.fhg.iais.roberta.syntax.lang.expr.Expr;
-import de.fhg.iais.roberta.syntax.lang.expr.ExprList;
 import de.fhg.iais.roberta.syntax.lang.expr.RgbColor;
 import de.fhg.iais.roberta.syntax.lang.expr.Var;
-import de.fhg.iais.roberta.syntax.lang.methods.MethodVoid;
-import de.fhg.iais.roberta.syntax.lang.stmt.RepeatStmt;
-import de.fhg.iais.roberta.syntax.lang.stmt.Stmt;
 import de.fhg.iais.roberta.syntax.lang.stmt.StmtList;
-import de.fhg.iais.roberta.syntax.lang.stmt.WaitStmt;
 import de.fhg.iais.roberta.syntax.lang.stmt.WaitTimeStmt;
 import de.fhg.iais.roberta.syntax.sensor.generic.AccelerometerSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.ColorSensor;
@@ -48,14 +44,13 @@ import de.fhg.iais.roberta.syntax.sensor.generic.KeysSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.LightSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.SoundSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.TimerSensor;
+import de.fhg.iais.roberta.syntax.sensor.thymio.TapSensor;
 import de.fhg.iais.roberta.util.basic.C;
 import de.fhg.iais.roberta.util.dbc.DbcException;
 import de.fhg.iais.roberta.util.syntax.MotorDuration;
 import de.fhg.iais.roberta.util.syntax.SC;
 
 public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IThymioVisitor<Void> {
-
-    private long numUserMethods = 0;
 
     public ThymioAsebaVisitor(
         List<List<Phrase>> programPhrases, ClassToInstanceMap<IProjectBean> beans, ConfigurationAst configurationAst) {
@@ -101,34 +96,26 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
     @Override
     public Void visitInfraredSensor(InfraredSensor infraredSensor) {
         String mode = infraredSensor.getMode().toLowerCase();
-        if ( mode.equals(C.DISTANCE) ) {
-            this.sb.append("prox.").append("horizontal").append("[").append(infraredSensor.getSlot()).append("]");
-        } else if ( mode.equals(C.LINE) ) {
-            this.sb.append("prox.").append("ground.reflected").append("[").append(infraredSensor.getSlot()).append("]");
-        } else {
-            throw new DbcException("Invalid infrared sensor mode!");
+        String sensorMode = "";
+        switch ( mode ) {
+            case C.DISTANCE:
+                sensorMode = "horizontal";
+                break;
+            case C.LINE:
+                sensorMode = "ground.reflected";
+                break;
+            case C.AMBIENTLIGHT:
+                sensorMode = "ground.ambiant";
+                break;
+            default:
+                throw new DbcException("Invalid infrared sensor mode!");
         }
+        this.sb.append("prox.").append(sensorMode).append("[").append(infraredSensor.getSlot()).append("]");
         return null;
     }
 
     @Override
     public Void visitKeysSensor(KeysSensor keysSensor) {
-//        incrIndentation();
-//        nlIndent();
-//        this.sb.append("if button.").append(keysSensor.getUserDefinedPort().toLowerCase());
-//        this.sb.append(" == 1 then");
-//        incrIndentation();
-//        nlIndent();
-//        this.sb.append("_state = ").append(this.stateCounter);
-//        decrIndentation();
-//        nlIndent();
-//        this.sb.append("else");
-//        incrIndentation();
-//        nlIndent();
-//        this.sb.append("timer.period[0] = 10");
-//        decrIndentation();
-//        nlIndent();
-//        this.sb.append("end");
         this.sb.append("button.").append(keysSensor.getUserDefinedPort().toLowerCase());
         return null;
     }
@@ -138,10 +125,7 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
         if ( lightAction.rgbLedColor.getClass().equals(ColorConst.class) ) {
             this.sb.append("call leds.").append(lightAction.port.toLowerCase()).append("(");
             ColorConst color = (ColorConst) lightAction.rgbLedColor;
-            this.sb
-                .append(color.getRedChannelInt()).append("/LED_REMAP, ")
-                .append(color.getGreenChannelInt()).append("/LED_REMAP, ")
-                .append(color.getBlueChannelInt()).append("/LED_REMAP)");
+            this.sb.append(color.getRedChannelInt()).append("/LED_REMAP, ").append(color.getGreenChannelInt()).append("/LED_REMAP, ").append(color.getBlueChannelInt()).append("/LED_REMAP)");
         } else if ( lightAction.rgbLedColor.getClass().equals(RgbColor.class) ) {
             this.sb.append("call leds.").append(lightAction.port.toLowerCase()).append("(");
             RgbColor color = (RgbColor) lightAction.rgbLedColor;
@@ -163,7 +147,7 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
         } else {
             lightAction.rgbLedColor.accept(this);
             nlIndent();
-            this.sb.append("call leds.").append(lightAction.port.toLowerCase()).append("(_r/LED_REMAP, _g/LED_REMAP, _b/LED_REMAP)");
+            this.sb.append("call leds.").append(lightAction.port.toLowerCase()).append("(___r/LED_REMAP, ___g/LED_REMAP, ___b/LED_REMAP)");
         }
         return null;
     }
@@ -188,13 +172,10 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
         this.sb.append("onevent timer0");
         incrIndentation();
         nlIndent();
-        this.programPhrases
-            .stream()
-            .filter(phrase -> phrase.getKind().getCategory() == Category.METHOD && phrase.getKind().hasName("METHOD_VOID"))
-            .forEach(e -> {
-                e.accept(this);
-                nlIndent();
-            });
+        this.getBean(UsedHardwareBean.class).getUserDefinedMethods().forEach(method -> {
+            method.accept(this);
+            nlIndent();
+        });
         int first = this.funcStart.size() > 0 ? this.funcStart.size() - 1 + 1 : 0;
         this.sb.append(this.getIfElse()).append(" _state == ").append(first).append(" then");
         incrIndentation();
@@ -304,8 +285,7 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
         }
         this.sb.append("__time = 0");
         nlIndent();
-        this.sb.append("call sound.freq(").append(
-            playNoteAction.frequency.split("\\.")[0]).append(", ").append(playNoteAction.duration).append("/16)");
+        this.sb.append("call sound.freq(").append(playNoteAction.frequency.split("\\.")[0]).append(", ").append(playNoteAction.duration).append("/16)");
         nlIndent();
         this.stateCounter++;
         this.sb.append("_state = ").append(this.stateCounter);
@@ -357,13 +337,13 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
 
     @Override
     public Void visitRgbColor(RgbColor rgbColor) {
-        this.sb.append("(");
+        this.sb.append("[");
         rgbColor.R.accept(this);
         this.sb.append(", ");
         rgbColor.G.accept(this);
         this.sb.append(", ");
         rgbColor.B.accept(this);
-        this.sb.append(")");
+        this.sb.append("]");
         return null;
     }
 
@@ -469,15 +449,11 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
             }
             this.sb.append("__time = 0");
             nlIndent();
-            this.sb.append("speedL = ").append(multLeft);
+            this.sb.append("motor.left.target = MOTOR_MAX * ").append(multLeft);
             speedLeft.accept(this);
-            this.sb.append(" * MOTOR_MAX");
             nlIndent();
-            this.sb.append("speedR = ").append(multRight);
-            speedLeft.accept(this);
-            this.sb.append(" * MOTOR_MAX");
-            nlIndent();
-            this.sb.append("callsub diffdrive");
+            this.sb.append("motor.right.target = MOTOR_MAX * ").append(multRight);
+            speedRight.accept(this);
             nlIndent();
             this.stateCounter++;
             this.sb.append("_state = ").append(this.stateCounter);
@@ -522,38 +498,6 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
 
     @Override
     public Void visitVolumeAction(VolumeAction volumeAction) {
-        return null;
-    }
-
-    @Override
-    public Void visitWaitStmt(WaitStmt waitStmt) {
-/*        this.stateCounter++;
-        this.sb.append("_state = ").append(this.stateCounter);
-        decrIndentation();
-        nlIndent();
-        this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
-        incrIndentation();
-        nlIndent();
-        String stateVar = this.isFunc ? "_funcstate" : this.isLoop ? "_loopstate" : "_state";
-        int counter = this.isFunc ? this.funcCounter : this.isLoop ? this.loopCounter : this.stateCounter;
-        String ifElseif = counter == 0 ? "if " : "elseif ";
-        this.sb.append(ifElseif).append(stateVar).append(" == ").append(counter).append(" then");
-        incrIndentation();
-        visitStmtList(waitStmt.statements);
-//        decrIndentation();
-        if ( isFunc ) {
-            this.funcCounter++;
-        } else if ( isLoop ) {
-            this.loopCounter++;
-        } else {
-            this.stateCounter++;
-        }
-//        decrIndentation();
-//        nlIndent();
-        if ( this.noOfStates == counter + 1 ) {
-            this.sb.append("end");
-//            decrIndentation();
-        }*/
         return null;
     }
 
@@ -632,6 +576,12 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
     }
 
     @Override
+    public Void visitTapSensor(TapSensor tapSensor) {
+        this.sb.append("(abs(acc[0]) > THRESHOLD or abs(acc[1]) > THRESHOLD or abs(acc[2]) > THRESHOLD)");
+        return null;
+    }
+
+    @Override
     protected void generateProgramPrefix(boolean withWrapping) {
         if ( !withWrapping ) {
             return;
@@ -647,20 +597,19 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
         nlIndent();
         this.sb.append("<constant value=\"3\" name=\"COLOR_INTENSITY_REMAP\"/>");
         nlIndent();
+        this.sb.append("<constant value=\"20\" name=\"THRESHOLD\"/>");
+        nlIndent();
         this.sb.append("<!--node thymio-II-->");
         nlIndent();
         this.sb.append("<node name=\"thymio-II\">");
         nlIndent();
-        nlIndent();
         this.myMethods = new ArrayList();
-        this.programPhrases.stream().filter(phrase -> phrase.getKind().getCategory() == Category.METHOD && phrase.getKind().hasName("METHOD_VOID")).forEach(m -> this.myMethods.add(((MethodVoid) m).getMethodName()));
-        this.myMethods
-            .forEach(m -> {
-                this.funcStart.add(this.stateCounter);
-                this.stateCounter++;
-            });
+        this.getBean(UsedHardwareBean.class).getUserDefinedMethods().forEach(method -> this.myMethods.add(method.getMethodName()));
+        this.myMethods.forEach(m -> {
+            this.funcStart.add(this.stateCounter);
+            this.stateCounter++;
+        });
         appendRobotVariables();
-        nlIndent();
         generateVariablesForUsage(this.programPhrases);
     }
 
@@ -680,10 +629,7 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
         }
         generateUserDefinedMethodsForThymio();
         if ( !this.getBean(CodeGeneratorSetupBean.class).getUsedMethods().isEmpty() ) {
-            String helperMethodImpls =
-                this.getBean(CodeGeneratorSetupBean.class)
-                    .getHelperMethodGenerator()
-                    .getHelperMethodDefinitions(this.getBean(CodeGeneratorSetupBean.class).getUsedMethods());
+            String helperMethodImpls = this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodDefinitions(this.getBean(CodeGeneratorSetupBean.class).getUsedMethods());
             this.sb.append(helperMethodImpls);
         }
         nlIndent();
@@ -694,104 +640,46 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
     }
 
     void generateUserDefinedMethodsForThymio() {
-        this.programPhrases
-            .stream()
-            .filter(phrase -> phrase.getKind().getCategory() == Category.METHOD && phrase.getKind().hasName("METHOD_VOID"))
-            .forEach(e -> {
-                String methodName = ((MethodVoid) e).getMethodName();
-                int funcIndex = this.myMethods.indexOf(methodName);
-                nlIndent();
-                this.sb.append("sub ").append(methodName);
-                incrIndentation();
-                nlIndent();
-                this.sb.append("_state = ").append(this.funcStart.get(funcIndex));
-                decrIndentation();
-                nlIndent();
-            });
+        this.getBean(UsedHardwareBean.class).getUserDefinedMethods().forEach(method -> {
+            String methodName = method.getMethodName();
+            int funcIndex = this.myMethods.indexOf(methodName);
+            nlIndent();
+            this.sb.append("sub ").append(methodName);
+            incrIndentation();
+            nlIndent();
+            this.sb.append("_state = ").append(this.funcStart.get(funcIndex));
+            decrIndentation();
+            nlIndent();
+        });
     }
 
     private void appendRobotVariables() {
-        nlIndent();
-        this.sb.append("var _color[3]");
-        nlIndent();
-        this.sb.append("var _r = 0");
-        nlIndent();
-        this.sb.append("var _g = 0");
-        nlIndent();
-        this.sb.append("var _b = 0");
         nlIndent();
         this.sb.append("var _result");
         nlIndent();
         this.sb.append("var _state = ").append(this.stateCounter);
         nlIndent();
         if ( this.stateCounter > 0 ) {
-            this.sb.append("var _return_state = 0");
+            this.sb.append("var _return_state");
             nlIndent();
         }
         this.sb.append("var __time = 0");
     }
 
     private void generateVariablesForUsage(List<Phrase> exprList) {
-        boolean isAppended = false;
-        boolean isAppendedDrive = false;
-        for ( Phrase e : exprList ) {
-            if ( e.getKind().hasName("CURVE_ACTION", "DRIVE_ACTION", "TURN_ACTION") ) {
-                if ( !isAppendedDrive ) {
-                    this.sb.append("var speedL");
-                    nlIndent();
-                    this.sb.append("var speedR");
-                    isAppendedDrive = true;
-                }
-            }
-            if ( e.getKind().getName().equals("REPEAT_STMT") ) {
-                RepeatStmt stmt = (RepeatStmt) e;
-                isAppended = generateVariablesForLoops(isAppended, stmt);
-                for ( Stmt s : stmt.list.get() ) {
-                    if ( s.getKind().getName().equals("REPEAT_STMT") ) {
-                        isAppended = generateVariablesForLoops(isAppended, (RepeatStmt) s);
-                    }
-                }
-            }
-            if ( e.getKind().getName().equals("IF_STMT") ) {
-                if ( !isAppended ) {
-                    this.sb.append("var ___true = 1");
-                    isAppended = true;
-                    nlIndent();
-                }
-            }
+        List<String> listVariablesWithoutDuplicates = new ArrayList<>(
+            new LinkedHashSet<>(this.getBean(UsedHardwareBean.class).getDeclaredVariables()));
+        for ( String global : this.getBean(UsedHardwareBean.class).getMarkedVariablesAsGlobal() ) {
+            listVariablesWithoutDuplicates.remove(global);
         }
-    }
-
-    private boolean generateVariablesForLoops(boolean isAppended, RepeatStmt stmt) {
-        switch ( stmt.mode ) {
-            case FOREVER:
-            case UNTIL:
-            case WHILE:
-                if ( !isAppended ) {
-                    this.sb.append("var ___true = 1");
-                    isAppended = true;
-                    nlIndent();
-                }
-                break;
-            case TIMES:
-            case FOR:
-                ExprList expr = (ExprList) stmt.expr;
-                this.sb.append("var ");
-                expr.get().get(0).accept(this);
-                this.sb.append(" = ");
-                expr.get().get(1).accept(this);
-                nlIndent();
-                break;
-            case WAIT:
-                this.sb.append(stmt.getKind()).append(stmt.mode).append(stmt.expr);
-//                        generateCodeFromStmtCondition("if", repeatStmt.getExpr());
-                break;
-            case FOR_EACH:
-//                        generateCodeFromStmtCondition("for", repeatStmt.getExpr());
-                break;
-            default:
-                throw new DbcException("Invalid Repeat Statement!");
-        }
-        return isAppended;
+        listVariablesWithoutDuplicates.forEach(var -> {
+            nlIndent();
+            this.sb.append("var ___").append(var);
+            if ( var.equals("color") ) {
+                this.sb.append("[3]");
+            } else if ( var.equals("true") ) {
+                this.sb.append(" = 1");
+            }
+        });
     }
 }

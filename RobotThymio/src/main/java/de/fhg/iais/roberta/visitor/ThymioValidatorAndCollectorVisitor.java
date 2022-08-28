@@ -31,6 +31,11 @@ import de.fhg.iais.roberta.syntax.action.thymio.RedLedOnAction;
 import de.fhg.iais.roberta.syntax.action.thymio.YellowLedOnAction;
 import de.fhg.iais.roberta.syntax.configuration.ConfigurationComponent;
 import de.fhg.iais.roberta.syntax.lang.blocksequence.MainTask;
+import de.fhg.iais.roberta.syntax.lang.expr.ColorConst;
+import de.fhg.iais.roberta.syntax.lang.expr.RgbColor;
+import de.fhg.iais.roberta.syntax.lang.expr.VarDeclaration;
+import de.fhg.iais.roberta.syntax.lang.stmt.IfStmt;
+import de.fhg.iais.roberta.syntax.lang.stmt.RepeatStmt;
 import de.fhg.iais.roberta.syntax.sensor.generic.AccelerometerSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.InfraredSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.KeysSensor;
@@ -38,6 +43,7 @@ import de.fhg.iais.roberta.syntax.sensor.generic.LightSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.SoundSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.TemperatureSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.TimerSensor;
+import de.fhg.iais.roberta.syntax.sensor.thymio.TapSensor;
 import de.fhg.iais.roberta.util.dbc.Assert;
 import de.fhg.iais.roberta.util.syntax.BlocklyConstants;
 import de.fhg.iais.roberta.util.syntax.SC;
@@ -57,6 +63,50 @@ public class ThymioValidatorAndCollectorVisitor extends CommonNepoValidatorAndCo
     }
 
     @Override
+    public Void visitRgbColor(RgbColor rgbColor) {
+        super.visitRgbColor(rgbColor);
+        addColorVariables();
+        return null;
+    }
+
+    @Override
+    public Void visitColorConst(ColorConst colorConst) {
+        super.visitColorConst(colorConst);
+        addColorVariables();
+        return null;
+    }
+
+    @Override
+    public Void visitRepeatStmt(RepeatStmt repeatStmt) {
+        super.visitRepeatStmt(repeatStmt);
+        if ( repeatStmt.mode == RepeatStmt.Mode.FOREVER ) {
+            usedHardwareBuilder.addDeclaredVariable("true");
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitIfStmt(IfStmt ifStmt) {
+        super.visitIfStmt(ifStmt);
+        usedHardwareBuilder.addDeclaredVariable("true");
+        return null;
+    }
+
+    @Override
+    public Void visitVarDeclaration(VarDeclaration varDeclaration) {
+        super.visitVarDeclaration(varDeclaration);
+        usedHardwareBuilder.addMarkedVariableAsGlobal(varDeclaration.name);
+        return null;
+    }
+
+    private void addColorVariables() {
+        usedHardwareBuilder.addDeclaredVariable("r");
+        usedHardwareBuilder.addDeclaredVariable("g");
+        usedHardwareBuilder.addDeclaredVariable("b");
+        usedHardwareBuilder.addDeclaredVariable("color");
+    }
+
+    @Override
     public Void visitAccelerometerSensor(AccelerometerSensor accelerometerSensor) {
         return null;
     }
@@ -69,7 +119,6 @@ public class ThymioValidatorAndCollectorVisitor extends CommonNepoValidatorAndCo
     @Override
     public Void visitCurveAction(CurveAction curveAction) {
         requiredComponentVisited(curveAction, curveAction.paramLeft.getSpeed(), curveAction.paramRight.getSpeed());
-        usedMethodBuilder.addUsedMethod(ThymioMethods.DIFFDRIVE);
         if ( curveAction.paramRight.getDuration() != null ) {
             requiredComponentVisited(curveAction, curveAction.paramRight.getDuration().getValue());
             usedMethodBuilder.addUsedMethod(ThymioMethods.STOP);
@@ -80,7 +129,6 @@ public class ThymioValidatorAndCollectorVisitor extends CommonNepoValidatorAndCo
     @Override
     public Void visitDriveAction(DriveAction driveAction) {
         requiredComponentVisited(driveAction, driveAction.param.getSpeed());
-        usedMethodBuilder.addUsedMethod(ThymioMethods.DIFFDRIVE);
         if ( driveAction.param.getDuration() != null ) {
             requiredComponentVisited(driveAction, driveAction.param.getDuration().getValue());
             usedMethodBuilder.addUsedMethod(ThymioMethods.STOP);
@@ -196,7 +244,6 @@ public class ThymioValidatorAndCollectorVisitor extends CommonNepoValidatorAndCo
     @Override
     public Void visitTurnAction(TurnAction turnAction) {
         requiredComponentVisited(turnAction, turnAction.param.getSpeed());
-        usedMethodBuilder.addUsedMethod(ThymioMethods.DIFFDRIVE);
         if ( turnAction.param.getDuration() != null ) {
             requiredComponentVisited(turnAction, turnAction.param.getDuration().getValue());
             usedMethodBuilder.addUsedMethod(ThymioMethods.STOP);
@@ -216,6 +263,11 @@ public class ThymioValidatorAndCollectorVisitor extends CommonNepoValidatorAndCo
 
 
     public Void visitLedsOffAction(LedsOffAction ledsOffAction) {
+        return null;
+    }
+
+    @Override
+    public Void visitTapSensor(TapSensor tapSensor) {
         return null;
     }
 

@@ -206,6 +206,8 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
         Binary.Op op = binary.op;
         String sym = getBinaryOperatorSymbol(op);
         switch ( op.toString() ) {
+            case "==":
+                break;
             case "AND":
             case "OR":
                 this.sb.append(" == 1 ").append(sym).append(" 1 == ");
@@ -359,13 +361,13 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
     @Override
     public Void visitListCreate(ListCreate listCreate) {
         if ( listCreate.typeVar.toString().equals("COLOR") ) {
-            this.sb.append("var _r[] = ");
+            this.sb.append("var ___r[] = ");
             listCreate.exprList.el.get(0).accept(this);
             nlIndent();
-            this.sb.append("var _g[] = ");
+            this.sb.append("var ___g[] = ");
             listCreate.exprList.el.get(1).accept(this);
             nlIndent();
-            this.sb.append("var _b[] = ");
+            this.sb.append("var ___b[] = ");
             listCreate.exprList.el.get(2).accept(this);
             return null;
         }
@@ -379,21 +381,21 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
     public Void visitListGetIndex(ListGetIndex listGetIndex) {
         if ( listGetIndex.param.get(0).getVarType().toString().equals("ARRAY_COLOUR") ) {
             if ( listGetIndex.mode == GET ) {
-                this.sb.append("_r = ");
+                this.sb.append("___r = ");
                 listGetIndex.param.get(0).accept(this);
                 this.sb.append("_r");
                 this.sb.append("[");
                 listGetIndex.param.get(1).accept(this);
                 this.sb.append("]");
                 nlIndent();
-                this.sb.append("_g = ");
+                this.sb.append("___g = ");
                 listGetIndex.param.get(0).accept(this);
                 this.sb.append("_g");
                 this.sb.append("[");
                 listGetIndex.param.get(1).accept(this);
                 this.sb.append("]");
                 nlIndent();
-                this.sb.append("_b = ");
+                this.sb.append("___b = ");
                 listGetIndex.param.get(0).accept(this);
                 this.sb.append("_b");
                 this.sb.append("[");
@@ -458,17 +460,17 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
             listSetIndex.param.get(1).accept(this);
             nlIndent();
             listSetIndex.param.get(0).accept(this);
-            this.sb.append("_r");
+            this.sb.append("___r");
             addSetIndex(listSetIndex);
             this.sb.append("_color[0]");
             nlIndent();
             listSetIndex.param.get(0).accept(this);
-            this.sb.append("_g");
+            this.sb.append("___g");
             addSetIndex(listSetIndex);
             this.sb.append("_color[1]");
             nlIndent();
             listSetIndex.param.get(0).accept(this);
-            this.sb.append("_b");
+            this.sb.append("___b");
             addSetIndex(listSetIndex);
             this.sb.append("_color[2]");
             return null;
@@ -755,31 +757,21 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
         incrIndentation();
         nlIndent();
         newState = true;
-
-        this.loopsStart.add(this.stateCounter);
-        switch ( repeatStmt.mode ) {
-            case FOREVER:
+        switch ( repeatStmt.mode.toString() ) {
+            case "FOREVER":
+            case "UNTIL":
+            case "WHILE":
+            case "WAIT":
                 generateCodeFromStmtCondition("if", repeatStmt.expr);
                 break;
-            case UNTIL:
-                generateCodeFromStmtCondition("if", repeatStmt.expr);
-                break;
-            case WHILE:
-                generateCodeFromStmtCondition("if", repeatStmt.expr);
-                break;
-            case TIMES:
-            case FOR:
-                generateCodeFromStmtConditionFor("if", repeatStmt.expr, false);
-                break;
-            case WAIT:
-                generateCodeFromStmtCondition("if", repeatStmt.expr);
-                break;
-            case FOR_EACH:
-                generateCodeFromStmtCondition("if", repeatStmt.expr);
+            case "TIMES":
+            case "FOR":
+                generateCodeFromStmtConditionFor("if", repeatStmt.expr);
                 break;
             default:
                 throw new DbcException("Invalid Repeat Statement!");
         }
+        this.loopsStart.add(this.stateCounter);
         incrIndentation();
         nlIndent();
         this.stateCounter++;
@@ -910,18 +902,16 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
         this.sb.append("var ").append(var.getCodeSafeName());
         if ( !var.value.getKind().hasName("EMPTY_EXPR") ) {
             if ( var.value.getKind().getName().equals("LIST_CREATE") ) {
-                if ( ((ListCreate) var.value).exprList.el.size() == 0 ) {
-                    this.sb.append("[10]");
-                    return null;
-                } else if ( ((ListCreate) var.value).typeVar.toString().equals("COLOR") ) {
+                if ( ((ListCreate) var.value).typeVar.toString().equals("COLOR") ) {
+                    int listSize = ((ListCreate) var.value).exprList.get().size();
                     this.sb.append("_r[] = [");
-                    for ( int i = 0; i < 3; i++ ) {
+                    for ( int i = 0; i < listSize; i++ ) {
                         if ( ((ListCreate) var.value).exprList.get().get(i).getKind().hasName("COLOR_CONST") ) {
                             this.sb.append(((ColorConst) ((ListCreate) var.value).exprList.get().get(i)).getRedChannelInt());
                         } else if ( ((ListCreate) var.value).exprList.get().get(i).getKind().hasName("RGB_COLOR") ) {
                             ((RgbColor) ((ListCreate) var.value).exprList.get().get(i)).R.accept(this);
                         }
-                        if ( i != 2 ) {
+                        if ( i != listSize - 1 ) {
                             this.sb.append(", ");
                         }
                     }
@@ -929,13 +919,13 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
                     nlIndent();
                     this.sb.append("var ").append(var.getCodeSafeName());
                     this.sb.append("_g[] = [");
-                    for ( int i = 0; i < 3; i++ ) {
+                    for ( int i = 0; i < listSize; i++ ) {
                         if ( ((ListCreate) var.value).exprList.get().get(i).getKind().hasName("COLOR_CONST") ) {
                             this.sb.append(((ColorConst) ((ListCreate) var.value).exprList.get().get(i)).getGreenChannelInt());
                         } else if ( ((ListCreate) var.value).exprList.get().get(i).getKind().hasName("RGB_COLOR") ) {
                             ((RgbColor) ((ListCreate) var.value).exprList.get().get(i)).G.accept(this);
                         }
-                        if ( i != 2 ) {
+                        if ( i != listSize - 1 ) {
                             this.sb.append(", ");
                         }
                     }
@@ -943,13 +933,13 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
                     nlIndent();
                     this.sb.append("var ").append(var.getCodeSafeName());
                     this.sb.append("_b[] = [");
-                    for ( int i = 0; i < 3; i++ ) {
+                    for ( int i = 0; i < listSize; i++ ) {
                         if ( ((ListCreate) var.value).exprList.get().get(i).getKind().hasName("COLOR_CONST") ) {
                             this.sb.append(((ColorConst) ((ListCreate) var.value).exprList.get().get(i)).getBlueChannelInt());
                         } else if ( ((ListCreate) var.value).exprList.get().get(i).getKind().hasName("RGB_COLOR") ) {
                             ((RgbColor) ((ListCreate) var.value).exprList.get().get(i)).B.accept(this);
                         }
-                        if ( i != 2 ) {
+                        if ( i != listSize - 1 ) {
                             this.sb.append(", ");
                         }
                     }
@@ -982,6 +972,60 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
 
     @Override
     public Void visitWaitStmt(WaitStmt waitStmt) {
+        //loopCounter++;
+        this.stateCounter++;
+        this.sb.append("_state = ").append(this.stateCounter);
+        decrIndentation();
+        nlIndent();
+        this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
+        incrIndentation();
+        nlIndent();
+        newState = true;
+        int stmtSize = waitStmt.statements.get().size();
+        int statesSize = stmtSize + 1;
+        int[] states = new int[statesSize];
+        int i = 0;
+        for ( ; i < stmtSize; i++ ) {
+            if ( i == 0 ) {
+                generateCodeFromStmtCondition("if", ((RepeatStmt) waitStmt.statements.get().get(i)).expr);
+                incrIndentation();
+                nlIndent();
+                this.stateCounter++;
+                states[i] = this.stateCounter;
+                this.sb.append("_state = ").append(this.stateCounter);
+                decrIndentation();
+            } else {
+                nlIndent();
+                generateCodeFromStmtCondition("elseif", ((RepeatStmt) waitStmt.statements.get().get(i)).expr);
+                incrIndentation();
+                nlIndent();
+                this.stateCounter++;
+                states[i] = this.stateCounter;
+                this.sb.append("_state = ").append(this.stateCounter);
+                decrIndentation();
+            }
+        }
+        nlIndent();
+        this.stateCounter++;
+        states[i] = this.stateCounter;
+        this.sb.append("end");
+        decrIndentation();
+        nlIndent();
+        for ( int j = 0; j < stmtSize; j++ ) {
+            this.sb.append("elseif _state == ").append(states[j]).append(" then");
+            incrIndentation();
+            StmtList then = ((RepeatStmt) waitStmt.statements.get().get(j)).list;
+            if ( !then.get().isEmpty() ) {
+                then.accept(this);
+            }
+            nlIndent();
+            this.sb.append("_state = ").append(states[statesSize - 1]);
+            decrIndentation();
+            nlIndent();
+        }
+        this.sb.append("elseif _state == ").append(states[statesSize - 1]).append(" then");
+        incrIndentation();
+        //loopCounter--;
         return null;
     }
 
@@ -1075,37 +1119,26 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
 
     protected void generateCodeFromStmtCondition(String stmtType, Expr expr) {
         this.sb.append(stmtType).append(whitespace());
-        if ( expr.getKind().getName().equals("BOOL_CONST") || expr.getKind().getName().equals("VAR") ) {
-            this.sb.append("___true == ");
-        }
         expr.accept(this);
+        if ( expr.getKind().getName().equals("BOOL_CONST") || expr.getKind().getName().equals("VAR") ) {
+            this.sb.append(" == ___true");
+        }
         this.sb.append(" then");
     }
 
-    protected void generateCodeFromStmtConditionFor(String stmtType, Expr expr, boolean inc) {
+    protected void generateCodeFromStmtConditionFor(String stmtType, Expr expr) {
         ExprList expressions = (ExprList) expr;
-        if ( inc ) {
-            incrIndentation();
-            expressions.get().get(0).accept(this);
-            this.sb.append("++");
-            decrIndentation();
-            nlIndent();
-            this.sb.append("elseif ");
-            expressions.get().get(0).accept(this);
-            this.sb.append(" == ");
-            expressions.get().get(2).accept(this);
-            this.sb.append(" then");
-            incrIndentation();
-            nlIndent();
-            expressions.get().get(0).accept(this);
-            this.sb.append(" = 0 ");
-            nlIndent();
-            this.sb.append("_loopstate++");
-            decrIndentation();
-            nlIndent();
-            this.sb.append("end");
-            return;
-        }
+        expressions.get().get(0).accept(this);
+        this.sb.append(" = ");
+        expressions.get().get(1).accept(this);
+        this.stateCounter++;
+        nlIndent();
+        this.sb.append("_state = ").append(this.stateCounter);
+        decrIndentation();
+        nlIndent();
+        this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
+        incrIndentation();
+        nlIndent();
         this.sb.append(stmtType).append(whitespace());
         expressions.get().get(0).accept(this);
         this.sb.append(whitespace()).append("< ");
