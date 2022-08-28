@@ -28,6 +28,8 @@ import de.fhg.iais.roberta.syntax.action.sound.PlayNoteAction;
 import de.fhg.iais.roberta.syntax.action.sound.ToneAction;
 import de.fhg.iais.roberta.syntax.action.sound.VolumeAction;
 import de.fhg.iais.roberta.syntax.action.thymio.PlayRecordingAction;
+import de.fhg.iais.roberta.syntax.action.thymio.RecordStartAction;
+import de.fhg.iais.roberta.syntax.action.thymio.RecordStopAction;
 import de.fhg.iais.roberta.syntax.action.thymio.RedLedOnAction;
 import de.fhg.iais.roberta.syntax.action.thymio.YellowLedOnAction;
 import de.fhg.iais.roberta.syntax.lang.blocksequence.MainTask;
@@ -198,17 +200,6 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
     public Void visitMotorOnAction(MotorOnAction motorOnAction) {
         String motorSide = motorOnAction.port.toLowerCase();
         if ( motorOnAction.getDurationValue() != null ) {
-            if ( !this.newState ) {
-                this.stateCounter++;
-                this.sb.append("_state = ").append(this.stateCounter);
-                decrIndentation();
-                nlIndent();
-                this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
-                incrIndentation();
-                nlIndent();
-            } else {
-                newState = false;
-            }
             this.sb.append("__time = 0");
             nlIndent();
             this.sb.append("motor.").append(motorSide).append(".target = MOTOR_MAX * ");
@@ -227,28 +218,31 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
             incrIndentation();
             nlIndent();
             this.sb.append("motor.").append(motorSide).append(".target = 0");
-            nlIndent();
-            this.stateCounter++;
-            this.sb.append("_state = ").append(this.stateCounter);
-            decrIndentation();
-            nlIndent();
-            this.sb.append("else");
-            incrIndentation();
-            nlIndent();
-            this.sb.append("__time++");
-            decrIndentation();
-            nlIndent();
-            this.sb.append("end");
-            decrIndentation();
-            nlIndent();
-            this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
-            this.newState = true;
-            incrIndentation();
+            addCheckTimeState();
         } else {
             this.sb.append("motor.").append(motorSide).append(".target = MOTOR_MAX * ");
             motorOnAction.param.getSpeed().accept(this);
         }
         return null;
+    }
+
+    private void addCheckTimeState() {
+        nlIndent();
+        this.stateCounter++;
+        this.sb.append("_state = ").append(this.stateCounter);
+        decrIndentation();
+        nlIndent();
+        this.sb.append("else");
+        incrIndentation();
+        nlIndent();
+        this.sb.append("__time++");
+        decrIndentation();
+        nlIndent();
+        this.sb.append("end");
+        decrIndentation();
+        nlIndent();
+        this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
+        incrIndentation();
     }
 
 
@@ -266,24 +260,25 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
 
     @Override
     public Void visitPlayFileAction(PlayFileAction playFileAction) {
-        // TODO
-        this.sb.append("call sound.system( ").append(playFileAction.fileName).append(" )");
+        this.sb.append("__time = 0");
+        nlIndent();
+        this.sb.append("call sound.system(").append(playFileAction.fileName).append(")");
+        nlIndent();
+        this.stateCounter++;
+        this.sb.append("_state = ").append(this.stateCounter);
+        decrIndentation();
+        nlIndent();
+        this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
+        incrIndentation();
+        nlIndent();
+        this.sb.append("if __time == ").append("1000 / timer.period[0] then");
+        incrIndentation();
+        addCheckTimeState();
         return null;
     }
 
     @Override
     public Void visitPlayNoteAction(PlayNoteAction playNoteAction) {
-        if ( !this.newState ) {
-            this.stateCounter++;
-            this.sb.append("_state = ").append(this.stateCounter);
-            decrIndentation();
-            nlIndent();
-            this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
-            incrIndentation();
-            nlIndent();
-        } else {
-            newState = false;
-        }
         this.sb.append("__time = 0");
         nlIndent();
         this.sb.append("call sound.freq(").append(playNoteAction.frequency.split("\\.")[0]).append(", ").append(playNoteAction.duration).append("/16)");
@@ -297,28 +292,32 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
         nlIndent();
         this.sb.append("if __time == ").append(playNoteAction.duration).append("/timer.period[0] then");
         incrIndentation();
-        nlIndent();
-        this.sb.append("_state = ").append(this.stateCounter);
-        decrIndentation();
-        nlIndent();
-        this.sb.append("else");
-        incrIndentation();
-        nlIndent();
-        this.sb.append("__time++");
-        decrIndentation();
-        nlIndent();
-        this.sb.append("end");
-        decrIndentation();
-        nlIndent();
-        this.stateCounter++;
-        this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
-        this.newState = true;
-        incrIndentation();
+        addCheckTimeState();
         return null;
     }
 
     @Override
     public Void visitPlayRecordingAction(PlayRecordingAction playRecordingAction) {
+        this.sb.append("__time = 0");
+        nlIndent();
+        this.sb.append("call sound.replay(");
+        playRecordingAction.filename.accept(this);
+        this.sb.append(")");
+        nlIndent();
+        this.sb.append("call sound.duration(");
+        playRecordingAction.filename.accept(this);
+        this.sb.append(", _result)");
+        nlIndent();
+        this.stateCounter++;
+        this.sb.append("_state = ").append(this.stateCounter);
+        decrIndentation();
+        nlIndent();
+        this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
+        incrIndentation();
+        nlIndent();
+        this.sb.append("if __time == ").append("_result/timer.period[0] then");
+        incrIndentation();
+        addCheckTimeState();
         return null;
     }
 
@@ -355,7 +354,7 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
 
     @Override
     public Void visitSoundSensor(SoundSensor soundSensor) {
-        this.sb.append("mic.intensity");
+        this.sb.append("mic.intensity * 100 / 255");
         return null;
     }
 
@@ -377,17 +376,6 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
 
     @Override
     public Void visitToneAction(ToneAction toneAction) {
-        if ( !this.newState ) {
-            this.stateCounter++;
-            this.sb.append("_state = ").append(this.stateCounter);
-            decrIndentation();
-            nlIndent();
-            this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
-            incrIndentation();
-            nlIndent();
-        } else {
-            newState = false;
-        }
         this.sb.append("__time = 0");
         nlIndent();
         this.sb.append("call sound.freq(");
@@ -395,8 +383,8 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
         this.sb.append(", ");
         toneAction.duration.accept(this);
         this.sb.append("/16)");
-        this.stateCounter++;
         nlIndent();
+        this.stateCounter++;
         this.sb.append("_state = ").append(this.stateCounter);
         decrIndentation();
         nlIndent();
@@ -407,23 +395,7 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
         toneAction.duration.accept(this);
         this.sb.append("/timer.period[0] then");
         incrIndentation();
-        nlIndent();
-        this.sb.append("_state = ").append(this.stateCounter);
-        decrIndentation();
-        nlIndent();
-        this.sb.append("else");
-        incrIndentation();
-        nlIndent();
-        this.sb.append("__time++");
-        decrIndentation();
-        nlIndent();
-        this.sb.append("end");
-        decrIndentation();
-        nlIndent();
-        this.stateCounter++;
-        this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
-        this.newState = true;
-        incrIndentation();
+        addCheckTimeState();
         return null;
     }
 
@@ -437,17 +409,6 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
 
     private void move(MotorDuration duration, Expr speedLeft, Expr speedRight, String multLeft, String multRight) {
         if ( duration != null ) {
-            if ( !this.newState ) {
-                this.stateCounter++;
-                this.sb.append("_state = ").append(this.stateCounter);
-                decrIndentation();
-                nlIndent();
-                this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
-                incrIndentation();
-                nlIndent();
-            } else {
-                newState = false;
-            }
             this.sb.append("__time = 0");
             nlIndent();
             this.sb.append("motor.left.target = MOTOR_MAX * ").append(multLeft);
@@ -469,31 +430,13 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
             incrIndentation();
             nlIndent();
             this.sb.append("callsub diffdrive_stop");
-            nlIndent();
-            this.stateCounter++;
-            this.sb.append("_state = ").append(this.stateCounter);
-            decrIndentation();
-            nlIndent();
-            this.sb.append("else");
-            incrIndentation();
-            nlIndent();
-            this.sb.append("__time++");
-            decrIndentation();
-            nlIndent();
-            this.sb.append("end");
-            decrIndentation();
-            nlIndent();
-            this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
-            this.newState = true;
-            incrIndentation();
+            addCheckTimeState();
         } else {
-            this.sb.append("motor.left.target = ").append(multLeft);
+            this.sb.append("motor.left.target = MOTOR_MAX * ").append(multLeft);
             speedLeft.accept(this);
-            this.sb.append(" * MOTOR_MAX");
             nlIndent();
-            this.sb.append("motor.right.target = ").append(multRight);
+            this.sb.append("motor.right.target = MOTOR_MAX * ").append(multRight);
             speedRight.accept(this);
-            this.sb.append(" * MOTOR_MAX");
         }
     }
 
@@ -504,17 +447,6 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
 
     @Override
     public Void visitWaitTimeStmt(WaitTimeStmt waitTimeStmt) {
-        if ( !this.newState ) {
-            this.stateCounter++;
-            this.sb.append("_state = ").append(this.stateCounter);
-            decrIndentation();
-            nlIndent();
-            this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
-            incrIndentation();
-            nlIndent();
-        } else {
-            newState = false;
-        }
         this.sb.append("__time = 0");
         nlIndent();
         this.stateCounter++;
@@ -528,23 +460,7 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
         waitTimeStmt.time.accept(this);
         this.sb.append("/timer.period[0] then");
         incrIndentation();
-        nlIndent();
-        this.stateCounter++;
-        this.sb.append("_state = ").append(this.stateCounter);
-        decrIndentation();
-        nlIndent();
-        this.sb.append("else");
-        incrIndentation();
-        nlIndent();
-        this.sb.append("__time++");
-        decrIndentation();
-        nlIndent();
-        this.sb.append("end");
-        decrIndentation();
-        nlIndent();
-        this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
-        this.newState = true;
-        incrIndentation();
+        addCheckTimeState();
         return null;
     }
 
@@ -579,6 +495,20 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
     @Override
     public Void visitTapSensor(TapSensor tapSensor) {
         this.sb.append("(29 + acc[1]) / 32");
+        return null;
+    }
+
+    @Override
+    public Void visitRecordStartAction(RecordStartAction recordStartAction) {
+        this.sb.append("call sound.record(");
+        recordStartAction.filename.accept(this);
+        this.sb.append(")");
+        return null;
+    }
+
+    @Override
+    public Void visitRecordStopAction(RecordStopAction recordStopAction) {
+        this.sb.append("call sound.record(-1)");
         return null;
     }
 

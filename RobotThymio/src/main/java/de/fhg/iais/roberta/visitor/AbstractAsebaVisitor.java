@@ -28,7 +28,6 @@ import de.fhg.iais.roberta.syntax.lang.expr.EmptyExpr;
 import de.fhg.iais.roberta.syntax.lang.expr.EmptyList;
 import de.fhg.iais.roberta.syntax.lang.expr.Expr;
 import de.fhg.iais.roberta.syntax.lang.expr.ExprList;
-import de.fhg.iais.roberta.syntax.lang.expr.FunctionExpr;
 import de.fhg.iais.roberta.syntax.lang.expr.ListCreate;
 import de.fhg.iais.roberta.syntax.lang.expr.MathConst;
 import de.fhg.iais.roberta.syntax.lang.expr.NullConst;
@@ -59,7 +58,6 @@ import de.fhg.iais.roberta.syntax.lang.methods.MethodIfReturn;
 import de.fhg.iais.roberta.syntax.lang.methods.MethodReturn;
 import de.fhg.iais.roberta.syntax.lang.methods.MethodVoid;
 import de.fhg.iais.roberta.syntax.lang.stmt.AssertStmt;
-import de.fhg.iais.roberta.syntax.lang.stmt.AssignStmt;
 import de.fhg.iais.roberta.syntax.lang.stmt.DebugAction;
 import de.fhg.iais.roberta.syntax.lang.stmt.IfStmt;
 import de.fhg.iais.roberta.syntax.lang.stmt.RepeatStmt;
@@ -80,7 +78,6 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
     protected Set<String> usedGlobalVarInFunctions = new OrderedHashSet<>();
     protected int stateCounter = 0;
     protected int loopCounter = -1;
-    protected boolean newState = true;
     List<Integer> loopsStart = new ArrayList();
     List<Integer> loopsBody = new ArrayList();
     List<Integer> loopsEnd = new ArrayList();
@@ -166,31 +163,6 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
         ((Binary) assertStmt.asserts).getRight().accept(this);
         this.sb.append(")");
         decrIndentation();
-        return null;
-    }
-
-    @Override
-    public Void visitAssignStmt(AssignStmt assignStmt) {
-        if ( assignStmt.expr.getClass().equals(Unary.class) ) {
-            if ( ((Unary) assignStmt.expr).op.name().equals("NOT") )
-                throw new DbcException("Cannot use NOT in assignment operations!");
-        }
-
-        if ( !assignStmt.expr.getClass().equals(FunctionExpr.class) ) {
-            assignStmt.name.accept(this);
-            src.add(" = ");
-            assignStmt.expr.accept(this);
-        } else {
-            if ( ((MathSingleFunct) ((FunctionExpr) assignStmt.expr).getFunction()).functName.toString().equals("ABS") ) {
-                assignStmt.name.accept(this);
-                src.add(" = ");
-                assignStmt.expr.accept(this);
-            } else {
-                assignStmt.expr.accept(this);
-                assignStmt.name.accept(this);
-                src.add(" = _result");
-            }
-        }
         return null;
     }
 
@@ -515,14 +487,7 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
 
     @Override
     public Void visitMathConstrainFunct(MathConstrainFunct mathConstrainFunct) {
-        this.sb.append("min(max(");
-        mathConstrainFunct.param.get(0).accept(this);
-        this.sb.append(", ");
-        mathConstrainFunct.param.get(1).accept(this);
-        this.sb.append("), ");
-        mathConstrainFunct.param.get(2).accept(this);
-        this.sb.append(")");
-        return null;
+        throw new DbcException("Function not supported");
     }
 
     @Override
@@ -569,47 +534,6 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
     @Override
     public Void visitMathOnListFunct(MathOnListFunct mathOnListFunct) {
         throw new DbcException("Statement not yet supported");
-    /*    switch ( mathOnListFunct.functName ) {
-            case SUM:
-                this.sb.append("sum(");
-                mathOnListFunct.param.get(0).accept(this);
-                this.sb.append(")");
-                break;
-            case MIN:
-                this.sb.append("min(");
-                mathOnListFunct.param.get(0).accept(this);
-                this.sb.append(")");
-                break;
-            case MAX:
-                this.sb.append("max(");
-                mathOnListFunct.param.get(0).accept(this);
-                this.sb.append(")");
-                break;
-            case AVERAGE:
-                this.sb.append("float(sum(");
-                mathOnListFunct.param.get(0).accept(this);
-                this.sb.append("))/len(");
-                mathOnListFunct.param.get(0).accept(this);
-                this.sb.append(")");
-                break;
-            case MEDIAN:
-                this.sb.append(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(FunctionNames.MEDIAN)).append("(");
-                mathOnListFunct.param.get(0).accept(this);
-                this.sb.append(")");
-                break;
-            case STD_DEV:
-                this.sb.append(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(FunctionNames.STD_DEV)).append("(");
-                mathOnListFunct.param.get(0).accept(this);
-                this.sb.append(")");
-                break;
-            case RANDOM:
-                mathOnListFunct.param.get(0).accept(this);
-                this.sb.append("[0]");
-                break;
-            default:
-                break;
-        }
-        return null;*/
     }
 
     @Override
@@ -665,20 +589,6 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
                 this.sb.append(" )");
                 nlIndent();
                 break;
-//            case TAN:
-//                this.sb.append("call math.sin( _result, ");
-//                mathSingleFunct.param.get(0).accept(this);
-//                this.sb.append(" )");
-//                nlIndent();
-//                this.sb.append("call math.cos( _result, ");
-//                mathSingleFunct.param.get(0).accept(this);
-//                this.sb.append(" )");
-//                nlIndent();
-//                this.sb.append("_result = ");
-//                break;
-//            case ATAN:
-//                this.sb.append("call math.atan2( _result, ");
-//                break;
             default:
                 throw new DbcException("Statement not supported by Aseba!");
         }
@@ -694,7 +604,6 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
         decrIndentation();
         nlIndent();
         this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
-        this.newState = true;
         incrIndentation();
         return null;
     }
@@ -722,7 +631,6 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
         this.funcCounter++;
         this.sb.append(this.getIfElse()).append(" _state == ").append(this.funcStart.get(this.funcCounter)).append(" then");
         incrIndentation();
-        newState = true;
         methodVoid.body.accept(this);
         nlIndent();
         this.sb.append("_state = _return_state");
@@ -756,7 +664,6 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
         this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
         incrIndentation();
         nlIndent();
-        newState = true;
         switch ( repeatStmt.mode.toString() ) {
             case "FOREVER":
             case "UNTIL":
@@ -791,7 +698,6 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
         decrIndentation();
         nlIndent();
         this.sb.append("elseif _state == ").append(this.loopsBody.get(this.loopCounter)).append(" then");
-        this.newState = true;
         incrIndentation();
         repeatStmt.list.accept(this);
         nlIndent();
@@ -829,7 +735,6 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
         nlIndent();
         this.stateCounter++;
         this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
-        this.newState = true;
         incrIndentation();
         return null;
     }
@@ -899,6 +804,7 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
 
     @Override
     public Void visitVarDeclaration(VarDeclaration var) {
+        // TODO add here color var!!!
         this.sb.append("var ").append(var.getCodeSafeName());
         if ( !var.value.getKind().hasName("EMPTY_EXPR") ) {
             if ( var.value.getKind().getName().equals("LIST_CREATE") ) {
@@ -980,7 +886,6 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
         this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
         incrIndentation();
         nlIndent();
-        newState = true;
         int stmtSize = waitStmt.statements.get().size();
         int statesSize = stmtSize + 1;
         int[] states = new int[statesSize];
@@ -1131,8 +1036,8 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
         expressions.get().get(0).accept(this);
         this.sb.append(" = ");
         expressions.get().get(1).accept(this);
-        this.stateCounter++;
         nlIndent();
+        this.stateCounter++;
         this.sb.append("_state = ").append(this.stateCounter);
         decrIndentation();
         nlIndent();

@@ -7,12 +7,12 @@ import de.fhg.iais.roberta.transformer.forField.NepoValue;
 import de.fhg.iais.roberta.typecheck.BlocklyType;
 import de.fhg.iais.roberta.util.ast.BlocklyProperties;
 
-@NepoPhrase(category = "ACTOR", blocklyNames = {"robActions_play_recording_file"}, name = "PLAY_RECORDING_FILE_ACTION")
-public final class PlayRecordingAction extends Action {
+@NepoPhrase(category = "ACTOR", blocklyNames = {"robSensors_record_start"}, name = "RECORD_START_ACTION")
+public final class RecordStartAction extends Action {
     @NepoValue(name = "FILENAME", type = BlocklyType.NUMBER)
     public final Expr filename;
 
-    public PlayRecordingAction(BlocklyProperties properties, Expr filename) {
+    public RecordStartAction(BlocklyProperties properties, Expr filename) {
         super(properties);
         this.filename = filename;
         setReadOnly();

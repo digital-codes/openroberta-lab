@@ -2,6 +2,8 @@ package de.fhg.iais.roberta.visitor;
 
 import de.fhg.iais.roberta.syntax.action.light.LedsOffAction;
 import de.fhg.iais.roberta.syntax.action.thymio.PlayRecordingAction;
+import de.fhg.iais.roberta.syntax.action.thymio.RecordStartAction;
+import de.fhg.iais.roberta.syntax.action.thymio.RecordStopAction;
 import de.fhg.iais.roberta.syntax.action.thymio.RedLedOnAction;
 import de.fhg.iais.roberta.syntax.action.thymio.YellowLedOnAction;
 import de.fhg.iais.roberta.syntax.sensor.thymio.TapSensor;
@@ -18,4 +20,8 @@ public interface IThymioVisitor<V> extends IActors4AutonomousDriveRobots<V>, ISe
     V visitLedsOffAction(LedsOffAction ledsOffAction);
 
     V visitTapSensor(TapSensor tapSensor);
+
+    V visitRecordStartAction(RecordStartAction recordStartAction);
+
+    V visitRecordStopAction(RecordStopAction recordStopAction);
 }

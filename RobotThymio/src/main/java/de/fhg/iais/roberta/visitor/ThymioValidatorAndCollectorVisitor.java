@@ -1,7 +1,6 @@
 package de.fhg.iais.roberta.visitor;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.google.common.collect.ClassToInstanceMap;
@@ -9,7 +8,6 @@ import com.google.common.collect.ClassToInstanceMap;
 import de.fhg.iais.roberta.bean.IProjectBean;
 import de.fhg.iais.roberta.components.ConfigurationAst;
 import de.fhg.iais.roberta.components.UsedActor;
-import de.fhg.iais.roberta.syntax.Phrase;
 import de.fhg.iais.roberta.syntax.action.display.ClearDisplayAction;
 import de.fhg.iais.roberta.syntax.action.display.ShowTextAction;
 import de.fhg.iais.roberta.syntax.action.light.LedsOffAction;
@@ -27,13 +25,20 @@ import de.fhg.iais.roberta.syntax.action.sound.PlayNoteAction;
 import de.fhg.iais.roberta.syntax.action.sound.ToneAction;
 import de.fhg.iais.roberta.syntax.action.sound.VolumeAction;
 import de.fhg.iais.roberta.syntax.action.thymio.PlayRecordingAction;
+import de.fhg.iais.roberta.syntax.action.thymio.RecordStartAction;
+import de.fhg.iais.roberta.syntax.action.thymio.RecordStopAction;
 import de.fhg.iais.roberta.syntax.action.thymio.RedLedOnAction;
 import de.fhg.iais.roberta.syntax.action.thymio.YellowLedOnAction;
-import de.fhg.iais.roberta.syntax.configuration.ConfigurationComponent;
 import de.fhg.iais.roberta.syntax.lang.blocksequence.MainTask;
 import de.fhg.iais.roberta.syntax.lang.expr.ColorConst;
 import de.fhg.iais.roberta.syntax.lang.expr.RgbColor;
 import de.fhg.iais.roberta.syntax.lang.expr.VarDeclaration;
+import de.fhg.iais.roberta.syntax.lang.functions.MathConstrainFunct;
+import de.fhg.iais.roberta.syntax.lang.functions.MathNumPropFunct;
+import de.fhg.iais.roberta.syntax.lang.functions.MathOnListFunct;
+import de.fhg.iais.roberta.syntax.lang.functions.MathRandomFloatFunct;
+import de.fhg.iais.roberta.syntax.lang.functions.MathRandomIntFunct;
+import de.fhg.iais.roberta.syntax.lang.functions.MathSingleFunct;
 import de.fhg.iais.roberta.syntax.lang.stmt.IfStmt;
 import de.fhg.iais.roberta.syntax.lang.stmt.RepeatStmt;
 import de.fhg.iais.roberta.syntax.sensor.generic.AccelerometerSensor;
@@ -44,10 +49,9 @@ import de.fhg.iais.roberta.syntax.sensor.generic.SoundSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.TemperatureSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.TimerSensor;
 import de.fhg.iais.roberta.syntax.sensor.thymio.TapSensor;
-import de.fhg.iais.roberta.util.dbc.Assert;
+import de.fhg.iais.roberta.util.dbc.DbcException;
 import de.fhg.iais.roberta.util.syntax.BlocklyConstants;
 import de.fhg.iais.roberta.util.syntax.SC;
-import de.fhg.iais.roberta.util.syntax.WithUserDefinedPort;
 import de.fhg.iais.roberta.visitor.validate.CommonNepoValidatorAndCollectorVisitor;
 
 
@@ -206,6 +210,7 @@ public class ThymioValidatorAndCollectorVisitor extends CommonNepoValidatorAndCo
 
     @Override
     public Void visitPlayRecordingAction(PlayRecordingAction playRecordingAction) {
+        requiredComponentVisited(playRecordingAction, playRecordingAction.filename);
         return null;
     }
 
@@ -271,55 +276,67 @@ public class ThymioValidatorAndCollectorVisitor extends CommonNepoValidatorAndCo
         return null;
     }
 
-    private void checkActorPort(WithUserDefinedPort action) {
-        Assert.isTrue(action instanceof Phrase, "checking Port of a non Phrase");
-        ConfigurationComponent usedConfigurationBlock = this.robotConfiguration.optConfigurationComponent(action.getUserDefinedPort());
-        if ( usedConfigurationBlock == null ) {
-            Phrase actionAsPhrase = (Phrase) action;
-            addErrorToPhrase(actionAsPhrase, "CONFIGURATION_ERROR_ACTOR_MISSING");
-        }
+    @Override
+    public Void visitRecordStartAction(RecordStartAction recordStartAction) {
+        requiredComponentVisited(recordStartAction, recordStartAction.filename);
+        return null;
     }
 
-    private void checkSensorPort(WithUserDefinedPort sensor) {
-        Assert.isTrue(sensor instanceof Phrase, "checking Port of a non Phrase");
-        Phrase sensorAsSensor = (Phrase) sensor;
-
-        String userDefinedPort = sensor.getUserDefinedPort();
-        ConfigurationComponent configurationComponent = this.robotConfiguration.optConfigurationComponent(userDefinedPort);
-        if ( configurationComponent == null ) {
-            configurationComponent = getSubComponent(userDefinedPort);
-            if ( configurationComponent == null ) {
-                addErrorToPhrase(sensorAsSensor, "CONFIGURATION_ERROR_SENSOR_MISSING");
-                return;
-            }
-        }
-        checkSensorType(sensorAsSensor, configurationComponent);
+    @Override
+    public Void visitRecordStopAction(RecordStopAction recordStopAction) {
+        return null;
     }
 
-    private void checkSensorType(Phrase sensor, ConfigurationComponent configurationComponent) {
-        String expectedComponentType = SENSOR_COMPONENT_TYPE_MAP.get(sensor.getKind().getName());
-        String typeWithoutSensing = sensor.getKind().getName().replace("_SENSING", "");
-        if ( !(typeWithoutSensing.equalsIgnoreCase(configurationComponent.componentType)) ) {
-            if ( expectedComponentType != null && !expectedComponentType.equalsIgnoreCase(configurationComponent.componentType) ) {
-                addErrorToPhrase(sensor, "CONFIGURATION_ERROR_SENSOR_WRONG");
-            }
-        }
-    }
-
-    private ConfigurationComponent getSubComponent(String userDefinedPort) {
-        for ( ConfigurationComponent component : this.robotConfiguration.getConfigurationComponentsValues() ) {
-            try {
-                for ( List<ConfigurationComponent> subComponents : component.getSubComponents().values() ) {
-                    for ( ConfigurationComponent subComponent : subComponents ) {
-                        if ( subComponent.userDefinedPortName.equals(userDefinedPort) ) {
-                            return subComponent;
-                        }
-                    }
-                }
-            } catch ( UnsupportedOperationException e ) {
-                continue;
-            }
+    @Override
+    public Void visitMathSingleFunct(MathSingleFunct mathSingleFunct) {
+        super.visitMathSingleFunct(mathSingleFunct);
+        switch ( mathSingleFunct.functName ) {
+            case ROOT:
+            case SIN:
+            case COS:
+            case SQUARE:
+            case ABS:
+                break;
+            default:
+                addErrorToPhrase(mathSingleFunct, "BLOCK_NOT_SUPPORTED");
         }
         return null;
+    }
+
+    @Override
+    public Void visitMathNumPropFunct(MathNumPropFunct mathNumPropFunct) {
+        super.visitMathNumPropFunct(mathNumPropFunct);
+        switch ( mathNumPropFunct.functName ) {
+            case EVEN:
+            case ODD:
+            case WHOLE:
+            case POSITIVE:
+            case NEGATIVE:
+            case DIVISIBLE_BY:
+                break;
+            case PRIME:
+                addErrorToPhrase(mathNumPropFunct, "BLOCK_NOT_SUPPORTED");
+                break;
+            default:
+                throw new DbcException("Statement not supported by Aseba!");
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitMathOnListFunct(MathOnListFunct mathOnListFunct) {
+        throw new DbcException("Block not supported by Aseba!");
+    }
+
+    public Void visitMathConstrainFunct(MathConstrainFunct mathConstrainFunct) {
+        throw new DbcException("Block not supported by Aseba!");
+    }
+
+    public Void visitMathRandomFloatFunct(MathRandomFloatFunct mathRandomFloatFunct) {
+        throw new DbcException("Block not supported by Aseba!");
+    }
+
+    public Void visitMathRandomIntFunct(MathRandomIntFunct mathRandomIntFunct) {
+        throw new DbcException("Block not supported by Aseba!");
     }
 }
