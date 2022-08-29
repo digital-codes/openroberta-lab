@@ -74,6 +74,7 @@ require.config({
         'robot.ev3': 'app/simulation/simulationLogic/robot.ev3',
         'robot.nxt': 'app/simulation/simulationLogic/robot.nxt',
         'robot.xnn': 'app/simulation/simulationLogic/robot.xnn',
+        'robot.thymio': 'app/simulation/simulationLogic/robot.thymio',
         'robot.base.mobile': 'app/simulation/simulationLogic/robot.base.mobile',
         'robot.base.stationary': 'app/simulation/simulationLogic/robot.base.stationary',
         'robot.base': 'app/simulation/simulationLogic/robot.base',

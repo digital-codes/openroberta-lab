@@ -15,7 +15,7 @@ var __extends = (this && this.__extends) || (function () {
 })();
 define(["require", "exports", "interpreter.constants", "simulation.math", "guiState.controller", "./simulation.objects", "util", "jquery", "blockly"], function (require, exports, C, SIMATH, GUISTATE_C, simulation_objects_1, UTIL, $, Blockly) {
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.Motors = exports.PinActuators = exports.MbotRGBLed = exports.RGBLed = exports.MbotDisplay = exports.MbedDisplay = exports.MatrixDisplay = exports.WebAudio = exports.TTS = exports.StatusLed = exports.MbotChassis = exports.NXTChassis = exports.EV3Chassis = exports.LegoChassis = exports.ChassisDiffDrive = void 0;
+    exports.Motors = exports.PinActuators = exports.MbotRGBLed = exports.RGBLed = exports.MbotDisplay = exports.MbedDisplay = exports.MatrixDisplay = exports.WebAudio = exports.TTS = exports.StatusLed = exports.MbotChassis = exports.ThymioChassis = exports.NXTChassis = exports.EV3Chassis = exports.LegoChassis = exports.ChassisDiffDrive = void 0;
     var ChassisDiffDrive = /** @class */ (function () {
         function ChassisDiffDrive(id, configuration) {
             this.left = { port: '', speed: 0 };
@@ -718,6 +718,127 @@ define(["require", "exports", "interpreter.constants", "simulation.math", "guiSt
         return NXTChassis;
     }(LegoChassis));
     exports.NXTChassis = NXTChassis;
+    var ThymioChassis = /** @class */ (function (_super) {
+        __extends(ThymioChassis, _super);
+        function ThymioChassis(id, configuration, pose) {
+            var _this = _super.call(this, id, configuration) || this;
+            _this.geom = {
+                x: -9,
+                y: -17,
+                w: 25,
+                h: 34,
+                radius: 0,
+                color: '#f2f2f2',
+            };
+            _this.backLeft = {
+                x: -9,
+                y: -17,
+                rx: 0,
+                ry: 0,
+                bumped: false,
+            };
+            _this.backMiddle = {
+                x: -9,
+                y: 0,
+                rx: 0,
+                ry: 0,
+            };
+            _this.backRight = {
+                x: -9,
+                y: 17,
+                rx: 0,
+                ry: 0,
+                bumped: false,
+            };
+            _this.frontLeft = {
+                x: 25,
+                y: -18,
+                rx: 0,
+                ry: 0,
+                bumped: false,
+            };
+            _this.frontMiddle = {
+                x: 34,
+                y: 0,
+                rx: 0,
+                ry: 0,
+            };
+            _this.frontRight = {
+                x: 25,
+                y: 18,
+                rx: 0,
+                ry: 0,
+                bumped: false,
+            };
+            _this.wheelBack = {
+                x: 0,
+                y: 0,
+                w: 0,
+                h: 0,
+                color: '#000000',
+            };
+            _this.wheelLeft = {
+                x: 0,
+                y: 0,
+                w: 0,
+                h: 0,
+                color: '#000000',
+            };
+            _this.wheelRight = {
+                x: 0,
+                y: 0,
+                w: 0,
+                h: 0,
+                color: '#000000',
+            };
+            _this.MAXPOWER = (1.5 * _this.WHEELDIAMETER * Math.PI * 3) / 100;
+            _this.transformNewPose(pose, _this);
+            _this.wheelFrontRight.x = _this.wheelRight.x + _this.wheelRight.w;
+            _this.wheelFrontRight.y = _this.wheelRight.y + _this.wheelRight.h;
+            _this.wheelBackRight.x = _this.wheelRight.x;
+            _this.wheelBackRight.y = _this.wheelRight.y + _this.wheelRight.h;
+            _this.wheelFrontLeft.x = _this.wheelLeft.x + _this.wheelLeft.w;
+            _this.wheelFrontLeft.y = _this.wheelLeft.y;
+            _this.wheelBackLeft.x = _this.wheelLeft.x;
+            _this.wheelBackLeft.y = _this.wheelLeft.y;
+            SIMATH.transform(pose, _this.wheelFrontRight);
+            SIMATH.transform(pose, _this.wheelBackRight);
+            SIMATH.transform(pose, _this.wheelFrontLeft);
+            SIMATH.transform(pose, _this.wheelBackLeft);
+            return _this;
+        }
+        ThymioChassis.prototype.draw = function (rCtx, myRobot) {
+            rCtx.save();
+            // draw geometry
+            rCtx.fillStyle = this.geom.color;
+            rCtx.fillRect(15, -10, 8, 20);
+            rCtx.shadowBlur = 5;
+            rCtx.shadowColor = 'black';
+            rCtx.beginPath();
+            var radius = this.geom.radius || 0;
+            rCtx.moveTo(this.geom.x + radius, this.geom.y);
+            rCtx.lineTo(this.geom.x + this.geom.w, this.geom.y);
+            rCtx.bezierCurveTo(this.geom.x + 38, this.geom.y + 6, this.geom.x + 38, this.geom.y + this.geom.h - 6, this.geom.x + this.geom.w, this.geom.y + this.geom.h);
+            rCtx.lineTo(this.geom.x + this.geom.w, this.geom.y + this.geom.h - radius);
+            rCtx.quadraticCurveTo(this.geom.x + this.geom.w, this.geom.y + this.geom.h, this.geom.x + this.geom.w - radius, this.geom.y + this.geom.h);
+            rCtx.lineTo(this.geom.x + radius, this.geom.y + this.geom.h);
+            rCtx.quadraticCurveTo(this.geom.x, this.geom.y + this.geom.h, this.geom.x, this.geom.y + this.geom.h - radius);
+            rCtx.lineTo(this.geom.x, this.geom.y + radius);
+            rCtx.quadraticCurveTo(this.geom.x, this.geom.y, this.geom.x + radius, this.geom.y);
+            rCtx.closePath();
+            rCtx.fill();
+            rCtx.shadowBlur = 0;
+            rCtx.shadowOffsetX = 0;
+            rCtx.beginPath();
+            rCtx.lineWidth = 2;
+            rCtx.fill();
+            rCtx.closePath();
+            rCtx.restore();
+        };
+        ThymioChassis.prototype.reset = function () { };
+        return ThymioChassis;
+    }(ChassisDiffDrive));
+    exports.ThymioChassis = ThymioChassis;
     var MbotChassis = /** @class */ (function (_super) {
         __extends(MbotChassis, _super);
         function MbotChassis(id, configuration, pose) {

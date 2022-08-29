@@ -37,9 +37,9 @@ export abstract class ChassisDiffDrive implements IUpdateAction, ISensor, IDrawa
         rightAngle: 0,
         leftAngle: 0,
     };
-    private readonly MAXPOWER: number;
+    protected MAXPOWER: number;
     private readonly TRACKWIDTH: number;
-    private readonly WHEELDIAMETER: number;
+    protected readonly WHEELDIAMETER: number;
     private angle: number;
     private distance: number;
 
@@ -762,6 +762,136 @@ export class NXTChassis extends LegoChassis {
             }
         }
     }
+}
+
+export class ThymioChassis extends ChassisDiffDrive {
+    geom: Geometry = {
+        x: -9,
+        y: -17,
+        w: 25,
+        h: 34,
+        radius: 0,
+        color: '#f2f2f2',
+    };
+    axisDiff: number;
+    backLeft: PointRobotWorldBumped = {
+        x: -9,
+        y: -17,
+        rx: 0,
+        ry: 0,
+        bumped: false,
+    };
+    backMiddle: PointRobotWorld = {
+        x: -9,
+        y: 0,
+        rx: 0,
+        ry: 0,
+    };
+    backRight: PointRobotWorldBumped = {
+        x: -9,
+        y: 17,
+        rx: 0,
+        ry: 0,
+        bumped: false,
+    };
+    frontLeft: PointRobotWorldBumped = {
+        x: 25,
+        y: -18,
+        rx: 0,
+        ry: 0,
+        bumped: false,
+    };
+    frontMiddle: PointRobotWorld = {
+        x: 34,
+        y: 0,
+        rx: 0,
+        ry: 0,
+    };
+    frontRight: PointRobotWorldBumped = {
+        x: 25,
+        y: 18,
+        rx: 0,
+        ry: 0,
+        bumped: false,
+    };
+    topView: string;
+    wheelBack: Geometry = {
+        x: 0,
+        y: 0,
+        w: 0,
+        h: 0,
+        color: '#000000',
+    };
+    wheelLeft: Geometry = {
+        x: 0,
+        y: 0,
+        w: 0,
+        h: 0,
+        color: '#000000',
+    };
+    wheelRight: Geometry = {
+        x: 0,
+        y: 0,
+        w: 0,
+        h: 0,
+        color: '#000000',
+    };
+
+    constructor(id: number, configuration: {}, pose: Pose) {
+        super(id, configuration);
+        this.MAXPOWER = (1.5 * this.WHEELDIAMETER * Math.PI * 3) / 100;
+        this.transformNewPose(pose, this);
+        this.wheelFrontRight.x = this.wheelRight.x + this.wheelRight.w;
+        this.wheelFrontRight.y = this.wheelRight.y + this.wheelRight.h;
+        this.wheelBackRight.x = this.wheelRight.x;
+        this.wheelBackRight.y = this.wheelRight.y + this.wheelRight.h;
+        this.wheelFrontLeft.x = this.wheelLeft.x + this.wheelLeft.w;
+        this.wheelFrontLeft.y = this.wheelLeft.y;
+        this.wheelBackLeft.x = this.wheelLeft.x;
+        this.wheelBackLeft.y = this.wheelLeft.y;
+        SIMATH.transform(pose, this.wheelFrontRight);
+        SIMATH.transform(pose, this.wheelBackRight);
+        SIMATH.transform(pose, this.wheelFrontLeft);
+        SIMATH.transform(pose, this.wheelBackLeft);
+    }
+
+    override draw(rCtx: CanvasRenderingContext2D, myRobot: RobotBaseMobile): void {
+        rCtx.save();
+        // draw geometry
+        rCtx.fillStyle = this.geom.color;
+        rCtx.fillRect(15, -10, 8, 20);
+        rCtx.shadowBlur = 5;
+        rCtx.shadowColor = 'black';
+        rCtx.beginPath();
+        const radius = this.geom.radius || 0;
+        rCtx.moveTo(this.geom.x + radius, this.geom.y);
+        rCtx.lineTo(this.geom.x + this.geom.w, this.geom.y);
+        rCtx.bezierCurveTo(
+            this.geom.x + 38,
+            this.geom.y + 6,
+            this.geom.x + 38,
+            this.geom.y + this.geom.h - 6,
+            this.geom.x + this.geom.w,
+            this.geom.y + this.geom.h
+        );
+        rCtx.lineTo(this.geom.x + this.geom.w, this.geom.y + this.geom.h - radius);
+        rCtx.quadraticCurveTo(this.geom.x + this.geom.w, this.geom.y + this.geom.h, this.geom.x + this.geom.w - radius, this.geom.y + this.geom.h);
+        rCtx.lineTo(this.geom.x + radius, this.geom.y + this.geom.h);
+        rCtx.quadraticCurveTo(this.geom.x, this.geom.y + this.geom.h, this.geom.x, this.geom.y + this.geom.h - radius);
+        rCtx.lineTo(this.geom.x, this.geom.y + radius);
+        rCtx.quadraticCurveTo(this.geom.x, this.geom.y, this.geom.x + radius, this.geom.y);
+        rCtx.closePath();
+        rCtx.fill();
+        rCtx.shadowBlur = 0;
+        rCtx.shadowOffsetX = 0;
+        rCtx.beginPath();
+        rCtx.lineWidth = 2;
+        rCtx.fill();
+        rCtx.closePath();
+        rCtx.restore();
+    }
+
+    reset(): void {}
 }
 
 export class MbotChassis extends ChassisDiffDrive {

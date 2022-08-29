@@ -273,7 +273,7 @@ export class Interpreter {
                     this.evalExpr(stmt);
                     break;
                 case C.GET_SAMPLE: {
-                    this.robotBehaviour.getSample(this.state, stmt[C.NAME], stmt[C.GET_SAMPLE], stmt[C.PORT], stmt[C.MODE]);
+                    this.robotBehaviour.getSample(this.state, stmt[C.NAME], stmt[C.GET_SAMPLE], stmt[C.PORT], stmt[C.MODE], stmt[C.SLOT]);
                     break;
                 }
                 case C.NN_STEP_STMT:

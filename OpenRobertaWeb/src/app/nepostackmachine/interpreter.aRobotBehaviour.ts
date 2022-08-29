@@ -29,7 +29,7 @@ export abstract class ARobotBehaviour {
 
     abstract clearDisplay(): void;
 
-    abstract getSample(s: State, name: string, sensor: string, port: number, mode: string): void;
+    abstract getSample(s: State, name: string, sensor: string, port: number, mode: string, slot: string): void;
 
     abstract timerReset(port: number): void;
 
