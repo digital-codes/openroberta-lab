@@ -20,6 +20,7 @@ define(["require", "exports", "robot.ev3", "./robot.actuators", "robot.sensors"]
         function RobotThymio(id, configuration, interpreter, savedName, myListener) {
             var _this = _super.call(this, id, configuration, interpreter, savedName, myListener) || this;
             _this.imgList = ['simpleBackgroundSmall', 'drawBackground', 'rescueBackground', 'mathBackground'];
+            _this.webAudio = new robot_actuators_1.WebAudio();
             return _this;
         }
         RobotThymio.prototype.configure = function (configuration) {
@@ -29,6 +30,8 @@ define(["require", "exports", "robot.ev3", "./robot.actuators", "robot.sensors"]
             this.chassis = new robot_actuators_1.ThymioChassis(this.id, configuration, this.pose);
             this.lineSensor = new robot_sensors_1.ThymioLineSensor({ x: 24, y: 0 });
             this.infraredSensors = new robot_sensors_1.ThymioInfraredSensors();
+            this.tapSensor = new robot_sensors_1.TapSensor();
+            this.soundSensor = new robot_sensors_1.VolumeMeterSensor(this);
             /*this.RGBLedLeft = new MbotRGBLed({ x: 20, y: -10 }, 2);
             this.RGBLedRight = new MbotRGBLed({ x: 20, y: 10 }, 1);
             this.display = new MbotDisplay(this.id, { x: 15, y: 50 });

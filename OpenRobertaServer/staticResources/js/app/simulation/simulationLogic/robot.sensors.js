@@ -15,7 +15,7 @@ var __extends = (this && this.__extends) || (function () {
 })();
 define(["require", "exports", "robot.base.mobile", "simulation.math", "util", "robot.actuators", "simulation.objects", "blockly", "volume-meter", "jquery", "simulation.roberta"], function (require, exports, robot_base_mobile_1, SIMATH, UTIL, robot_actuators_1, simulation_objects_1, Blockly, VolumeMeter, $, simulation_roberta_1) {
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.SoundSensor = exports.VolumeMeterSensor = exports.TemperatureSensor = exports.Rob3rtaInfraredSensor = exports.CalliopeLightSensor = exports.CompassSensor = exports.GestureSensor = exports.MbotButton = exports.MicrobitPins = exports.Pins = exports.TouchKeys = exports.EV3Keys = exports.Keys = exports.GyroSensorExt = exports.GyroSensor = exports.LightSensor = exports.NXTColorSensor = exports.ColorSensor = exports.TouchSensor = exports.MbotInfraredSensor = exports.ThymioInfraredSensors = exports.ThymioLineSensor = exports.ThymioInfraredSensor = exports.InfraredSensor = exports.UltrasonicSensor = exports.DistanceSensor = exports.Timer = void 0;
+    exports.SoundSensor = exports.VolumeMeterSensor = exports.TemperatureSensor = exports.Rob3rtaInfraredSensor = exports.CalliopeLightSensor = exports.CompassSensor = exports.GestureSensor = exports.MbotButton = exports.MicrobitPins = exports.Pins = exports.TouchKeys = exports.EV3Keys = exports.Keys = exports.GyroSensorExt = exports.GyroSensor = exports.LightSensor = exports.NXTColorSensor = exports.ColorSensor = exports.TapSensor = exports.TouchSensor = exports.MbotInfraredSensor = exports.ThymioInfraredSensors = exports.ThymioLineSensor = exports.ThymioInfraredSensor = exports.InfraredSensor = exports.UltrasonicSensor = exports.DistanceSensor = exports.Timer = void 0;
     var WAVE_LENGTH = 60;
     var Timer = /** @class */ (function () {
         function Timer(num) {
@@ -607,6 +607,20 @@ define(["require", "exports", "robot.base.mobile", "simulation.math", "util", "r
         return TouchSensor;
     }());
     exports.TouchSensor = TouchSensor;
+    var TapSensor = /** @class */ (function () {
+        function TapSensor() {
+        }
+        TapSensor.prototype.updateSensor = function (running, dt, myRobot, values, uCtx, udCtx, personalObstacleList) {
+            values['touch'] = values['touch'] || {};
+            var touch = myRobot.chassis.frontLeft.bumped ||
+                myRobot.chassis.frontRight.bumped ||
+                myRobot.chassis.backLeft.bumped ||
+                myRobot.chassis.backRight.bumped;
+            values['touch'] = touch ? 1 : 0;
+        };
+        return TapSensor;
+    }());
+    exports.TapSensor = TapSensor;
     var ColorSensor = /** @class */ (function () {
         function ColorSensor(port, x, y, theta, r, color) {
             this.color = 'grey';
@@ -1383,7 +1397,7 @@ define(["require", "exports", "robot.base.mobile", "simulation.math", "util", "r
             return '<div><label>' + Blockly.Msg['SENSOR_SOUND'] + '</label><span>' + UTIL.round(this.volume, 0) + ' %</span></div>';
         };
         VolumeMeterSensor.prototype.updateSensor = function (running, dt, myRobot, values, uCtx, udCtx, personalObstacleList) {
-            this.volume = this.sound ? UTIL.round(this.sound['volume'] * 100, 0) : 0;
+            this.volume = this.sound ? UTIL.round(this.sound['volume'] * 10000, 0) : 0;
             values['sound'] = {};
             values['sound']['volume'] = this.volume;
         };

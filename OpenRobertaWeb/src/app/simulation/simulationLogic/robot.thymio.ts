@@ -1,13 +1,16 @@
 import { SelectionListener } from 'robot.base';
 import { Interpreter } from 'interpreter.interpreter';
 import RobotEv3 from 'robot.ev3';
-import { ThymioChassis } from './robot.actuators';
-import { ThymioInfraredSensors, ThymioLineSensor } from 'robot.sensors';
+import { ThymioChassis, WebAudio } from './robot.actuators';
+import { TapSensor, ThymioInfraredSensors, ThymioLineSensor, VolumeMeterSensor } from 'robot.sensors';
 
 export default class RobotThymio extends RobotEv3 {
     override readonly imgList = ['simpleBackgroundSmall', 'drawBackground', 'rescueBackground', 'mathBackground'];
+    override webAudio: WebAudio = new WebAudio();
     private lineSensor: ThymioLineSensor;
     private infraredSensors: ThymioInfraredSensors;
+    private tapSensor: TapSensor;
+    private soundSensor: VolumeMeterSensor;
 
     constructor(id: number, configuration: object, interpreter: Interpreter, savedName: string, myListener: SelectionListener) {
         super(id, configuration, interpreter, savedName, myListener);
@@ -21,6 +24,8 @@ export default class RobotThymio extends RobotEv3 {
         this.chassis = new ThymioChassis(this.id, configuration, this.pose);
         this.lineSensor = new ThymioLineSensor({ x: 24, y: 0 });
         this.infraredSensors = new ThymioInfraredSensors();
+        this.tapSensor = new TapSensor();
+        this.soundSensor = new VolumeMeterSensor(this);
         /*this.RGBLedLeft = new MbotRGBLed({ x: 20, y: -10 }, 2);
         this.RGBLedRight = new MbotRGBLed({ x: 20, y: 10 }, 1);
         this.display = new MbotDisplay(this.id, { x: 15, y: 50 });

@@ -810,12 +810,16 @@ define(["require", "exports", "interpreter.constants", "simulation.math", "guiSt
         ThymioChassis.prototype.draw = function (rCtx, myRobot) {
             rCtx.save();
             // draw geometry
-            rCtx.fillStyle = this.geom.color;
-            rCtx.fillRect(15, -10, 8, 20);
-            rCtx.shadowBlur = 5;
-            rCtx.shadowColor = 'black';
-            rCtx.beginPath();
             var radius = this.geom.radius || 0;
+            if (this.frontLeft.bumped || this.frontRight.bumped || this.backLeft.bumped || this.backRight.bumped) {
+                rCtx.shadowColor = 'red';
+            }
+            else {
+                rCtx.shadowColor = 'black';
+            }
+            rCtx.shadowBlur = 5;
+            rCtx.beginPath();
+            rCtx.fillStyle = this.geom.color;
             rCtx.moveTo(this.geom.x + radius, this.geom.y);
             rCtx.lineTo(this.geom.x + this.geom.w, this.geom.y);
             rCtx.bezierCurveTo(this.geom.x + 38, this.geom.y + 6, this.geom.x + 38, this.geom.y + this.geom.h - 6, this.geom.x + this.geom.w, this.geom.y + this.geom.h);

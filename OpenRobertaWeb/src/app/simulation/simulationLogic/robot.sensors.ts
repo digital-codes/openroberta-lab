@@ -790,6 +790,26 @@ export class TouchSensor implements IExternalSensor, IDrawable, ILabel {
     }
 }
 
+export class TapSensor implements ISensor {
+    updateSensor(
+        running: boolean,
+        dt: number,
+        myRobot: RobotBase,
+        values: object,
+        uCtx: CanvasRenderingContext2D,
+        udCtx: CanvasRenderingContext2D,
+        personalObstacleList: any[]
+    ): void {
+        values['touch'] = values['touch'] || {};
+        let touch: boolean =
+            (myRobot as RobotBaseMobile).chassis.frontLeft.bumped ||
+            (myRobot as RobotBaseMobile).chassis.frontRight.bumped ||
+            (myRobot as RobotBaseMobile).chassis.backLeft.bumped ||
+            (myRobot as RobotBaseMobile).chassis.backRight.bumped;
+        values['touch'] = touch ? 1 : 0;
+    }
+}
+
 export class ColorSensor implements IExternalSensor, IDrawable, ILabel {
     color: string = 'grey';
     readonly port: string;
@@ -1728,7 +1748,7 @@ export class VolumeMeterSensor implements ISensor, ILabel {
         udCtx: CanvasRenderingContext2D,
         personalObstacleList: any[]
     ): void {
-        this.volume = this.sound ? UTIL.round(this.sound['volume'] * 100, 0) : 0;
+        this.volume = this.sound ? UTIL.round(this.sound['volume'] * 10000, 0) : 0;
         values['sound'] = {};
         values['sound']['volume'] = this.volume;
     }

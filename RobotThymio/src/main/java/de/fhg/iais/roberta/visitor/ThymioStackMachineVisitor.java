@@ -29,6 +29,7 @@ import de.fhg.iais.roberta.syntax.action.thymio.RecordStopAction;
 import de.fhg.iais.roberta.syntax.action.thymio.RedLedOnAction;
 import de.fhg.iais.roberta.syntax.action.thymio.YellowLedOnAction;
 import de.fhg.iais.roberta.syntax.sensor.generic.InfraredSensor;
+import de.fhg.iais.roberta.syntax.sensor.generic.SoundSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.TimerSensor;
 import de.fhg.iais.roberta.syntax.sensor.thymio.TapSensor;
 import de.fhg.iais.roberta.util.basic.C;
@@ -90,6 +91,11 @@ public final class ThymioStackMachineVisitor extends AbstractStackMachineVisitor
     }
 
     @Override
+    public Void visitSoundSensor(SoundSensor soundSensor) {
+        return add(makeNode(C.GET_SAMPLE).put(C.GET_SAMPLE, C.SOUND).put(C.MODE, C.VOLUME));
+    }
+
+    @Override
     public Void visitMotorSetPowerAction(MotorSetPowerAction motorSetPowerAction) {
         return null;
     }
@@ -123,7 +129,7 @@ public final class ThymioStackMachineVisitor extends AbstractStackMachineVisitor
 
     @Override
     public Void visitTapSensor(TapSensor tapSensor) {
-        return null;
+        return add(makeNode(C.GET_SAMPLE).put(C.GET_SAMPLE, C.TOUCH));
     }
 
     @Override

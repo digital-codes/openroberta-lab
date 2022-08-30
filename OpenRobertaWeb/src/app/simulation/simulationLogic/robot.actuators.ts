@@ -858,12 +858,15 @@ export class ThymioChassis extends ChassisDiffDrive {
     override draw(rCtx: CanvasRenderingContext2D, myRobot: RobotBaseMobile): void {
         rCtx.save();
         // draw geometry
-        rCtx.fillStyle = this.geom.color;
-        rCtx.fillRect(15, -10, 8, 20);
-        rCtx.shadowBlur = 5;
-        rCtx.shadowColor = 'black';
-        rCtx.beginPath();
         const radius = this.geom.radius || 0;
+        if (this.frontLeft.bumped || this.frontRight.bumped || this.backLeft.bumped || this.backRight.bumped) {
+            rCtx.shadowColor = 'red';
+        } else {
+            rCtx.shadowColor = 'black';
+        }
+        rCtx.shadowBlur = 5;
+        rCtx.beginPath();
+        rCtx.fillStyle = this.geom.color;
         rCtx.moveTo(this.geom.x + radius, this.geom.y);
         rCtx.lineTo(this.geom.x + this.geom.w, this.geom.y);
         rCtx.bezierCurveTo(
