@@ -518,7 +518,7 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
             return;
         }
         nlIndent();
-        this.sb.append("<!DOCTYPE aesl-source>");
+/*        this.sb.append("<!DOCTYPE aesl-source>");
         nlIndent();
         this.sb.append("<network>");
         nlIndent();
@@ -533,6 +533,12 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
         this.sb.append("<!--node thymio-II-->");
         nlIndent();
         this.sb.append("<node name=\"thymio-II\">");
+        nlIndent();*/
+        this.sb.append("var MOTOR_MAX = 5");
+        nlIndent();
+        this.sb.append("var LED_REMAP = 8");
+        nlIndent();
+        this.sb.append("var COLOR_INTENSITY_REMAP = 3");
         nlIndent();
         this.myMethods = new ArrayList();
         this.getBean(UsedHardwareBean.class).getUserDefinedMethods().forEach(method -> this.myMethods.add(method.getMethodName()));
@@ -564,10 +570,10 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
             this.sb.append(helperMethodImpls);
         }
         nlIndent();
-        this.sb.append("</node>");
+        /*this.sb.append("</node>");
         nlIndent();
         this.sb.append("</network>");
-        nlIndent();
+        nlIndent();*/
     }
 
     void generateUserDefinedMethodsForThymio() {

@@ -64,6 +64,7 @@ require.config({
         'socket.controller': 'app/roberta/controller/socket.controller',
         'webview.controller': 'app/roberta/controller/webview.controller',
         'sourceCodeEditor.controller': 'app/roberta/controller/sourceCodeEditor.controller',
+        'thymioSocket.controller': 'app/roberta/controller/thymioSocket.controller',
         'simulation.constants': 'app/simulation/simulationLogic/constants',
         'simulation.math': 'app/simulation/simulationLogic/math',
         'robot.calliope': 'app/simulation/simulationLogic/robot.calliope',
@@ -103,43 +104,64 @@ require.config({
         'neuralnetwork.ui': 'app/neuralnetwork/neuralnetwork.ui',
         'neuralnetwork.helper': 'app/neuralnetwork/neuralnetwork.helper',
         'neuralnetwork.msg': 'app/neuralnetwork/neuralnetwork.msg',
+        'thymio': 'app/roberta/models/thymio',
+        'thymio_generated': 'app/roberta/models/thymio_generated',
+        'flatbuffers': 'libs/thymio/flatbuffers',
+        '@cor3ntin/flexbuffers-wasm': 'libs/thymio/flexbuffers',
+        'isomorphic-ws': 'libs/thymio/browser',
+        'lodash.isequal': 'libs/thymio/lodash/isEqual',
         confVisualization: 'app/configVisualization/confVisualization',
         'const.robots': 'app/configVisualization/const.robots',
         port: 'app/configVisualization/port',
         robotBlock: 'app/configVisualization/robotBlock',
-        wires: 'app/configVisualization/wires',
+        wires: 'app/configVisualization/wires'
     },
     shim: {
         webots: {
-            deps: ['glm', 'webots.enum', 'webots.wren'],
+            deps: ['glm', 'webots.enum', 'webots.wren']
+        },
+        '@cor3ntin/flexbuffers-wasm': {
+            exports: 'FlexBuffers'
+        },
+        'flatbuffers': {
+            exports: 'flatbuffers',
+            init: function () {
+                return this;
+            }
+        },
+        'lodash.isequal': {
+            exports: 'isEqual'
+        },
+        thymio: {
+            deps: ['flatbuffers', '@cor3ntin/flexbuffers-wasm', 'lodash.isequal']
         },
         bootstrap: {
-            deps: ['jquery'],
+            deps: ['jquery']
         },
         blockly: {
-            exports: 'Blockly',
+            exports: 'Blockly'
         },
         confVisualization: {
-            deps: ['blockly'],
+            deps: ['blockly']
         },
         robotBlock: {
-            deps: ['blockly'],
+            deps: ['blockly']
         },
         port: {
-            deps: ['blockly'],
+            deps: ['blockly']
         },
         'volume-meter': {
             exports: 'VolumeMeter',
             init: function () {
                 return {
-                    createAudioMeter: createAudioMeter,
+                    createAudioMeter: createAudioMeter
                 };
-            },
+            }
         },
         'jquery-validate': {
-            deps: ['jquery'],
-        },
-    },
+            deps: ['jquery']
+        }
+    }
 });
 require([
     'require',
@@ -180,7 +202,7 @@ require([
     'sourceCodeEditor.controller',
     'codeflask',
     'confVisualization',
-    'robotBlock',
+    'robotBlock'
 ], function (require) {
     $ = require('jquery');
     WRAP = require('wrap');
