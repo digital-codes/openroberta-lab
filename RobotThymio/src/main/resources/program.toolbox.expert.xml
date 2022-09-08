@@ -260,6 +260,8 @@
         <block type='robSensors_irhorizontal_getSample'/>
         <block type='robSensors_sound_getSample'/>
         <block type='robSensors_tap_getSample'/>
+        <block type="robSensors_timer_getSample"/>
+        <block type="robSensors_timer_reset"/>
         <block type='robSensors_record_start'>
             <value name='FILENAME'>
                 <block type='math_integer'>
@@ -349,7 +351,20 @@
                 </block>
             </value>
         </block>
+        <block type="math_on_list"/>
         <block type='math_modulo'/>
+        <block type="math_random_int">
+            <value name="FROM">
+                <block type="math_number">
+                    <field name="NUM">1</field>
+                </block>
+            </value>
+            <value name="TO">
+                <block type="math_number">
+                    <field name="NUM">100</field>
+                </block>
+            </value>
+        </block>
     </category>
     <category name="TOOLBOX_LIST" svg="true">
         <block type="robLists_create_with">
@@ -371,7 +386,6 @@
                 </block>
             </value>
         </block>
-        <block type="robLists_indexOf"/>
         <block type="robLists_getIndex"/>
         <block type="robLists_setIndex"/>
         <!-- <block type="robLists_getSublist"/>-->

@@ -318,15 +318,18 @@ define(["require", "exports", "util", "log", "message", "program.controller", "p
         GUISTATE.robot.state = 'busy';
         GUISTATE_C.setState(result);
         if (result.rc == 'ok') {
+            //try {
             THYMIO_C.uploadProgram(result.sourceCode).then(function (ok) {
-                MSG.displayInformation(result, 'MESSAGE_EDIT_START', result.message, GUISTATE_C.getProgramName(), GUISTATE_C.getRobot());
-            }).catch(function (err) {
-                MSG.displayInformation({ rc: 'error' }, null, 'ORA_ROBOT_NOT_WAITING', GUISTATE_C.getProgramName(), GUISTATE_C.getRobot());
+                if (ok == 'done') {
+                    MSG.displayInformation(result, 'MESSAGE_EDIT_START', result.message, GUISTATE_C.getProgramName(), GUISTATE_C.getRobot());
+                }
+            }, function (err) {
+                MSG.displayInformation({ rc: 'error' }, null, err, GUISTATE_C.getProgramName(), GUISTATE_C.getRobot());
             });
             setTimeout(function () {
                 GUISTATE_C.setConnectionState('wait');
                 GUISTATE.robot.state = 'wait';
-            }, 5000);
+            }, 1000);
         }
         else {
             GUISTATE_C.setConnectionState('wait');

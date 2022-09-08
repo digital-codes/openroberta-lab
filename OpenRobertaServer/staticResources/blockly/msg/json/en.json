@@ -1,7 +1,7 @@
 {
 	"@metadata": {
 		"author": "Ellen Spertus <ellen.spertus@gmail.com>",
-		"lastupdated": "2022-09-03 11:29:13.431558",
+		"lastupdated": "2022-09-08 11:16:24.514305",
 		"locale": "en",
 		"messagedocumentation" : "qqq"
 	},
@@ -1351,6 +1351,8 @@
 	"CONNECTION_SEND_TOOLTIP_BOB3": "Sends a message of type number to another Bob3. Hold the Bob3's face to face!",
 	"BLOCK_NOT_EXECUTED": "The exection of this block will have no effect!",
 	"BLOCK_NOT_SUPPORTED": "This robot does not support this block!",
+	"MODE_NOT_SUPPORTED": "The selected mode of this block is not supported by this system!",
+	"NO_CONST_NOT_SUPPORTED": "Please use a constant instead of an expression here!",
 	"BLOCK_USED_INCORRECTLY": "Unfortunately, this block cannot be used in this way.",
 	"BOB3_RECALL_NUMBER": "recall number",
 	"BOB3_REMEMBER_NUMBER": "remember number",

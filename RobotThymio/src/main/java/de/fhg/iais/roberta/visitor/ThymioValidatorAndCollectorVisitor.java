@@ -8,6 +8,9 @@ import com.google.common.collect.ClassToInstanceMap;
 import de.fhg.iais.roberta.bean.IProjectBean;
 import de.fhg.iais.roberta.components.ConfigurationAst;
 import de.fhg.iais.roberta.components.UsedActor;
+import de.fhg.iais.roberta.components.UsedSensor;
+import de.fhg.iais.roberta.mode.general.IndexLocation;
+import de.fhg.iais.roberta.mode.general.ListElementOperations;
 import de.fhg.iais.roberta.syntax.action.display.ClearDisplayAction;
 import de.fhg.iais.roberta.syntax.action.display.ShowTextAction;
 import de.fhg.iais.roberta.syntax.action.light.LedsOffAction;
@@ -31,16 +34,20 @@ import de.fhg.iais.roberta.syntax.action.thymio.RedLedOnAction;
 import de.fhg.iais.roberta.syntax.action.thymio.YellowLedOnAction;
 import de.fhg.iais.roberta.syntax.lang.blocksequence.MainTask;
 import de.fhg.iais.roberta.syntax.lang.expr.ColorConst;
+import de.fhg.iais.roberta.syntax.lang.expr.ListCreate;
+import de.fhg.iais.roberta.syntax.lang.expr.NumConst;
 import de.fhg.iais.roberta.syntax.lang.expr.RgbColor;
 import de.fhg.iais.roberta.syntax.lang.expr.VarDeclaration;
+import de.fhg.iais.roberta.syntax.lang.functions.IndexOfFunct;
+import de.fhg.iais.roberta.syntax.lang.functions.ListGetIndex;
+import de.fhg.iais.roberta.syntax.lang.functions.ListRepeat;
+import de.fhg.iais.roberta.syntax.lang.functions.ListSetIndex;
 import de.fhg.iais.roberta.syntax.lang.functions.MathConstrainFunct;
 import de.fhg.iais.roberta.syntax.lang.functions.MathNumPropFunct;
 import de.fhg.iais.roberta.syntax.lang.functions.MathOnListFunct;
 import de.fhg.iais.roberta.syntax.lang.functions.MathRandomFloatFunct;
-import de.fhg.iais.roberta.syntax.lang.functions.MathRandomIntFunct;
 import de.fhg.iais.roberta.syntax.lang.functions.MathSingleFunct;
-import de.fhg.iais.roberta.syntax.lang.stmt.IfStmt;
-import de.fhg.iais.roberta.syntax.lang.stmt.RepeatStmt;
+import de.fhg.iais.roberta.syntax.lang.stmt.WaitTimeStmt;
 import de.fhg.iais.roberta.syntax.sensor.generic.AccelerometerSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.InfraredSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.KeysSensor;
@@ -49,6 +56,7 @@ import de.fhg.iais.roberta.syntax.sensor.generic.SoundSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.TemperatureSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.TimerSensor;
 import de.fhg.iais.roberta.syntax.sensor.thymio.TapSensor;
+import de.fhg.iais.roberta.typecheck.BlocklyType;
 import de.fhg.iais.roberta.util.dbc.DbcException;
 import de.fhg.iais.roberta.util.syntax.BlocklyConstants;
 import de.fhg.iais.roberta.util.syntax.SC;
@@ -64,35 +72,98 @@ public class ThymioValidatorAndCollectorVisitor extends CommonNepoValidatorAndCo
 
     public ThymioValidatorAndCollectorVisitor(ConfigurationAst robotConfiguration, ClassToInstanceMap<IProjectBean.IBuilder> beanBuilders) {
         super(robotConfiguration, beanBuilders);
+        usedMethodBuilder.addUsedMethod(ThymioMethods.CLOSE);
     }
 
     @Override
     public Void visitRgbColor(RgbColor rgbColor) {
         super.visitRgbColor(rgbColor);
-        addColorVariables();
+        usedHardwareBuilder.addDeclaredVariable("color_");
+        return null;
+    }
+
+    @Override
+    public Void visitWaitTimeStmt(WaitTimeStmt waitTimeStmt) {
+        super.visitWaitTimeStmt(waitTimeStmt);
+        //requiredComponentVisited(waitTimeStmt, waitTimeStmt.time);
+        usedHardwareBuilder.addDeclaredVariable("duration_");
         return null;
     }
 
     @Override
     public Void visitColorConst(ColorConst colorConst) {
         super.visitColorConst(colorConst);
-        addColorVariables();
+        usedHardwareBuilder.addDeclaredVariable("color_");
         return null;
     }
 
     @Override
-    public Void visitRepeatStmt(RepeatStmt repeatStmt) {
-        super.visitRepeatStmt(repeatStmt);
-        if ( repeatStmt.mode == RepeatStmt.Mode.FOREVER ) {
-            usedHardwareBuilder.addDeclaredVariable("true");
+    public Void visitIndexOfFunct(IndexOfFunct indexOfFunct) {
+        addErrorToPhrase(indexOfFunct, "BLOCK_NOT_SUPPORTED");
+        return null;
+    }
+
+    @Override
+    public Void visitListGetIndex(ListGetIndex listGetIndex) {
+        super.visitListGetIndex(listGetIndex);
+        IndexLocation location = (IndexLocation) listGetIndex.location;
+        switch ( location ) {
+            case FIRST:
+            case RANDOM:
+            case FROM_END:
+            case LAST:
+                addErrorToPhrase(listGetIndex, "MODE_NOT_SUPPORTED");
+                break;
+            default:
+                break;
+        }
+        if ( listGetIndex.getElementOperation() != ListElementOperations.GET ) {
+            addErrorToPhrase(listGetIndex, "MODE_NOT_SUPPORTED");
         }
         return null;
     }
 
     @Override
-    public Void visitIfStmt(IfStmt ifStmt) {
-        super.visitIfStmt(ifStmt);
-        usedHardwareBuilder.addDeclaredVariable("true");
+    public Void visitListCreate(ListCreate listCreate) {
+        requiredComponentVisited(listCreate, listCreate.exprList);
+        int listSize = listCreate.exprList.get().size();
+        for ( int i = 0; i < listSize; i++ ) {
+            if ( (listCreate.typeVar.toString().equals("NUMBER") && !listCreate.exprList.get().get(i).getKind().hasName("NUM_CONST")) || (listCreate.typeVar.toString().equals("COLOR") && !listCreate.exprList.get().get(i).getKind().hasName("COLOR_CONST")) ) {
+                addErrorToPhrase(listCreate.exprList.get().get(i), "NO_CONST_NOT_SUPPORTED");
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitListRepeat(ListRepeat listRepeat) {
+        requiredComponentVisited(listRepeat, listRepeat.param);
+        if ( !listRepeat.getCounter().getClass().equals(NumConst.class) ) {
+            addErrorToPhrase(listRepeat.param.get(1), "NO_CONST_NOT_SUPPORTED");
+        }
+        if ( (listRepeat.typeVar == BlocklyType.NUMBER && !listRepeat.param.get(0).getClass().equals(NumConst.class)) || (listRepeat.typeVar == BlocklyType.COLOR && !listRepeat.param.get(0).getClass().equals(ColorConst.class)) ) {
+            addErrorToPhrase(listRepeat.getElement(), "NO_CONST_NOT_SUPPORTED");
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitListSetIndex(ListSetIndex listSetIndex) {
+        super.visitListSetIndex(listSetIndex);
+        IndexLocation location = (IndexLocation) listSetIndex.location;
+        switch ( location ) {
+            case FIRST:
+            case RANDOM:
+            case FROM_END:
+            case LAST:
+                addErrorToPhrase(listSetIndex, "MODE_NOT_SUPPORTED");
+                break;
+            default:
+                break;
+        }
+        if ( listSetIndex.mode != ListElementOperations.SET ) {
+            addErrorToPhrase(listSetIndex, "MODE_NOT_SUPPORTED");
+        }
         return null;
     }
 
@@ -101,13 +172,6 @@ public class ThymioValidatorAndCollectorVisitor extends CommonNepoValidatorAndCo
         super.visitVarDeclaration(varDeclaration);
         usedHardwareBuilder.addMarkedVariableAsGlobal(varDeclaration.name);
         return null;
-    }
-
-    private void addColorVariables() {
-        usedHardwareBuilder.addDeclaredVariable("r");
-        usedHardwareBuilder.addDeclaredVariable("g");
-        usedHardwareBuilder.addDeclaredVariable("b");
-        usedHardwareBuilder.addDeclaredVariable("color");
     }
 
     @Override
@@ -126,6 +190,7 @@ public class ThymioValidatorAndCollectorVisitor extends CommonNepoValidatorAndCo
         if ( curveAction.paramRight.getDuration() != null ) {
             requiredComponentVisited(curveAction, curveAction.paramRight.getDuration().getValue());
             usedMethodBuilder.addUsedMethod(ThymioMethods.STOP);
+            usedHardwareBuilder.addDeclaredVariable("duration_");
         }
         return null;
     }
@@ -136,6 +201,7 @@ public class ThymioValidatorAndCollectorVisitor extends CommonNepoValidatorAndCo
         if ( driveAction.param.getDuration() != null ) {
             requiredComponentVisited(driveAction, driveAction.param.getDuration().getValue());
             usedMethodBuilder.addUsedMethod(ThymioMethods.STOP);
+            usedHardwareBuilder.addDeclaredVariable("duration_");
         }
         return null;
     }
@@ -184,6 +250,7 @@ public class ThymioValidatorAndCollectorVisitor extends CommonNepoValidatorAndCo
         requiredComponentVisited(motorOnAction, motorOnAction.param.getSpeed());
         if ( motorOnAction.param.getDuration() != null ) {
             requiredComponentVisited(motorOnAction, motorOnAction.param.getDuration().getValue());
+            usedHardwareBuilder.addDeclaredVariable("duration_");
         }
         return null;
     }
@@ -211,11 +278,13 @@ public class ThymioValidatorAndCollectorVisitor extends CommonNepoValidatorAndCo
     @Override
     public Void visitPlayRecordingAction(PlayRecordingAction playRecordingAction) {
         requiredComponentVisited(playRecordingAction, playRecordingAction.filename);
+        usedHardwareBuilder.addDeclaredVariable("duration_");
         return null;
     }
 
     @Override
     public Void visitRedLedOnAction(RedLedOnAction redLedOnAction) {
+        usedHardwareBuilder.addDeclaredVariable("led_");
         return null;
     }
 
@@ -236,6 +305,7 @@ public class ThymioValidatorAndCollectorVisitor extends CommonNepoValidatorAndCo
 
     @Override
     public Void visitTimerSensor(TimerSensor timerSensor) {
+        usedHardwareBuilder.addUsedSensor(new UsedSensor(timerSensor.getMode(), SC.TIMER, timerSensor.getMode()));
         return null;
     }
 
@@ -243,6 +313,7 @@ public class ThymioValidatorAndCollectorVisitor extends CommonNepoValidatorAndCo
     public Void visitToneAction(ToneAction toneAction) {
         requiredComponentVisited(toneAction, toneAction.duration, toneAction.frequency);
         usedHardwareBuilder.addUsedActor(new UsedActor(toneAction.port, SC.BUZZER));
+        usedHardwareBuilder.addDeclaredVariable("duration_");
         return null;
     }
 
@@ -252,6 +323,7 @@ public class ThymioValidatorAndCollectorVisitor extends CommonNepoValidatorAndCo
         if ( turnAction.param.getDuration() != null ) {
             requiredComponentVisited(turnAction, turnAction.param.getDuration().getValue());
             usedMethodBuilder.addUsedMethod(ThymioMethods.STOP);
+            usedHardwareBuilder.addDeclaredVariable("duration_");
         }
         return null;
     }
@@ -263,11 +335,12 @@ public class ThymioValidatorAndCollectorVisitor extends CommonNepoValidatorAndCo
 
     @Override
     public Void visitYellowLedOnAction(YellowLedOnAction yellowLedOnAction) {
+        usedHardwareBuilder.addDeclaredVariable("led_");
         return null;
     }
 
 
-    public Void visitLedsOffAction(LedsOffAction ledsOffAction) {
+    public Void visitLedsOffAction(LedsOffAction led_sOffAction) {
         return null;
     }
 
@@ -298,7 +371,7 @@ public class ThymioValidatorAndCollectorVisitor extends CommonNepoValidatorAndCo
             case ABS:
                 break;
             default:
-                addErrorToPhrase(mathSingleFunct, "BLOCK_NOT_SUPPORTED");
+                addErrorToPhrase(mathSingleFunct, "MODE_NOT_SUPPORTED");
         }
         return null;
     }
@@ -315,7 +388,7 @@ public class ThymioValidatorAndCollectorVisitor extends CommonNepoValidatorAndCo
             case DIVISIBLE_BY:
                 break;
             case PRIME:
-                addErrorToPhrase(mathNumPropFunct, "BLOCK_NOT_SUPPORTED");
+                addErrorToPhrase(mathNumPropFunct, "MODE_NOT_SUPPORTED");
                 break;
             default:
                 throw new DbcException("Statement not supported by Aseba!");
@@ -325,7 +398,18 @@ public class ThymioValidatorAndCollectorVisitor extends CommonNepoValidatorAndCo
 
     @Override
     public Void visitMathOnListFunct(MathOnListFunct mathOnListFunct) {
-        throw new DbcException("Block not supported by Aseba!");
+        super.visitMathOnListFunct(mathOnListFunct);
+        switch ( mathOnListFunct.functName ) {
+            case MIN:
+            case MAX:
+            case AVERAGE:
+                // supported
+                break;
+            default:
+                addErrorToPhrase(mathOnListFunct, "MODE_NOT_SUPPORTED");
+                break;
+        }
+        return null;
     }
 
     public Void visitMathConstrainFunct(MathConstrainFunct mathConstrainFunct) {
@@ -333,10 +417,6 @@ public class ThymioValidatorAndCollectorVisitor extends CommonNepoValidatorAndCo
     }
 
     public Void visitMathRandomFloatFunct(MathRandomFloatFunct mathRandomFloatFunct) {
-        throw new DbcException("Block not supported by Aseba!");
-    }
-
-    public Void visitMathRandomIntFunct(MathRandomIntFunct mathRandomIntFunct) {
         throw new DbcException("Block not supported by Aseba!");
     }
 }
