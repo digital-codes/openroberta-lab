@@ -27,11 +27,15 @@ import de.fhg.iais.roberta.syntax.action.sound.PlayFileAction;
 import de.fhg.iais.roberta.syntax.action.sound.PlayNoteAction;
 import de.fhg.iais.roberta.syntax.action.sound.ToneAction;
 import de.fhg.iais.roberta.syntax.action.sound.VolumeAction;
+import de.fhg.iais.roberta.syntax.action.thymio.LedButtonOnAction;
+import de.fhg.iais.roberta.syntax.action.thymio.LedCircleOnAction;
+import de.fhg.iais.roberta.syntax.action.thymio.LedProxHOnAction;
+import de.fhg.iais.roberta.syntax.action.thymio.LedProxVOnAction;
+import de.fhg.iais.roberta.syntax.action.thymio.LedSoundOnAction;
+import de.fhg.iais.roberta.syntax.action.thymio.LedTemperatureOnAction;
 import de.fhg.iais.roberta.syntax.action.thymio.PlayRecordingAction;
 import de.fhg.iais.roberta.syntax.action.thymio.RecordStartAction;
 import de.fhg.iais.roberta.syntax.action.thymio.RecordStopAction;
-import de.fhg.iais.roberta.syntax.action.thymio.RedLedOnAction;
-import de.fhg.iais.roberta.syntax.action.thymio.YellowLedOnAction;
 import de.fhg.iais.roberta.syntax.lang.blocksequence.MainTask;
 import de.fhg.iais.roberta.syntax.lang.expr.ColorConst;
 import de.fhg.iais.roberta.syntax.lang.expr.ListCreate;
@@ -66,7 +70,6 @@ import de.fhg.iais.roberta.visitor.validate.CommonNepoValidatorAndCollectorVisit
 public class ThymioValidatorAndCollectorVisitor extends CommonNepoValidatorAndCollectorVisitor implements IThymioVisitor<Void> {
     private static final Map<String, String> SENSOR_COMPONENT_TYPE_MAP = new HashMap<String, String>() {{
         put("SOUND_RECORD", SC.SOUND);
-//        put("QUAD_COLOR_SENSING", ThymioConstants.MBUILD_QUADRGB);
         put("GYRO_AXIS_RESET", SC.GYRO);
     }};
 
@@ -283,7 +286,7 @@ public class ThymioValidatorAndCollectorVisitor extends CommonNepoValidatorAndCo
     }
 
     @Override
-    public Void visitRedLedOnAction(RedLedOnAction redLedOnAction) {
+    public Void visitLedButtonOnAction(LedButtonOnAction ledButtonOnAction) {
         usedHardwareBuilder.addDeclaredVariable("led_");
         return null;
     }
@@ -334,11 +337,39 @@ public class ThymioValidatorAndCollectorVisitor extends CommonNepoValidatorAndCo
     }
 
     @Override
-    public Void visitYellowLedOnAction(YellowLedOnAction yellowLedOnAction) {
+    public Void visitLedCircleOnAction(LedCircleOnAction ledCircleOnAction) {
+        requiredComponentVisited(ledCircleOnAction, ledCircleOnAction.led1, ledCircleOnAction.led2, ledCircleOnAction.led3, ledCircleOnAction.led4, ledCircleOnAction.led5, ledCircleOnAction.led6, ledCircleOnAction.led7, ledCircleOnAction.led8);
         usedHardwareBuilder.addDeclaredVariable("led_");
         return null;
     }
 
+    @Override
+    public Void visitLedSoundOnAction(LedSoundOnAction ledSoundOnAction) {
+        requiredComponentVisited(ledSoundOnAction, ledSoundOnAction.led1);
+        usedHardwareBuilder.addDeclaredVariable("led_");
+        return null;
+    }
+
+    @Override
+    public Void visitLedTemperatureOnAction(LedTemperatureOnAction ledTemperatureOnAction) {
+        requiredComponentVisited(ledTemperatureOnAction, ledTemperatureOnAction.led1, ledTemperatureOnAction.led2);
+        usedHardwareBuilder.addDeclaredVariable("led_");
+        return null;
+    }
+
+    @Override
+    public Void visitLedProxHOnAction(LedProxHOnAction ledProxHOnAction) {
+        requiredComponentVisited(ledProxHOnAction, ledProxHOnAction.led1, ledProxHOnAction.led2, ledProxHOnAction.led3, ledProxHOnAction.led4, ledProxHOnAction.led5, ledProxHOnAction.led6, ledProxHOnAction.led7, ledProxHOnAction.led8);
+        usedHardwareBuilder.addDeclaredVariable("led_");
+        return null;
+    }
+
+    @Override
+    public Void visitLedProxVOnAction(LedProxVOnAction ledProxVOnAction) {
+        requiredComponentVisited(ledProxVOnAction, ledProxVOnAction.led1, ledProxVOnAction.led2);
+        usedHardwareBuilder.addDeclaredVariable("led_");
+        return null;
+    }
 
     public Void visitLedsOffAction(LedsOffAction led_sOffAction) {
         return null;

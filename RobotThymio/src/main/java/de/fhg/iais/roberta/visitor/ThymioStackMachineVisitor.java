@@ -23,11 +23,15 @@ import de.fhg.iais.roberta.syntax.action.sound.PlayFileAction;
 import de.fhg.iais.roberta.syntax.action.sound.PlayNoteAction;
 import de.fhg.iais.roberta.syntax.action.sound.ToneAction;
 import de.fhg.iais.roberta.syntax.action.sound.VolumeAction;
+import de.fhg.iais.roberta.syntax.action.thymio.LedButtonOnAction;
+import de.fhg.iais.roberta.syntax.action.thymio.LedCircleOnAction;
+import de.fhg.iais.roberta.syntax.action.thymio.LedProxHOnAction;
+import de.fhg.iais.roberta.syntax.action.thymio.LedProxVOnAction;
+import de.fhg.iais.roberta.syntax.action.thymio.LedSoundOnAction;
+import de.fhg.iais.roberta.syntax.action.thymio.LedTemperatureOnAction;
 import de.fhg.iais.roberta.syntax.action.thymio.PlayRecordingAction;
 import de.fhg.iais.roberta.syntax.action.thymio.RecordStartAction;
 import de.fhg.iais.roberta.syntax.action.thymio.RecordStopAction;
-import de.fhg.iais.roberta.syntax.action.thymio.RedLedOnAction;
-import de.fhg.iais.roberta.syntax.action.thymio.YellowLedOnAction;
 import de.fhg.iais.roberta.syntax.sensor.generic.InfraredSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.SoundSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.TimerSensor;
@@ -113,12 +117,32 @@ public final class ThymioStackMachineVisitor extends AbstractStackMachineVisitor
     }
 
     @Override
-    public Void visitRedLedOnAction(RedLedOnAction redLedOnAction) {
+    public Void visitLedButtonOnAction(LedButtonOnAction ledButtonOnAction) {
         return null;
     }
 
     @Override
-    public Void visitYellowLedOnAction(YellowLedOnAction yellowLedOnAction) {
+    public Void visitLedCircleOnAction(LedCircleOnAction ledCircleOnAction) {
+        return null;
+    }
+
+    @Override
+    public Void visitLedSoundOnAction(LedSoundOnAction ledSoundOnAction) {
+        return null;
+    }
+
+    @Override
+    public Void visitLedTemperatureOnAction(LedTemperatureOnAction ledTemperatureOnAction) {
+        return null;
+    }
+
+    @Override
+    public Void visitLedProxHOnAction(LedProxHOnAction ledProxHOnAction) {
+        return null;
+    }
+
+    @Override
+    public Void visitLedProxVOnAction(LedProxVOnAction ledProxVOnAction) {
         return null;
     }
 

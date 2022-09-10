@@ -124,7 +124,7 @@
                 </value>
             </block>
             <block type='robActions_leds_off'/>
-            <block type='robActions_red_led'>
+            <block type='robActions_led_button'>
                 <value name='LED1'>
                     <block type='math_integer'>
                         <field name='NUM'>100</field>
@@ -146,7 +146,7 @@
                     </block>
                 </value>
             </block>
-            <block type='robActions_red_led'>
+            <block type='robActions_led_button'>
                 <value name='LED1'>
                     <block type='math_integer'>
                         <field name='NUM'>0</field>
@@ -168,7 +168,7 @@
                     </block>
                 </value>
             </block>
-            <block type='robActions_yellow_led'>
+            <block type='robActions_led_circle'>
                 <value name='LED1'>
                     <block type='math_integer'>
                         <field name='NUM'>100</field>
@@ -210,7 +210,7 @@
                     </block>
                 </value>
             </block>
-            <block type='robActions_yellow_led'>
+            <block type='robActions_led_circle'>
                 <value name='LED1'>
                     <block type='math_integer'>
                         <field name='NUM'>0</field>
@@ -247,6 +247,152 @@
                     </block>
                 </value>
                 <value name='LED8'>
+                    <block type='math_integer'>
+                        <field name='NUM'>0</field>
+                    </block>
+                </value>
+            </block>
+            <block type='robActions_led_proxh'>
+                <value name='LED1'>
+                    <block type='math_integer'>
+                        <field name='NUM'>100</field>
+                    </block>
+                </value>
+                <value name='LED2'>
+                    <block type='math_integer'>
+                        <field name='NUM'>100</field>
+                    </block>
+                </value>
+                <value name='LED3'>
+                    <block type='math_integer'>
+                        <field name='NUM'>100</field>
+                    </block>
+                </value>
+                <value name='LED4'>
+                    <block type='math_integer'>
+                        <field name='NUM'>100</field>
+                    </block>
+                </value>
+                <value name='LED5'>
+                    <block type='math_integer'>
+                        <field name='NUM'>100</field>
+                    </block>
+                </value>
+                <value name='LED6'>
+                    <block type='math_integer'>
+                        <field name='NUM'>100</field>
+                    </block>
+                </value>
+                <value name='LED7'>
+                    <block type='math_integer'>
+                        <field name='NUM'>100</field>
+                    </block>
+                </value>
+                <value name='LED8'>
+                    <block type='math_integer'>
+                        <field name='NUM'>100</field>
+                    </block>
+                </value>
+            </block>
+            <block type='robActions_led_proxh'>
+                <value name='LED1'>
+                    <block type='math_integer'>
+                        <field name='NUM'>0</field>
+                    </block>
+                </value>
+                <value name='LED2'>
+                    <block type='math_integer'>
+                        <field name='NUM'>0</field>
+                    </block>
+                </value>
+                <value name='LED3'>
+                    <block type='math_integer'>
+                        <field name='NUM'>0</field>
+                    </block>
+                </value>
+                <value name='LED4'>
+                    <block type='math_integer'>
+                        <field name='NUM'>0</field>
+                    </block>
+                </value>
+                <value name='LED5'>
+                    <block type='math_integer'>
+                        <field name='NUM'>0</field>
+                    </block>
+                </value>
+                <value name='LED6'>
+                    <block type='math_integer'>
+                        <field name='NUM'>0</field>
+                    </block>
+                </value>
+                <value name='LED7'>
+                    <block type='math_integer'>
+                        <field name='NUM'>0</field>
+                    </block>
+                </value>
+                <value name='LED8'>
+                    <block type='math_integer'>
+                        <field name='NUM'>0</field>
+                    </block>
+                </value>
+            </block>
+            <block type='robActions_led_proxv'>
+                <value name='LED1'>
+                    <block type='math_integer'>
+                        <field name='NUM'>100</field>
+                    </block>
+                </value>
+                <value name='LED2'>
+                    <block type='math_integer'>
+                        <field name='NUM'>100</field>
+                    </block>
+                </value>
+            </block>
+            <block type='robActions_led_proxv'>
+                <value name='LED1'>
+                    <block type='math_integer'>
+                        <field name='NUM'>0</field>
+                    </block>
+                </value>
+                <value name='LED2'>
+                    <block type='math_integer'>
+                        <field name='NUM'>0</field>
+                    </block>
+                </value>
+            </block>
+            <block type='robActions_led_temperature'>
+                <value name='LED1'>
+                    <block type='math_integer'>
+                        <field name='NUM'>100</field>
+                    </block>
+                </value>
+                <value name='LED2'>
+                    <block type='math_integer'>
+                        <field name='NUM'>100</field>
+                    </block>
+                </value>
+            </block>
+            <block type='robActions_led_temperature'>
+                <value name='LED1'>
+                    <block type='math_integer'>
+                        <field name='NUM'>0</field>
+                    </block>
+                </value>
+                <value name='LED2'>
+                    <block type='math_integer'>
+                        <field name='NUM'>0</field>
+                    </block>
+                </value>
+            </block>
+            <block type='robActions_led_sound'>
+                <value name='LED1'>
+                    <block type='math_integer'>
+                        <field name='NUM'>100</field>
+                    </block>
+                </value>
+            </block>
+            <block type='robActions_led_sound'>
+                <value name='LED1'>
                     <block type='math_integer'>
                         <field name='NUM'>0</field>
                     </block>

@@ -7,8 +7,8 @@ import de.fhg.iais.roberta.transformer.forField.NepoValue;
 import de.fhg.iais.roberta.typecheck.BlocklyType;
 import de.fhg.iais.roberta.util.ast.BlocklyProperties;
 
-@NepoPhrase(category = "ACTOR", blocklyNames = {"robActions_yellow_led"}, name = "THYMIO_YELOOW_LED_ON_ACTION")
-public final class YellowLedOnAction extends Action {
+@NepoPhrase(category = "ACTOR", blocklyNames = {"robActions_led_proxh"}, name = "LED_PROXH_ON_ACTION")
+public final class LedProxHOnAction extends Action {
     @NepoValue(name = "LED1", type = BlocklyType.NUMBER)
     public final Expr led1;
     @NepoValue(name = "LED2", type = BlocklyType.NUMBER)
@@ -26,7 +26,7 @@ public final class YellowLedOnAction extends Action {
     @NepoValue(name = "LED8", type = BlocklyType.NUMBER)
     public final Expr led8;
 
-    public YellowLedOnAction(BlocklyProperties properties, Expr led1, Expr led2, Expr led3, Expr led4, Expr led5, Expr led6, Expr led7, Expr led8) {
+    public LedProxHOnAction(BlocklyProperties properties, Expr led1, Expr led2, Expr led3, Expr led4, Expr led5, Expr led6, Expr led7, Expr led8) {
         super(properties);
         this.led1 = led1;
         this.led2 = led2;
