@@ -181,6 +181,14 @@
                 </block>
             </value>
         </block>
+        <block type="robActions_aifes_addclassifydata">
+            <value name="NN_CLASSIFY_DATA">
+                <block type="math_number" intask="true">
+                    <field name="NUM">0</field>
+                </block>
+            </value>
+        </block>
+        <block type="robActions_aifes_initclassifydata"></block>
         <block type="robActions_aifes_train"></block>
         <block type="robActions_aifes_classify"></block>
     </category>

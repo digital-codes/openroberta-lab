@@ -9,9 +9,11 @@ import de.fhg.iais.roberta.components.ConfigurationAst;
 import de.fhg.iais.roberta.syntax.Phrase;
 import de.fhg.iais.roberta.syntax.lang.expr.Expr;
 import de.fhg.iais.roberta.syntax.lang.expr.Var;
+import de.fhg.iais.roberta.syntax.neuralnetwork.NeuralNetworkAddClassifyData;
 import de.fhg.iais.roberta.syntax.neuralnetwork.NeuralNetworkAddRawData;
 import de.fhg.iais.roberta.syntax.neuralnetwork.NeuralNetworkAddTrainingsData;
 import de.fhg.iais.roberta.syntax.neuralnetwork.NeuralNetworkClassify;
+import de.fhg.iais.roberta.syntax.neuralnetwork.NeuralNetworkInitClassifyData;
 import de.fhg.iais.roberta.syntax.neuralnetwork.NeuralNetworkInitRawData;
 import de.fhg.iais.roberta.syntax.neuralnetwork.NeuralNetworkSetup;
 import de.fhg.iais.roberta.syntax.neuralnetwork.NeuralNetworkTrain;
@@ -147,37 +149,63 @@ public class Nano33bleCppVisitor extends ArduinoCppVisitor implements INano33Ble
 
     @Override
     public Void visitNeuralNetworkInitRawData(NeuralNetworkInitRawData nn) {
-        this.sb.append("InitRawData");
+        String dataSetStr = this.configuration.getConfigurationComponent("Aifes").getProperty("AIFES_DATASET");
+        String inputNeuronsStr = this.configuration.getConfigurationComponent("Aifes").getProperty("AIFES_NUMBER_INPUT_NEURONS");
+        this.sb.append("currentData = 0;\n    currentDataSet = 0;\n");
+        this.sb.append("    for (int i = 0; i <" + dataSetStr + "; i++){\n        for (int j = 0; j <" + inputNeuronsStr + "; j++){\n            input_data[i][j] = 0.0;\n        }\n        target_data[i] = 0.0;\n     }");
         return null;
     }
 
     @Override
     public Void visitNeuralNetworkAddRawData(NeuralNetworkAddRawData nn) {
-        this.sb.append("input_data[")
-            .append(this.configuration.getConfigurationComponent("_A").getProperty("AIFES_DATASET"))
-            .append("][")
-            .append(this.configuration.getConfigurationComponent("_A").getProperty("AIFES_NUMBER_INPUT_NEURONS"))
-            .append("]=")
-            .append(nn.rawData)
-            .append(nn.rawData);
+        this.sb.append("addTrainingData(" + nn.getValueNN(nn.rawData) + ");");
         return null;
     }
 
     @Override
     public Void visitNeuralNetworkAddTrainingsData(NeuralNetworkAddTrainingsData nn) {
-        this.sb.append("NeuralNetworkAddTrainingsData");
+        this.sb.append("addTargetData(" + nn.getValueNNTrain(nn.classNumber) + ");");
         return null;
     }
 
     @Override
     public Void visitNeuralNetworkTrain(NeuralNetworkTrain nn) {
-        this.sb.append("error = AIFES_E_training_fnn_f32(&input_tensor,&target_tensor,&FNN,&FNN_TRAIN,&FNN_INIT_WEIGHTS,&output_tensor); \n");
+        String dataSetStr = this.configuration.getConfigurationComponent("Aifes").getProperty("AIFES_DATASET");
+        String numberLayersStr = this.configuration.getConfigurationComponent("Aifes").getProperty("AIFES_FNN_LAYERS");
+        int numberLayers = Integer.parseInt(numberLayersStr);
+        this.sb.append("uint16_t input_shape[] = {" + dataSetStr + ", (uint16_t)FNN_structure[0]};\n")
+            .append("    aitensor_t input_tensor = AITENSOR_2D_F32(input_shape, input_data);\n    uint16_t target_shape[] = {" + dataSetStr + ", (uint16_t)FNN_structure[" + (numberLayers - 1) + "]};\n")
+            .append("    aitensor_t target_tensor = AITENSOR_2D_F32(target_shape, target_data);\n    float output_train_data[" + dataSetStr + "];\n")
+            .append("    uint16_t output_train_shape[] = {" + dataSetStr + ", (uint16_t)FNN_structure[" + (numberLayers - 1) + "]};\n")
+            .append("    aitensor_t output_train_tensor = AITENSOR_2D_F32(output_train_shape, output_train_data);\n")
+            .append("    error = AIFES_E_training_fnn_f32(&input_tensor,&target_tensor,&FNN,&FNN_TRAIN,&FNN_INIT_WEIGHTS,&output_train_tensor);\n")
+            .append("    if (error != 0){\n        Serial.println(F(\"ERROR while train!\"));\n    }");
+        return null;
+    }
+
+
+    @Override
+    public Void visitNeuralNetworkAddClassifyData(NeuralNetworkAddClassifyData nn) {
+        this.sb.append("addClassifyData(" + nn.getValueNNClassify(nn.classNumber) + ");");
+        return null;
+    }
+
+    @Override
+    public Void visitNeuralNetworkInitClassifyData(NeuralNetworkInitClassifyData nn) {
+        String inputNeuronsStr = this.configuration.getConfigurationComponent("Aifes").getProperty("AIFES_NUMBER_INPUT_NEURONS");
+        this.sb.append("for (int i = 0; i < " + inputNeuronsStr + "; i++){\n        classify_data[i] = 0.0;\n    }");
         return null;
     }
 
     @Override
     public Void visitNeuralNetworkClassify(NeuralNetworkClassify nn) {
-        this.sb.append("error = AIFES_E_inference_fnn_f32(&input_tensor,&FNN,&output_tensor);");
+        String numberLayersStr = this.configuration.getConfigurationComponent("Aifes").getProperty("AIFES_FNN_LAYERS");
+        int numberLayers = Integer.parseInt(numberLayersStr);
+        this.sb.append("uint16_t classify_shape[] = {1, (uint16_t)FNN_structure[0]};\n    aitensor_t classify_tensor = AITENSOR_2D_F32(classify_shape, classify_data);\n")
+            .append("    float output_classify_data[1];\n    uint16_t output_classify_shape[] = {1 , (uint16_t)FNN_structure[" + (numberLayers - 1) + "]};\n")
+            .append("    aitensor_t output_classify_tensor = AITENSOR_2D_F32(output_classify_shape, output_classify_data);\n")
+            .append("    error = AIFES_E_inference_fnn_f32(&classify_tensor,&FNN,&output_classify_tensor);\n    if (error != 0){\n        Serial.println(F(\"ERROR while classifiy!\"));\n    }\n")
+            .append("    Serial.println(output_classify_data[0], 5);");//TODO: Löschen
         return null;
     }
 

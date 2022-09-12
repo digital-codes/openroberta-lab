@@ -756,51 +756,28 @@ public class ArduinoCppVisitor extends AbstractCommonArduinoCppVisitor implement
                 case "AIFES":
                     int FNN_3_LAYERS = Integer.parseInt(usedConfigurationBlock.getProperty("AIFES_FNN_LAYERS"));
                     for ( int i = 0; i < FNN_3_LAYERS - 1; i++ ) {
-                        this.sb.append("   FNN_activations[")
-                            .append(i)
-                            .append("] = ")
-                            .append("AIfES_E_")
-                            .append(usedConfigurationBlock.getProperty("AIFES_LEARNINGFUNCTION"))
-                            .append(";\n");
+                        if ( i != 0 ) {
+                            this.sb.append("    ");
+                        }
+                        this.sb.append("FNN_activations[" + i + "] = " + "AIfES_E_" + usedConfigurationBlock.getProperty("AIFES_LEARNINGFUNCTION") + ";\n");
                     }
-                    this.sb.append("   FNN.layer_count = ")
-                        .append(usedConfigurationBlock.getProperty("AIFES_FNN_LAYERS"))
-                        .append(";\n")
-                        .append("   FNN.fnn_structure = FNN_structure;\n")
-                        .append("   FNN.fnn_activations = FNN_activations;\n")
-                        .append("   FlatWeights = (float *)malloc(sizeof(float)*weight_number);\n")
-                        .append("   FNN.flat_weights = FlatWeights;\n")
-                        .append("   FNN_INIT_WEIGHTS.init_weights_method = ")
-                        .append(usedConfigurationBlock.getProperty("AIFES_WEIGHT"))
-                        .append(";\n")
-                        .append("   FNN_INIT_WEIGHTS.min_init_uniform = ")
-                        .append(usedConfigurationBlock.getProperty("AIFES_MIN_WEIGHT"))
-                        .append(";\n")
-                        .append("   FNN_INIT_WEIGHTS.max_init_uniform = ")
-                        .append(usedConfigurationBlock.getProperty("AIFES_MAX_WEIGHT"))
-                        .append(";\n")
-                        .append("   FNN_TRAIN.optimizer = AIfES_E_")
-                        .append(usedConfigurationBlock.getProperty("AIFES_OPTIMIER"))
-                        .append(";\n")
-                        .append("   FNN_TRAIN.loss = AIfES_")
-                        .append(usedConfigurationBlock.getProperty("AIFES_LOSS"))
-                        .append(";\n")
-                        .append("   FNN_TRAIN.learn_rate = ")
-                        .append(usedConfigurationBlock.getProperty("AIFES_LEARNINGRATE"))
-                        .append("f;\n")
-                        .append("   FNN_TRAIN.sgd_momentum = ")
-                        .append(usedConfigurationBlock.getProperty("AIFES_MOMENTUM"))
-                        .append(";\n")
-                        .append("   FNN_TRAIN.batch_size = ")
-                        .append(usedConfigurationBlock.getProperty("AIFES_DATASET"))
-                        .append(";\n")
-                        .append("   FNN_TRAIN.epochs = ")
-                        .append(usedConfigurationBlock.getProperty("AIFES_EPOCHS"))
-                        .append(";\n")
-                        .append("   FNN_TRAIN.epochs_loss_print_interval = PRINT_INTERVAL;\n")
-                        .append("   FNN_TRAIN.loss_print_function = printLoss;\n")
-                        .append("   FNN_TRAIN.early_stopping = AIfES_E_early_stopping_on;\n")//Prüfe early_stopping, ob in config
-                        .append("   FNN_TRAIN.early_stopping_target_loss = 0.004;");
+                    this.sb.append("    FNN.layer_count = " + usedConfigurationBlock.getProperty("AIFES_FNN_LAYERS") + ";\n")
+                        .append("    FNN.fnn_structure = FNN_structure;\n")
+                        .append("    FNN.fnn_activations = FNN_activations;\n")
+                        .append("    FlatWeights = (float *)malloc(sizeof(float)*weight_number);\n")
+                        .append("    FNN.flat_weights = FlatWeights;\n")
+                        .append("    FNN_INIT_WEIGHTS.init_weights_method = AIfES_E_" + usedConfigurationBlock.getProperty("AIFES_WEIGHT") + ";\n")
+                        .append("    FNN_INIT_WEIGHTS.min_init_uniform = " + usedConfigurationBlock.getProperty("AIFES_MIN_WEIGHT") + ";\n")
+                        .append("    FNN_INIT_WEIGHTS.max_init_uniform = " + usedConfigurationBlock.getProperty("AIFES_MAX_WEIGHT") + ";\n")
+                        .append("    FNN_TRAIN.optimizer = AIfES_E_" + usedConfigurationBlock.getProperty("AIFES_OPTIMIER") + ";\n")
+                        .append("    FNN_TRAIN.learn_rate = " + usedConfigurationBlock.getProperty("AIFES_LEARNINGRATE") + "f;\n")
+                        .append("    FNN_TRAIN.sgd_momentum = " + usedConfigurationBlock.getProperty("AIFES_MOMENTUM") + ";\n")
+                        .append("    FNN_TRAIN.batch_size = " + usedConfigurationBlock.getProperty("AIFES_DATASET") + ";\n")
+                        .append("    FNN_TRAIN.epochs = " + usedConfigurationBlock.getProperty("AIFES_EPOCHS") + ";\n")
+                        .append("    FNN_TRAIN.epochs_loss_print_interval = 10;\n")
+                        .append("    FNN_TRAIN.early_stopping = AIfES_E_early_stopping_on;\n")//Prüfe early_stopping, ob in config
+                        .append("    FNN_TRAIN.early_stopping_target_loss = 0.004;\n")
+                        .append("    FNN_TRAIN.loss_print_function = printLoss;\n    ");
                     break;
                 default:
                     throw new DbcException("Sensor is not supported: " + usedConfigurationBlock.componentType);
@@ -983,28 +960,34 @@ public class ArduinoCppVisitor extends AbstractCommonArduinoCppVisitor implement
                 case SC.HTS221:
                     break;
                 case "AIFES":
-                    this.sb.append("uint32_t global_epoch_counter = 0; \n") //DEKLARATIONEN, von setup
-                        .append("uint32_t FNN_structure[")
-                        .append(cc.getProperty("AIFES_FNN_LAYERS"))
-                        .append("] = {")
-                        .append(cc.getProperty("AIFES_NUMBER_INPUT_NEURONS"))
-                        .append(",")
-                        .append(cc.getProperty("AIFES_NUMBER_HIDDENLAYERS_NEURONS"))
-                        .append(",")
-                        .append(cc.getProperty("AIFES_NUMBER_OUTPUT_NEURONS"))
-                        .append("}; \n")
-                        .append("AIFES_E_activations FNN_activations[")
-                        .append(cc.getProperty("AIFES_FNN_LAYERS"))
-                        .append("-1];\n")
-                        .append("uint32_t weight_number = AIFES_E_flat_weights_number_fnn_f32(FNN_structure,")
-                        .append(cc.getProperty("AIFES_FNN_LAYERS"))
-                        .append(");\n")
-                        .append("float FlatWeights[weight_number];\n")//Prüfe ob korrekt
+                    this.sb.append("uint32_t global_epoch_counter = 0; \n")
+                        .append("uint32_t FNN_structure[" + cc.getProperty("AIFES_FNN_LAYERS") + "] = {" + cc.getProperty("AIFES_NUMBER_INPUT_NEURONS") + "," + cc.getProperty("AIFES_NUMBER_HIDDENLAYERS_NEURONS") + "," + cc.getProperty("AIFES_NUMBER_OUTPUT_NEURONS") + "}; \n")
+                        .append("AIFES_E_activations FNN_activations[" + cc.getProperty("AIFES_FNN_LAYERS") + "-1];\n")
+                        .append("uint32_t weight_number = AIFES_E_flat_weights_number_fnn_f32(FNN_structure," + cc.getProperty("AIFES_FNN_LAYERS") + ");\n")
+                        .append("float *FlatWeights;\n")
                         .append("AIFES_E_model_parameter_fnn_f32 FNN;\n")
                         .append("uint32_t i;\n")
                         .append("AIFES_E_init_weights_parameter_fnn_f32  FNN_INIT_WEIGHTS;\n")
                         .append("AIFES_E_training_parameter_fnn_f32  FNN_TRAIN;\n")
-                        .append("int8_t error = 0;");
+                        .append("void printLoss(float loss){\n    global_epoch_counter++;\n}\n")
+                        .append("float input_data[" + cc.getProperty("AIFES_DATASET") + "][" + cc.getProperty("AIFES_NUMBER_INPUT_NEURONS") + "];\n")
+                        .append("float target_data[" + cc.getProperty("AIFES_DATASET") + "];\n")
+                        .append("float classify_data[" + cc.getProperty("AIFES_NUMBER_INPUT_NEURONS") + "];\n")
+                        .append("int8_t error = 0;\n")
+                        .append("int8_t currentTrainingSet = 0;\n")
+                        .append("int8_t currentDataSet = 0;\n")
+                        .append("int8_t currentData = 0;\n")
+                        .append("int8_t currentClassifySet = 0;\n")
+                        .append("void addTrainingData(float data){\n   input_data[currentDataSet][currentData] = data;\n")
+                        .append("    if ( currentDataSet >= (" + (Integer.parseInt(cc.getProperty("AIFES_DATASET")) - 1) + ") ) {\n        currentData = 0;\n        currentDataSet = 0;\n    }\n")
+                        .append("    else if ( currentData >= (" + (Integer.parseInt(cc.getProperty("AIFES_NUMBER_INPUT_NEURONS")) - 1) + ") ) {\n        currentData = 0;\n        currentDataSet++; \n    }\n")
+                        .append("    else {\n        currentData++; \n    } \n}\n")
+                        .append("void addTargetData(float data){\n   target_data[currentTrainingSet] = data;\n")
+                        .append("    if ( currentTrainingSet != (" + (Integer.parseInt(cc.getProperty("AIFES_DATASET")) - 1) + ") ) {\n        currentTrainingSet++; \n    }\n")
+                        .append("    else if ( currentTrainingSet == (" + (Integer.parseInt(cc.getProperty("AIFES_DATASET")) - 1) + ") ) {\n        currentTrainingSet = 0;\n    }\n}")
+                        .append("void addClassifyData(float data){\n     classify_data[currentClassifySet] = data;\n")
+                        .append("    if (currentClassifySet < " + (Integer.parseInt(cc.getProperty("AIFES_NUMBER_INPUT_NEURONS")) - 1) + ") {\n        currentClassifySet++; \n    }\n")
+                        .append("    else if (currentClassifySet >= " + (Integer.parseInt(cc.getProperty("AIFES_NUMBER_INPUT_NEURONS")) - 1) + ") {\n        currentClassifySet = 0; \n    }\n}\n");
                     break;
                 default:
                     throw new DbcException("Configuration block is not supported: " + cc.componentType);

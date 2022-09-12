@@ -26,7 +26,7 @@
             <field name="AIFES_LEARNINGFUNCTION">sigmoid</field>
             <field name="AIFES_OPTIMIER">adam</field>
             <field name="AIFES_LOSS">E_mse</field>
-            <field name="AIFES_WEIGHT">Init_uniform</field>
+            <field name="AIFES_WEIGHT">init_uniform</field>
         </block>
     </category>
     <category name="TOOLBOX_SENSOR" svg="true">

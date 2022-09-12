@@ -18,4 +18,14 @@ public final class NeuralNetworkAddRawData extends Stmt {
         setReadOnly();
     }
 
+    public String getValueNN(Expr rawData) {
+        String rawValue = rawData.toString();
+        rawValue = rawValue.replace("NumConst", "");
+        rawValue = rawValue.replace("[", "");
+        rawValue = rawValue.replace("]", "");
+        rawValue = rawValue.replace("value: ", "");
+        Integer.parseInt(rawValue);
+        return rawValue;
+    }
+
 }
