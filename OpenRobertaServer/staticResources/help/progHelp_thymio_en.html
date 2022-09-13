@@ -31,21 +31,9 @@
                     value of the variable.</li>
             </ul>
         </div>
-        <div id="robActions_motor_on" class="help beginner">
-            <h3 id="ProgrammingblocksThymio-»motor...onspeed%...«"><span style="letter-spacing: 0.0px;">»motor ... on
-                    speed % ... «</span></h3>
-            <p><span style="letter-spacing: 0.0px;">With this block you can control a single motor on your robot and set
-                    its speed. The motor will keep this speed until it is changed by other blocks.</span></p>
-            <p><span style="letter-spacing: 0.0px;">Options and input values:</span>
-            </p>
-            <ul style="margin-top: 0; margin-bottom: 10px">
-                <li class="typcn typcn-arrow-sorted-down">Motor, select the motor you want to control.</li>
-                <li class="typcn typcn-arrow-left">Number, the desired speed of the motor in percent, between -100 and
-                    100.</li>
-            </ul><br>
-        </div>
-        <div id="robActions_motor_on_for" class="help beginner">
-            <h3 id="ProgrammingblocksThymio-»motor...onspeed%...timems...«">»motor ... on speed % ... time ms ... «</h3>
+        <div id="robActions_motor_on_for" class="help expert">
+            <h3 id="ProgrammingblocksThymio-»motor...onspeed%...timems...«[Expertblock]">»motor ... on speed % ... time
+                ms ... « <span class="typcn typcn-star"></span></h3>
             <p>With this block you can control a single motor on your robot and set its speed. The motor will then
                 rotate at this speed for the set time.</p>
             <p>Options and input values:
@@ -58,40 +46,28 @@
                 </li>
             </ul><br>
         </div>
-        <div id="robActions_motor_getPower" class="help beginner">
-            <h3 id="ProgrammingblocksThymio-»getspeed%motor...«">»get speed % motor ... «</h3>
-            <p>With this block you can query the current speed of a motor.</p>
-            <p>Options:
+        <div id="robActions_motor_on" class="help expert">
+            <h3 id="ProgrammingblocksThymio-»motor...onspeed%...«[Expertblock]"><span
+                    style="letter-spacing: 0.0px;">»motor ... on speed % ... « </span><span
+                    class="typcn typcn-star"></span></h3>
+            <p><span style="letter-spacing: 0.0px;">With this block you can control a single motor on your robot and set
+                    its speed. The motor will keep this speed until it is changed by other blocks.</span></p>
+            <p><span style="letter-spacing: 0.0px;">Options and input values:</span>
             </p>
             <ul style="margin-top: 0; margin-bottom: 10px">
-                <li class="typcn typcn-arrow-sorted-down">Motor, select the motor whose speed you want to query.</li>
-            </ul><br>
-            <p>Return value:
-            </p>
-            <ul style="margin-top: 0; margin-bottom: 10px">
-                <li class="typcn typcn-arrow-right">Number, the current speed of the motor in percent, between -100 and
+                <li class="typcn typcn-arrow-sorted-down">Motor, select the motor you want to control.</li>
+                <li class="typcn typcn-arrow-left">Number, the desired speed of the motor in percent, between -100 and
                     100.</li>
             </ul><br>
         </div>
-        <div id="robActions_motor_stop" class="help beginner">
-            <h3 id="ProgrammingblocksThymio-»stopmotor...«">»stop motor ... «</h3>
+        <div id="robActions_motor_stop" class="help expert">
+            <h3 id="ProgrammingblocksThymio-»stopmotor...«[Expertblock]">»stop motor ... « <span
+                    class="typcn typcn-star"></span></h3>
             <p>You can stop an motor with this block.</p>
             <p>Options:
             </p>
             <ul style="margin-top: 0; margin-bottom: 10px">
                 <li class="typcn typcn-arrow-sorted-down">Motor, select the motor you want to stop.</li>
-            </ul><br>
-        </div>
-        <div id="robActions_motorDiff_on" class="help beginner">
-            <h3 id="ProgrammingblocksThymio-»drive...speed%...«">»drive ... speed % ... «</h3>
-            <p>With this block you can make your robot move forward or backward at the desired speed. The robot
-                maintains the selected speed until it is changed.</p>
-            <p>Options and input values:
-            </p>
-            <ul style="margin-top: 0; margin-bottom: 10px">
-                <li class="typcn typcn-arrow-sorted-down">Direction, select whether your robot should move forwards or
-                    backwards.</li>
-                <li class="typcn typcn-arrow-left">Number, the desired speed in percent, between -100 and 100.</li>
             </ul><br>
         </div>
         <div id="robActions_motorDiff_on_for" class="help beginner">
@@ -108,22 +84,21 @@
                 </li>
             </ul><br>
         </div>
-        <div id="robActions_motorDiff_stop" class="help beginner">
-            <h3 id="ProgrammingblocksThymio-»stop«">»stop«</h3>
-            <p>With this block you can stop your robot immediately.</p>
-        </div>
-        <div id="robActions_motorDiff_turn" class="help beginner">
-            <h3 id="ProgrammingblocksThymio-»turn...speed%...«">»turn ... speed % ... «</h3>
-            <p>With this block you can make your robot rotate. The robot will then rotate at the selected speed until it
-                is changed.</p>
+        <div id="robActions_motorDiff_on" class="help beginner">
+            <h3 id="ProgrammingblocksThymio-»drive...speed%...«">»drive ... speed % ... «</h3>
+            <p>With this block you can make your robot move forward or backward at the desired speed. The robot
+                maintains the selected speed until it is changed.</p>
             <p>Options and input values:
             </p>
             <ul style="margin-top: 0; margin-bottom: 10px">
-                <li class="typcn typcn-arrow-sorted-down">Direction, select whether your robot should rotate to the left
-                    or to the right.</li>
-                <li class="typcn typcn-arrow-left">Number, select the speed at which your robot should rotate in
-                    percent, between -100 and 100.</li>
+                <li class="typcn typcn-arrow-sorted-down">Direction, select whether your robot should move forwards or
+                    backwards.</li>
+                <li class="typcn typcn-arrow-left">Number, the desired speed in percent, between -100 and 100.</li>
             </ul><br>
+        </div>
+        <div id="robActions_motorDiff_stop" class="help beginner">
+            <h3 id="ProgrammingblocksThymio-»stop«">»stop«</h3>
+            <p>With this block you can stop your robot immediately.</p>
         </div>
         <div id="robActions_motorDiff_turn_for" class="help beginner">
             <h3 id="ProgrammingblocksThymio-»turn...speed%...timems...«">»turn ... speed % ... time ms ... «</h3>
@@ -140,20 +115,17 @@
                 </li>
             </ul><br>
         </div>
-        <div id="robActions_motorDiff_curve" class="help beginner">
-            <h3 id="ProgrammingblocksThymio-»steer...speed%left...speed%right...«">»steer ... speed % left ... speed %
-                right ... «</h3>
-            <p>With this block you can make your robot drive and set the speed of the motors independently of each
-                other, thus your robot can drive a curve.</p>
+        <div id="robActions_motorDiff_turn" class="help beginner">
+            <h3 id="ProgrammingblocksThymio-»turn...speed%...«">»turn ... speed % ... «</h3>
+            <p>With this block you can make your robot rotate. The robot will then rotate at the selected speed until it
+                is changed.</p>
             <p>Options and input values:
             </p>
             <ul style="margin-top: 0; margin-bottom: 10px">
-                <li class="typcn typcn-arrow-sorted-down">Direction, select whether the robot should move forwards or
-                    backwards.</li>
-                <li class="typcn typcn-arrow-left">Number, the speed for the left motor in percent between -100 and 100.
-                </li>
-                <li class="typcn typcn-arrow-left">Number, the speed for the right motor in percent between -100 and
-                    100.</li>
+                <li class="typcn typcn-arrow-sorted-down">Direction, select whether your robot should rotate to the left
+                    or to the right.</li>
+                <li class="typcn typcn-arrow-left">Number, select the speed at which your robot should rotate in
+                    percent, between -100 and 100.</li>
             </ul><br>
         </div>
         <div id="robActions_motorDiff_curve_for" class="help beginner">
@@ -174,17 +146,20 @@
                 </li>
             </ul><br>
         </div>
-        <div id="mbedActions_play_tone" class="help beginner">
-            <h3 id="ProgrammingblocksThymio-»playfrequencyHz...durationms...«">»play frequency Hz ... duration ms ... «
-            </h3>
-            <p>This block allows your robot to play a sound at a desired frequency for a specified time.</p>
-            <p>Input values:
+        <div id="robActions_motorDiff_curve" class="help beginner">
+            <h3 id="ProgrammingblocksThymio-»steer...speed%left...speed%right...«">»steer ... speed % left ... speed %
+                right ... «</h3>
+            <p>With this block you can make your robot drive and set the speed of the motors independently of each
+                other, thus your robot can drive a curve.</p>
+            <p>Options and input values:
             </p>
             <ul style="margin-top: 0; margin-bottom: 10px">
-                <li class="typcn typcn-arrow-left">Number, the frequency of the tone, humans can perceive tones between
-                    20 and 20.000 Hz.</li>
-                <li class="typcn typcn-arrow-left">Number, the duration for which the tone should be played in
-                    milliseconds.</li>
+                <li class="typcn typcn-arrow-sorted-down">Direction, select whether the robot should move forwards or
+                    backwards.</li>
+                <li class="typcn typcn-arrow-left">Number, the speed for the left motor in percent between -100 and 100.
+                </li>
+                <li class="typcn typcn-arrow-left">Number, the speed for the right motor in percent between -100 and
+                    100.</li>
             </ul><br>
         </div>
         <div id="mbedActions_play_note" class="help beginner">
@@ -197,6 +172,19 @@
                 <li class="typcn typcn-arrow-sorted-down">Note, select the note to be played.</li>
             </ul>
         </div>
+        <div id="mbedActions_play_tone" class="help expert">
+            <h3 id="ProgrammingblocksThymio-»playfrequencyHz...durationms...«[Expertblock]">»play frequency Hz ...
+                duration ms ... « <span class="typcn typcn-star"></span></h3>
+            <p>This block allows your robot to play a sound at a desired frequency for a specified time.</p>
+            <p>Input values:
+            </p>
+            <ul style="margin-top: 0; margin-bottom: 10px">
+                <li class="typcn typcn-arrow-left">Number, the frequency of the tone, humans can perceive tones between
+                    20 and 20.000 Hz.</li>
+                <li class="typcn typcn-arrow-left">Number, the duration for which the tone should be played in
+                    milliseconds.</li>
+            </ul><br>
+        </div>
         <div id="robActions_play_file" class="help beginner">
             <h3 id="ProgrammingblocksThymio-»playfile...«">»play file ... «</h3>
             <p>This block allows your robot to play a predefined file.</p>
@@ -206,8 +194,9 @@
                 <li class="typcn typcn-arrow-sorted-down">File, select the file to be played.</li>
             </ul><br>
         </div>
-        <div id="robActions_play_recording" class="help beginner">
-            <h3 id="ProgrammingblocksThymio-»playrecordfile...«">»play record file ... «</h3>
+        <div id="robActions_play_recording_file" class="help expert">
+            <h3 id="ProgrammingblocksThymio-»playrecordfile...«[Expertblock]">»play record file ... « <span
+                    class="typcn typcn-star"></span></h3>
             <p>This block allows your robot to play a previously created recording.</p>
             <p>Input values:
             </p>
@@ -234,9 +223,9 @@
                 <li class="typcn typcn-arrow-sorted-down">LED, select the LED you want to switch off.</li>
             </ul><br>
         </div>
-        <div id="robActions_red_led" class="help beginner">
-            <h3 id="ProgrammingblocksThymio-»turnbuttonLEDontop%...right%...bottom%...left%...«">»turn button LED on top
-                % ... right % ... bottom % ... left % ... «</h3>
+        <div id="robActions_led_button" class="help expert">
+            <h3 id="ProgrammingblocksThymio-»turnbuttonLEDon...«[Expertblock]">»turn button LED on ... « <span
+                    class="typcn typcn-star"></span></h3>
             <p>With this button you can control the four red LEDs on the top of your robot, which together form a
                 control pad, and set their brightness.</p>
             <p>Input values:
@@ -252,11 +241,9 @@
                 </li>
             </ul><br>
         </div>
-        <div id="robActions_yellow_led" class="help beginner">
-            <h3
-                id="ProgrammingblocksThymio-»turncircleLEDontop%...topright%...right%...bottomright%...bottom%...bottomleft%...left%...topleft%...«">
-                »turn circle LED on top % ... top right % ... right % ... bottom right % ... bottom % ... bottom left %
-                ... left % ... top left % ... «</h3>
+        <div id="robActions_led_circle" class="help expert">
+            <h3 id="ProgrammingblocksThymio-»turncircleLEDon...«[Expertblock]">»turn circle LED on ... « <span
+                    class="typcn typcn-star"></span></h3>
             <p>With this block you can control the eight orange LEDs on the top of your robot, which together form a
                 circle. You can set the brightness of each LED individually.</p>
             <p>Input values:
@@ -280,6 +267,85 @@
                     100.</li>
             </ul>
         </div>
+        <div id="robActions_led_proxh" class="help expert">
+            <h3 id="ProgrammingblocksThymio-»turndistancesensorLEDon...«[Experten-Block]">»turn distance sensor LED on
+                ... « <span class="typcn typcn-star"></span></h3>
+            <p>With this block you can control the brightness of the LEDs of the distance sensor. You can also switch
+                off the LEDs by setting their brightness to 0%. The distance sensor has a total of eight LEDs.</p>
+            <p>Input values:
+            </p>
+            <ul style="margin-top: 0; margin-bottom: 10px">
+                <li class="typcn typcn-arrow-left">Number, the brightness of the front left LED in percent between 0 and
+                    100.</li>
+                <li class="typcn typcn-arrow-left">Number, the brightness of the front left middle LED in percent
+                    between 0 and 100.</li>
+                <li class="typcn typcn-arrow-left">Number, the brightness of the front middle/left LED in percent
+                    between 0 and 100.</li>
+                <li class="typcn typcn-arrow-left">Number, the brightness of the front middle/right LED in percent
+                    between 0 and 100.</li>
+                <li class="typcn typcn-arrow-left">Number, the brightness of the front right middle LED in percent
+                    between 0 and 100.</li>
+                <li class="typcn typcn-arrow-left">Number, the brightness of the front right LED in percent between 0
+                    and 100.</li>
+                <li class="typcn typcn-arrow-left">Number, the brightness of the back left LED in percent between 0 and
+                    100.</li>
+                <li class="typcn typcn-arrow-left">Number, the brightness of the back right LED in percent between 0 and
+                    100.</li>
+            </ul>
+        </div>
+        <div id="robActions_led_proxv" class="help expert">
+            <h3 id="ProgrammingblocksThymio-»turnbottomsensorLED...«[Experten-Block]">»turn bottom sensor LED ... «
+                <span class="typcn typcn-star"></span></h3>
+            <p>With this block you can control the brightness of the LEDs of the bottom sensor. You can also switch off
+                the LEDs by setting their brightness to 0%. The bottom sensor has two LEDs.</p>
+            <p>Input values:
+            </p>
+            <ul style="margin-top: 0; margin-bottom: 10px">
+                <li class="typcn typcn-arrow-left">Number, the brightness of the bottom left LED in percent between 0
+                    and 100.</li>
+                <li class="typcn typcn-arrow-left">Number, the brightness of the bottom right LED in percent between 0
+                    and 100.</li>
+            </ul>
+        </div>
+        <div id="robActions_led_temperature" class="help expert">
+            <h3 id="ProgrammingblocksThymio-»turntemperaturesensoron...«[Experten-Block]">»turn temperature sensor on
+                ... « <span class="typcn typcn-star"></span></h3>
+            <p>With this block you can control the brightness of the LEDs of the temperature sensor. You can also switch
+                off the LEDs by setting their brightness to 0%. The temperature sensor has one red and one blue LED.</p>
+            <p>Input values:
+            </p>
+            <ul style="margin-top: 0; margin-bottom: 10px">
+                <li class="typcn typcn-arrow-left">Number, the brightness of the red LED in percent between 0 and 100.
+                </li>
+                <li class="typcn typcn-arrow-left">Number, the brightness of the blue LED in percent between 0 and 100.
+                </li>
+            </ul><br>
+        </div>
+        <div id="robActions_led_sound" class="help expert">
+            <h3 id="ProgrammingblocksThymio-»turnsoundsensorLEDon...«[Experten-Block]">»turn sound sensor LED on ... «
+                <span class="typcn typcn-star"></span></h3>
+            <p>With this block you can control the brightness of the microphone LED. You can also switch off the LED by
+                setting its brightness to 0%.</p>
+            <p>Input value:
+            </p>
+            <ul style="margin-top: 0; margin-bottom: 10px">
+                <li class="typcn typcn-arrow-left">Number, the brightness of the LED in percent between 0 and 100.</li>
+            </ul><br>
+        </div>
+        <div id="robSensors_key_getSample" class="help beginner">
+            <h3 id="ProgrammingblocksThymio-»button...pressed?«">»get pressed button ... «</h3>
+            <p>With this block you can query the buttons of your robot's control pad.</p>
+            <p>Options:
+            </p>
+            <ul style="margin-top: 0; margin-bottom: 10px">
+                <li class="typcn typcn-arrow-sorted-down">Sensor, select the button you want to query.</li>
+            </ul><br>
+            <p>Return value:
+            </p>
+            <ul style="margin-top: 0; margin-bottom: 10px">
+                <li class="typcn typcn-arrow-right">Boolean, »true« if the key is pressed, otherwise »false«.</li>
+            </ul><br>
+        </div>
         <div id="robSensors_infrared_getSample" class="help beginner">
             <h3 id="ProgrammingblocksThymio-»get...infraredsensor...«">»get ... infrared sensor ... «</h3>
             <p>With this block you can query the infrared sensor of your robot. This sensor can detect a black line or
@@ -295,13 +361,13 @@
             <p>Return values:
             </p>
             <ul style="margin-top: 0; margin-bottom: 10px">
-                <li class="typcn typcn-arrow-right">Truth value, »true« if a line is detected, »false« otherwise.</li>
+                <li class="typcn typcn-arrow-right">boolean, »true« if a line is detected, »false« otherwise.</li>
                 <li class="typcn typcn-arrow-right">Number, the brightness of the environment in percent between 0 and
                     100.</li>
             </ul><br>
         </div>
         <div id="robSensors_irhorizontal_getSample" class="help beginner">
-            <h3 id="ProgrammingblocksThymio-»getdistance%infraredsensor...«">»get distance % infrared sensor ... «</h3>
+            <h3 id="ProgrammingblocksThymio-»getdistance%infraredsensor...«">»get distance % horizontal infrared sensor ... «</h3>
             <p>With this block you can query one of the front infrared sensors of your robot. These sensors measure the
                 distance to the nearest object, but only have a range of about 10 cm.</p>
             <p>Options:
@@ -315,20 +381,6 @@
                 <li class="typcn typcn-arrow-right">Number, the distance to the nearest object in centimetres.</li>
             </ul><br>
         </div>
-        <div id="robSensors_key_getSample" class="help beginner">
-            <h3 id="ProgrammingblocksThymio-»button...pressed?«">»button ... pressed?«</h3>
-            <p>With this block you can query the buttons of your robot's control pad.</p>
-            <p>Options:
-            </p>
-            <ul style="margin-top: 0; margin-bottom: 10px">
-                <li class="typcn typcn-arrow-sorted-down">Sensor, select the button you want to query.</li>
-            </ul><br>
-            <p>Return value:
-            </p>
-            <ul style="margin-top: 0; margin-bottom: 10px">
-                <li class="typcn typcn-arrow-right">Truth value, »true« if the key is pressed, otherwise »false«.</li>
-            </ul><br>
-        </div>
         <div id="robSensors_sound_getSample" class="help beginner">
             <h3 id="ProgrammingblocksThymio-»getsound%microphone«">»get sound % microphone«</h3>
             <p>With this block you can query the microphone of your robot. The microphone measures the volume of the
@@ -340,9 +392,34 @@
                 </li>
             </ul><br>
         </div>
-        <div id="robSensors_record_start" class="help beginner">
-            <h3 id="ProgrammingblocksThymio-»startrecordingmicrophonefile...«">»start recording microphone file ... «
-            </h3>
+        <div id="robSensors_tap_getSample" class="help beginner">
+            <h3 id="ProgrammingblocksThymio-»getshockmilli-gaccelerometer«">»get value tap sensor«</h3>
+            <p>With this block you can query the absolute value of the tap sensor.</p>
+            <p>Return value:
+            </p>
+            <ul style="margin-top: 0; margin-bottom: 10px">
+                <li class="typcn typcn-arrow-right">Number, the strength of the acceleration in milli-g, where 1000
+                    mill-g = 9.81 m/s².</li>
+            </ul><br>
+        </div>
+        <div id="robSensors_timer_getSample" class="help beginner">
+            <h3 id="ProgrammingblocksThymio-»getvaluetimer1«">»get value timer 1«</h3>
+            <p>With this block you can query the internal timer of your robot. This timer measures the time that has
+                elapsed since the start of the programme or the last reset.</p>
+            <p>Return value:
+            </p>
+            <ul style="margin-top: 0; margin-bottom: 10px">
+                <li class="typcn typcn-arrow-right">Number, time since the programme start or the last reset of the
+                    timer in milliseconds.</li>
+            </ul>
+        </div>
+        <div id="robSensors_timer_reset" class="help beginner">
+            <h3 id="ProgrammingblocksThymio-»resettimer1«">»reset timer 1«</h3>
+            <p>With this block you can reset the inbuilt timer of your robot so it starts again at zero.</p>
+        </div>
+        <div id="robSensors_record_start" class="help expert">
+            <h3 id="ProgrammingblocksThymio-»startrecordingmicrophonefile...«[Expertblock]">»start recording microphone
+                file ... « <span class="typcn typcn-star"></span></h3>
             <p>With this block you can control the microphone of your robot and start a recording. You can then play
                 back this recording later.</p>
             <p>Input value:
@@ -351,13 +428,14 @@
                 <li class="typcn typcn-arrow-right">Number, the number under which the recording is to be saved.</li>
             </ul><br>
         </div>
-        <div id="robSensors_record_stop" class="help beginner">
-            <h3 id="ProgrammingblocksThymio-»stoprecordingmicrophone«">»stop recording microphone«</h3>
+        <div id="robSensors_record_stop" class="help expert">
+            <h3 id="ProgrammingblocksThymio-»stoprecordingmicrophone«[Expertblock]">»stop recording microphone« <span
+                    class="typcn typcn-star"></span></h3>
             <p>With this block you can stop a recording in progress.</p>
         </div>
-        <div id="robSensors_accelerometer_getSample" class="help beginner">
-            <h3 id="ProgrammingblocksThymio-»getvaluemilli-gaccelerometer...«">»get value milli-g accelerometer ... «
-            </h3>
+        <div id="robSensors_accelerometer_getSample" class="help expert">
+            <h3 id="ProgrammingblocksThymio-»getvaluemilli-gaccelerometer...«[Expertblock]">»get value milli-g
+                accelerometer ... « <span class="typcn typcn-star"></span></h3>
             <p>With this block you can query the acceleration sensor of your robot. This sensor measures the amount of
                 acceleration your robot experiences and compares it to the acceleration due to gravity of 9.81 m/s².</p>
             <p>Option:
@@ -381,16 +459,6 @@
             </p>
             <ul style="margin-top: 0; margin-bottom: 10px">
                 <li class="typcn typcn-arrow-right">Number, the temperature of the environment in °C.</li>
-            </ul><br>
-        </div>
-        <div id="robSensors_tap_getSample" class="help beginner">
-            <h3 id="ProgrammingblocksThymio-»getshockmilli-gaccelerometer«">»get shock milli-g accelerometer«</h3>
-            <p>With this block you can query the absolute value of the accelerometer.</p>
-            <p>Return value:
-            </p>
-            <ul style="margin-top: 0; margin-bottom: 10px">
-                <li class="typcn typcn-arrow-right">Number, the strength of the acceleration in milli-g, where 1000
-                    mill-g = 9.81 m/s².</li>
             </ul><br>
         </div>
         <div id="robControls_if" class="help beginner">

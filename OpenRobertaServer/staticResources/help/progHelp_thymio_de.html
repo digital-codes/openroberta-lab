@@ -5,7 +5,7 @@
 
 <body>
     <div id="helpContent">
-        <div id="robControls_start_ardu" class="help beginner">
+        <div id="robControls_start" class="help beginner">
             <h3 id="BlockbeschreibungThymio-»Start«"><span style="color: rgb(0,0,0);">»Start«</span><span
                     style="color: rgb(0,0,0);"> </span></h3>
             <p>Jedes Programm beginnt mit dem »Start«-Block, welcher nicht gelöscht werden kann. Den ersten Block, den
@@ -30,22 +30,9 @@
                 <li class="typcn typcn-arrow-left">Wert, Anfangswert der Variablen.</li>
             </ul>
         </div>
-        <div id="robActions_motor_on" class="help beginner">
-            <h3 id="BlockbeschreibungThymio-»Motor...anTempo%...«"><span style="letter-spacing: 0.0px;">»Motor ... an
-                    Tempo % ... «</span></h3>
-            <p><span style="letter-spacing: 0.0px;">Mit diesem Block kannst du einen einzelnen Motor an deinem Roboter
-                    ansteuern und seine Geschwindigkeit setzen. Der Motor behält diese Geschwindigkeit bei, bis sie
-                    durch andere Blöcke verändert wird.</span></p>
-            <p>Optionen und Eingabewerte:
-            </p>
-            <ul style="margin-top: 0; margin-bottom: 10px">
-                <li class="typcn typcn-arrow-sorted-down">Motor, wähle den Motor, den du steuern möchtest.</li>
-                <li class="typcn typcn-arrow-left">Zahl, die gewünschte Geschwindigkeit des Motors in Prozent, zwischen
-                    -100 und 100.</li>
-            </ul><br>
-        </div>
-        <div id="robActions_motor_on_for" class="help beginner">
-            <h3 id="BlockbeschreibungThymio-»Motor...anTempo%...Zeitms...«">»Motor ... an Tempo % ... Zeit ms ... «</h3>
+        <div id="robActions_motor_on_for" class="help expert">
+            <h3 id="BlockbeschreibungThymio-»Motor...anTempo%...Zeitms...«[Experten-Block]">»Motor ... an Tempo % ...
+                Zeit ms ... « <span class="typcn typcn-star"></span></h3>
             <p>Mit diesem Block kannst du einen einzelnen Motor an deinem Roboter ansteuern und seine Geschwindigkeit
                 setzen. Der Motor dreht sich dann mit dieser Geschwindigkeit für die festgelegte Zeit.</p>
             <p>Optionen und Eingabewerte:
@@ -58,42 +45,29 @@
                 </li>
             </ul><br>
         </div>
-        <div id="robActions_motor_getPower" class="help beginner">
-            <h3 id="BlockbeschreibungThymio-»gibTempo%Motor...«">»gib Tempo % Motor ... «</h3>
-            <p>Mit diesem Block kannst du momentane Geschwindigkeit eines Motors abfragen.</p>
-            <p>Optionen:
+        <div id="robActions_motor_on" class="help expert">
+            <h3 id="BlockbeschreibungThymio-»Motor...anTempo%...«[Experten-Block]"><span
+                    style="letter-spacing: 0.0px;">»Motor ... an Tempo % ... « <span
+                        class="typcn typcn-star"></span></span></h3>
+            <p><span style="letter-spacing: 0.0px;">Mit diesem Block kannst du einen einzelnen Motor an deinem Roboter
+                    ansteuern und seine Geschwindigkeit setzen. Der Motor behält diese Geschwindigkeit bei, bis sie
+                    durch andere Blöcke verändert wird.</span></p>
+            <p>Optionen und Eingabewerte:
             </p>
             <ul style="margin-top: 0; margin-bottom: 10px">
-                <li class="typcn typcn-arrow-sorted-down">Motor, wähle den Motor, dessen Geschwindigkeit du abfragen
-                    möchtest.</li>
-            </ul><br>
-            <p>Rückgabewert:
-            </p>
-            <ul style="margin-top: 0; margin-bottom: 10px">
-                <li class="typcn typcn-arrow-right">Zahl, die momentane Geschwindigkeit des Motors in Prozent, zwischen
+                <li class="typcn typcn-arrow-sorted-down">Motor, wähle den Motor, den du steuern möchtest.</li>
+                <li class="typcn typcn-arrow-left">Zahl, die gewünschte Geschwindigkeit des Motors in Prozent, zwischen
                     -100 und 100.</li>
             </ul><br>
         </div>
-        <div id="robActions_motor_stop" class="help beginner">
-            <h3 id="BlockbeschreibungThymio-»StoppeMotor...«">»Stoppe Motor ... «</h3>
+        <div id="robActions_motor_stop" class="help expert">
+            <h3 id="BlockbeschreibungThymio-»StoppeMotor...«[Experten-Block]">»Stoppe Motor ... « <span
+                    class="typcn typcn-star"></span></h3>
             <p>Mit diesem Block kannst du einen Motor stoppen.</p>
             <p>Optionen:
             </p>
             <ul style="margin-top: 0; margin-bottom: 10px">
                 <li class="typcn typcn-arrow-sorted-down">Motor, wähle den Motor, den du stoppen möchtest.</li>
-            </ul><br>
-        </div>
-        <div id="robActions_motorDiff_on" class="help beginner">
-            <h3 id="BlockbeschreibungThymio-»Fahre...Tempo%...«">»Fahre ... Tempo % ... «</h3>
-            <p>Mit diesem Block kannst du deinen Roboter mit der gewünschten Geschwindigkeit vor- oder rückwärts fahren
-                lassen. Der Roboter behält die gewählte Geschwindigkeit bei, bis sie verändert wird.</p>
-            <p>Optionen und Eingabewerte:
-            </p>
-            <ul style="margin-top: 0; margin-bottom: 10px">
-                <li class="typcn typcn-arrow-sorted-down">Richtung, wähle ob dein Roboter vor- oder rückwärts fahren
-                    soll.</li>
-                <li class="typcn typcn-arrow-left">Zahl, die gewünschte Geschwindigkeit in Prozent, zwischen -100 und
-                    100.</li>
             </ul><br>
         </div>
         <div id="robActions_motorDiff_on_for" class="help beginner">
@@ -111,22 +85,22 @@
                     Millisekunden.</li>
             </ul><br>
         </div>
-        <div id="robActions_motorDiff_stop" class="help beginner">
-            <h3 id="BlockbeschreibungThymio-»Stoppe«">»Stoppe«</h3>
-            <p>Mit diesem Block kannst du deinen Roboter stoppen.</p>
-        </div>
-        <div id="robActions_motorDiff_turn" class="help beginner">
-            <h3 id="BlockbeschreibungThymio-»Drehe...Tempo%...«">»Drehe ... Tempo % ... «</h3>
-            <p>Mit diesem Block kannst du deinen Roboter rotieren lassen. Der Roboter dreht sich dann mit der gewählten
-                Geschwindigkeit, bis diese verändert wird.</p>
+        <div id="robActions_motorDiff_on" class="help beginner">
+            <h3 id="BlockbeschreibungThymio-»Fahre...Tempo%...«">»Fahre ... Tempo % ... «</h3>
+            <p>Mit diesem Block kannst du deinen Roboter mit der gewünschten Geschwindigkeit vor- oder rückwärts fahren
+                lassen. Der Roboter behält die gewählte Geschwindigkeit bei, bis sie verändert wird.</p>
             <p>Optionen und Eingabewerte:
             </p>
             <ul style="margin-top: 0; margin-bottom: 10px">
-                <li class="typcn typcn-arrow-sorted-down">Richtung, wähle ob sich dein Roboter nach links oder rechts
-                    drehen soll.</li>
-                <li class="typcn typcn-arrow-left">Zahl, wähle die Geschwindigkeit mit der sich dein Roboter drehen soll
-                    in Prozent, zwischen -100 und 100.</li>
+                <li class="typcn typcn-arrow-sorted-down">Richtung, wähle ob dein Roboter vor- oder rückwärts fahren
+                    soll.</li>
+                <li class="typcn typcn-arrow-left">Zahl, die gewünschte Geschwindigkeit in Prozent, zwischen -100 und
+                    100.</li>
             </ul><br>
+        </div>
+        <div id="robActions_motorDiff_stop" class="help beginner">
+            <h3 id="BlockbeschreibungThymio-»Stoppe«">»Stoppe«</h3>
+            <p>Mit diesem Block kannst du deinen Roboter stoppen.</p>
         </div>
         <div id="robActions_motorDiff_turn_for" class="help beginner">
             <h3 id="BlockbeschreibungThymio-»Drehe...Tempo%...Zeitms...«">»Drehe ... Tempo % ... Zeit ms ... «</h3>
@@ -143,20 +117,17 @@
                 </li>
             </ul><br>
         </div>
-        <div id="robActions_motorDiff_curve" class="help beginner">
-            <h3 id="BlockbeschreibungThymio-»Steure...Tempo%links...Tempo%rechts...«">»Steure ... Tempo % links ...
-                Tempo % rechts ... «</h3>
-            <p>Mit diesem Block kannst du deinen Roboter fahren lassen und dabei die Geschwindigkeit der Motoren
-                unabhängig voneinander setzen, dadurch kann dein Roboter eine Kurve fahren.</p>
+        <div id="robActions_motorDiff_turn" class="help beginner">
+            <h3 id="BlockbeschreibungThymio-»Drehe...Tempo%...«">»Drehe ... Tempo % ... «</h3>
+            <p>Mit diesem Block kannst du deinen Roboter rotieren lassen. Der Roboter dreht sich dann mit der gewählten
+                Geschwindigkeit, bis diese verändert wird.</p>
             <p>Optionen und Eingabewerte:
             </p>
             <ul style="margin-top: 0; margin-bottom: 10px">
-                <li class="typcn typcn-arrow-sorted-down">Richtung, wähle ob der Roboter vor- oder rückwärts fahren
-                    soll.</li>
-                <li class="typcn typcn-arrow-left">Zahl, die Geschwindigkeit für den linken Motor in Prozent zwischen
-                    -100 und 100.</li>
-                <li class="typcn typcn-arrow-left">Zahl, die Geschwindigkeit für den rechten Motor in Prozent zwischen
-                    -100 und 100.</li>
+                <li class="typcn typcn-arrow-sorted-down">Richtung, wähle ob sich dein Roboter nach links oder rechts
+                    drehen soll.</li>
+                <li class="typcn typcn-arrow-left">Zahl, wähle die Geschwindigkeit mit der sich dein Roboter drehen soll
+                    in Prozent, zwischen -100 und 100.</li>
             </ul><br>
         </div>
         <div id="robActions_motorDiff_curve_for" class="help beginner">
@@ -177,17 +148,20 @@
                 <li class="typcn typcn-arrow-left">Zahl, die Zeit für die der Roboter fahren soll in Millisekunden.</li>
             </ul><br>
         </div>
-        <div id="mbedActions_play_tone" class="help beginner">
-            <h3 id="BlockbeschreibungThymio-»SpieleFrequenzHz...Dauerms...«">»Spiele Frequenz Hz ... Dauer ms ... «</h3>
-            <p>Mit diesem Block kann dein Roboter einen Ton mit einer gewünschten Frequenz für eine bestimmte Zeit
-                abspielen.</p>
-            <p>Eingabewerte:
+        <div id="robActions_motorDiff_curve" class="help beginner">
+            <h3 id="BlockbeschreibungThymio-»Steure...Tempo%links...Tempo%rechts...«">»Steure ... Tempo % links ...
+                Tempo % rechts ... «</h3>
+            <p>Mit diesem Block kannst du deinen Roboter fahren lassen und dabei die Geschwindigkeit der Motoren
+                unabhängig voneinander setzen, dadurch kann dein Roboter eine Kurve fahren.</p>
+            <p>Optionen und Eingabewerte:
             </p>
             <ul style="margin-top: 0; margin-bottom: 10px">
-                <li class="typcn typcn-arrow-left">Zahl, die Frequenz des Tons, Menschen können Töne zwischen 20 und
-                    20.000 Hz wahrnehmen.</li>
-                <li class="typcn typcn-arrow-left">Zahl, die Dauer für die der Ton gespielt werden soll in
-                    Millisekunden.</li>
+                <li class="typcn typcn-arrow-sorted-down">Richtung, wähle ob der Roboter vor- oder rückwärts fahren
+                    soll.</li>
+                <li class="typcn typcn-arrow-left">Zahl, die Geschwindigkeit für den linken Motor in Prozent zwischen
+                    -100 und 100.</li>
+                <li class="typcn typcn-arrow-left">Zahl, die Geschwindigkeit für den rechten Motor in Prozent zwischen
+                    -100 und 100.</li>
             </ul><br>
         </div>
         <div id="mbedActions_play_note" class="help beginner">
@@ -200,6 +174,20 @@
                 <li class="typcn typcn-arrow-sorted-down">Note, wähle die Note, die abgespielt werden soll.</li>
             </ul><br>
         </div>
+        <div id="mbedActions_play_tone" class="help expert">
+            <h3 id="BlockbeschreibungThymio-»SpieleFrequenzHz...Dauerms...«[Experten-Block]">»Spiele Frequenz Hz ...
+                Dauer ms ... « <span class="typcn typcn-star"></span></h3>
+            <p>Mit diesem Block kann dein Roboter einen Ton mit einer gewünschten Frequenz für eine bestimmte Zeit
+                abspielen.</p>
+            <p>Eingabewerte:
+            </p>
+            <ul style="margin-top: 0; margin-bottom: 10px">
+                <li class="typcn typcn-arrow-left">Zahl, die Frequenz des Tons, Menschen können Töne zwischen 20 und
+                    20.000 Hz wahrnehmen.</li>
+                <li class="typcn typcn-arrow-left">Zahl, die Dauer für die der Ton gespielt werden soll in
+                    Millisekunden.</li>
+            </ul><br>
+        </div>
         <div id="robActions_play_file" class="help beginner">
             <h3 id="BlockbeschreibungThymio-»SpieleStück«">»Spiele Stück«</h3>
             <p>Mit diesem Block kann dein Roboter ein vordefiniertes Stück abspielen.</p>
@@ -209,8 +197,9 @@
                 <li class="typcn typcn-arrow-sorted-down">Stück, wähle das Stück aus, das abgespielt werden soll.</li>
             </ul><br>
         </div>
-        <div id="robActions_play_recording" class="help beginner">
-            <h3 id="BlockbeschreibungThymio-»SpieleAufnahmeStück...«">»Spiele Aufnahme Stück ... «</h3>
+        <div id="robActions_play_recording_file" class="help expert">
+            <h3 id="BlockbeschreibungThymio-»SpieleAufnahmeStück...«[Experten-Block]">»Spiele Aufnahme Stück ... « <span
+                    class="typcn typcn-star"></span></h3>
             <p>Mit diesem Block kann dein Roboter eine vorher angefertigte Aufnahme abspielen.</p>
             <p>Eingabewerte:
             </p>
@@ -237,9 +226,9 @@
                 <li class="typcn typcn-arrow-sorted-down">LED, wähle die LED aus, die du ausschalten möchtest.</li>
             </ul><br>
         </div>
-        <div id="robActions_red_led" class="help beginner">
-            <h3 id="BlockbeschreibungThymio-»SchalteKnopf-LEDanoben%...rechts%...unten%...links%...«">»Schalte Knopf-LED
-                an oben % ... rechts % ... unten % ... links % ... «</h3>
+        <div id="robActions_led_button" class="help expert">
+            <h3 id="BlockbeschreibungThymio-»SchalteTasten-LEDan...«[Experten-Block]">»Schalte Tasten-LED an ... « <span
+                    class="typcn typcn-star"></span></h3>
             <p>Mit diesem Knopf kannst du die vier roten LEDs auf der Oberseite deines Roboters, die zusammen ein
                 Steuerkreuz bilden, steuern und deren Helligkeit setzen.</p>
             <p>Eingabewerte:
@@ -255,11 +244,9 @@
                 </li>
             </ul><br>
         </div>
-        <div id="robActions_yellow_led" class="help beginner">
-            <h3
-                id="BlockbeschreibungThymio-»SchalteKreis-LEDanoben%...obenrechts%...rechts%...untenrechts%...unten%...untenlinks%...links%...obenlinks%...«">
-                »Schalte Kreis-LED an oben % ... oben rechts % ... rechts % ... unten rechts % ... unten % ... unten
-                links % ... links % ... oben links % ... «</h3>
+        <div id="robActions_led_circle" class="help expert">
+            <h3 id="BlockbeschreibungThymio-»SchalteKreis-LEDan...«[Experten-Block]">»Schalte Kreis-LED an ... « <span
+                    class="typcn typcn-star"></span></h3>
             <p>Mit diesem Block kannst du die acht orangenen LEDs auf der Oberseite deines Roboters steuern, die
                 zusammen einen Kreis bilden. Du kannst dabei die Helligkeit jeder LED individuell setzen.</p>
             <p>Eingabewerte:
@@ -281,6 +268,89 @@
                 </li>
                 <li class="typcn typcn-arrow-left">Zahl, die Helligkeit der oberen linken LED in Prozent zwischen 0 und
                     100.</li>
+            </ul><br>
+        </div>
+        <div id="robActions_led_proxh" class="help expert">
+            <h3 id="BlockbeschreibungThymio-»SchalteAbstandssensor-LEDan...«[Experten-Block]">»Schalte
+                Abstandssensor-LED an ... « <span class="typcn typcn-star"></span></h3>
+            <p><span style="letter-spacing: -0.006em;">Mit diesem Block kannst du die Helligkeit der LEDs des
+                    Abstandssensors steuern. <span>Du kannst die LEDs auch ausschalten, indem du ihre Helligkeit auf 0%
+                        setzt. Der Abstandssensor hat insgesamt acht LEDs.</span></span></p>
+            <p><span style="letter-spacing: -0.006em;"><span>Eingabewerte:</span></span>
+            </p>
+            <ul style="margin-top: 0; margin-bottom: 10px">
+                <li class="typcn typcn-arrow-left">Zahl, die Helligkeit der vorderen linken LED in Prozent zwischen 0
+                    und 100.</li>
+                <li class="typcn typcn-arrow-left">Zahl, die Helligkeit der vorderen halb linken LED in Prozent zwischen
+                    0 und 100.</li>
+                <li class="typcn typcn-arrow-left">Zahl, die Helligkeit der vorderen mitte/linken LED in Prozent
+                    zwischen 0 und 100.</li>
+                <li class="typcn typcn-arrow-left">Zahl, die Helligkeit der vorderen mitte/rechten LED in Prozent
+                    zwischen 0 und 100.</li>
+                <li class="typcn typcn-arrow-left">Zahl, die Helligkeit der vorderen halb rechten LED in Prozent
+                    zwischen 0 und 100.</li>
+                <li class="typcn typcn-arrow-left">Zahl, die Helligkeit der vorderen rechten LED in Prozent zwischen 0
+                    und 100.</li>
+                <li class="typcn typcn-arrow-left">Zahl, die Helligkeit der hinteren linken LED in Prozent zwischen 0
+                    und 100.</li>
+                <li class="typcn typcn-arrow-left">Zahl, die Helligkeit der hinteren rechten LED in Prozent zwischen 0
+                    und 100.</li>
+            </ul>
+        </div>
+        <div id="robActions_led_proxv" class="help expert">
+            <h3 id="BlockbeschreibungThymio-»SchalteBodensensor-LEDan...«[Experten-Block]">»Schalte Bodensensor-LED an
+                ... « <span class="typcn typcn-star"></span></h3>
+            <p><span style="letter-spacing: -0.006em;">Mit diesem Block kannst du die Helligkeit der LEDs des
+                    Bodensensors steuern. <span>Du kannst die LEDs auch ausschalten, indem du ihre Helligkeit auf 0%
+                        setzt. Der Bodensensor hat zwei LEDs.</span></span></p>
+            <p><span style="letter-spacing: -0.006em;"><span>Eingabewerte:</span></span>
+            </p>
+            <ul style="margin-top: 0; margin-bottom: 10px">
+                <li class="typcn typcn-arrow-left">Zahl, die Helligkeit der unteren linken LED in Prozent zwischen 0 und
+                    100.</li>
+                <li class="typcn typcn-arrow-left">Zahl, die Helligkeit der unteren rechten LED in Prozent zwischen 0
+                    und 100.</li>
+            </ul>
+        </div>
+        <div id="robActions_led_temperature" class="help expert">
+            <h3 id="BlockbeschreibungThymio-»SchalteTemperatursensor-LEDan...«[Experten-Block]">»Schalte
+                Temperatursensor-LED an ... « <span class="typcn typcn-star"></span></h3>
+            <p><span style="letter-spacing: -0.006em;">Mit diesem Block kannst du die Helligkeit der LEDs des
+                    Temperatursensors steuern. Du kannst die LEDs auch ausschalten, indem du ihre Helligkeit auf 0%
+                    setzt. Der Temperatursensor hat eine rote und eine blauen LED.</span></p>
+            <p><span style="letter-spacing: -0.006em;">Eingabewerte:</span>
+            </p>
+            <ul style="margin-top: 0; margin-bottom: 10px">
+                <li class="typcn typcn-arrow-left">Zahl, die Helligkeit der roten LED in Prozent zwischen 0 und 100.
+                </li>
+                <li class="typcn typcn-arrow-left">Zahl, die Helligkeit der blauen LED in Prozent zwischen 0 und 100.
+                </li>
+            </ul><br><br>
+        </div>
+        <div id="robActions_led_sound" class="help expert">
+            <h3 id="BlockbeschreibungThymio-»SchalteMikrofon-LEDan...«[Experten-Block]">»Schalte Mikrofon-LED an ... «
+                <span class="typcn typcn-star"></span></h3>
+            <p><span style="letter-spacing: -0.006em;">Mit diesem Block kannst du die Helligkeit der Mikrofon-LED
+                    steuern. Du kannst die LED auch ausschalten, indem du ihre Helligkeit auf 0% setzt.</span></p>
+            <p><span style="letter-spacing: -0.006em;">Eingabewert:</span>
+            </p>
+            <ul style="margin-top: 0; margin-bottom: 10px">
+                <li class="typcn typcn-arrow-left">Zahl, die Helligkeit der LED in Prozent zwischen 0 und 100.</li>
+            </ul><br>
+        </div>
+        <div id="robSensors_key_getSample" class="help beginner">
+            <h3 id="BlockbeschreibungThymio-»Taste...gedrückt?«">»Taste ... gedrückt?«</h3>
+            <p>Mit diesem Block kannst du die Tasten des Steuerkreuzes deines Roboters abfragen.</p>
+            <p>Optionen:
+            </p>
+            <ul style="margin-top: 0; margin-bottom: 10px">
+                <li class="typcn typcn-arrow-sorted-down">Sensor, wähle die Taste aus, die du abfragen möchtest.</li>
+            </ul><br>
+            <p>Rückgabewert:
+            </p>
+            <ul style="margin-top: 0; margin-bottom: 10px">
+                <li class="typcn typcn-arrow-right">Wahrheitswert, »wahr« wenn die Taste gedrückt wird, sonst »falsch«.
+                </li>
             </ul><br>
         </div>
         <div id="robSensors_infrared_getSample" class="help beginner">
@@ -320,21 +390,6 @@
                 <li class="typcn typcn-arrow-right">Zahl, die Entfernung zum nächsten Objekt in Zentimeter.</li>
             </ul><br>
         </div>
-        <div id="robSensors_key_getSample" class="help beginner">
-            <h3 id="BlockbeschreibungThymio-»Taste...gedrückt?«">»Taste ... gedrückt?«</h3>
-            <p>Mit diesem Block kannst du die Tasten des Steuerkreuzes deines Roboters abfragen.</p>
-            <p>Optionen:
-            </p>
-            <ul style="margin-top: 0; margin-bottom: 10px">
-                <li class="typcn typcn-arrow-sorted-down">Sensor, wähle die Taste aus, die du abfragen möchtest.</li>
-            </ul><br>
-            <p>Rückgabewert:
-            </p>
-            <ul style="margin-top: 0; margin-bottom: 10px">
-                <li class="typcn typcn-arrow-right">Wahrheitswert, »wahr« wenn die Taste gedrückt wird, sonst »falsch«.
-                </li>
-            </ul><br>
-        </div>
         <div id="robSensors_sound_getSample" class="help beginner">
             <h3 id="BlockbeschreibungThymio-»gibGeräusch%Mikrofon«">»gib Geräusch % Mikrofon«</h3>
             <p>Mit diesem Block kannst du das Mikrofon deines Roboters abfragen. Das Mikrofon misst die Lautstärke der
@@ -346,8 +401,35 @@
                 </li>
             </ul><br>
         </div>
-        <div id="robSensors_record_start" class="help beginner">
-            <h3 id="BlockbeschreibungThymio-»StarteAufnahmeMikrofonStück...«">»Starte Aufnahme Mikrofon Stück ... «</h3>
+        <div id="robSensors_tap_getSample" class="help beginner">
+            <h3 id="BlockbeschreibungThymio-»gibWertErschütterungssensor«">»gib Wert Erschütterungssensor«</h3>
+            <p>Mit diesem Block kannst du den Absolutwert des Erschütterungssensors abfragen.</p>
+            <p>Rückgabewert:
+            </p>
+            <ul style="margin-top: 0; margin-bottom: 10px">
+                <li class="typcn typcn-arrow-right">Zahl, die Stärke der Beschleunigung in milli-g, dabei gilt 1000
+                    mill-g = 9,81 m/s².</li>
+            </ul><br>
+        </div>
+        <div id="robSensors_timer_getSample" class="help beginner">
+            <h3 id="BlockbeschreibungThymio-»gibWertmsZeitgeber1«">»gib Wert ms Zeitgeber 1«</h3>
+            <p>Mit diesem Block kannst du den internen Zeitgeber deines Roboters abfragen. Dieser Zeitgeber misst die
+                Zeit, die seit Start des Programms oder dem letzten Zurücksetzen verstrichen ist.</p>
+            <p>Rückgabewert:
+            </p>
+            <ul style="margin-top: 0; margin-bottom: 10px">
+                <li class="typcn typcn-arrow-right">Zahl, die Zeit seit Start des Programms oder dem letzten
+                    Zurücksetzen in Millisekunden.</li>
+            </ul>
+        </div>
+        <div id="robSensors_timer_reset" class="help beginner">
+            <h3 id="BlockbeschreibungThymio-»SetzeZeitgeber1zurück«">»Setze Zeitgeber 1 zurück«</h3>
+            <p>Mit diesem Block kannst du den internen Zeitgeber deines Roboters zurücksetzen, sodass dieser wieder bei
+                Null anfängt zu zählen.</p>
+        </div>
+        <div id="robSensors_record_start" class="help expert">
+            <h3 id="BlockbeschreibungThymio-»StarteAufnahmeMikrofonStück...«[Experten-Block]">»Starte Aufnahme Mikrofon
+                Stück ... « <span class="typcn typcn-star"></span></h3>
             <p>Mit diesem Block kannst du das Mikrofon deines Roboters steuern und eine Aufnahme starten. Du kannst
                 diese Aufnahme dann später wieder abspielen.</p>
             <p>Eingabewert:
@@ -356,13 +438,14 @@
                 <li class="typcn typcn-arrow-left">Zahl, die Nummer unter der die Aufnahme gespeichert werden soll.</li>
             </ul><br>
         </div>
-        <div id="robSensors_record_stop" class="help beginner">
-            <h3 id="BlockbeschreibungThymio-»StoppeAufnahmeMikrofon«">»Stoppe Aufnahme Mikrofon«</h3>
+        <div id="robSensors_record_stop" class="help expert">
+            <h3 id="BlockbeschreibungThymio-»StoppeAufnahmeMikrofon«[Experten-Block]">»Stoppe Aufnahme Mikrofon« <span
+                    class="typcn typcn-star"></span></h3>
             <p>Mit diesem Block kannst du eine laufende Aufnahme stoppen.</p>
         </div>
-        <div id="robSensors_accelerometer_getSample" class="help beginner">
-            <h3 id="BlockbeschreibungThymio-»gibWertmilli-gBeschleunigungssensor...«">»gib Wert milli-g
-                Beschleunigungssensor ... «</h3>
+        <div id="robSensors_accelerometer_getSample" class="help expert">
+            <h3 id="BlockbeschreibungThymio-»gibWertmilli-gBeschleunigungssensor...«[Experten-Block]">»gib Wert milli-g
+                Beschleunigungssensor ... « <span class="typcn typcn-star"></span></h3>
             <p>Mit diesem Block kannst du den Beschleunigungssensor deines Roboters abfragen. Dieser Sensor misst die
                 Stärke der Beschleunigung, die dein Roboter erfährt, und vergleicht sie mit der Erdbeschleunigung von
                 9,81 m/s².</p>
@@ -387,17 +470,6 @@
             </p>
             <ul style="margin-top: 0; margin-bottom: 10px">
                 <li class="typcn typcn-arrow-right">Zahl, die Temperatur der Umgebung in °C.</li>
-            </ul><br>
-        </div>
-        <div id="robSensors_tap_getSample" class="help beginner">
-            <h3 id="BlockbeschreibungThymio-»gibshockmilli-gBeschleunigungssensor«">»gib shock milli-g
-                Beschleunigungssensor«</h3>
-            <p>Mit diesem Block kannst du den Absolutwert des Beschleunigungssensors abfragen.</p>
-            <p>Rückgabewert:
-            </p>
-            <ul style="margin-top: 0; margin-bottom: 10px">
-                <li class="typcn typcn-arrow-right">Zahl, die Stärke der Beschleunigung in milli-g, dabei gilt 1000
-                    mill-g = 9,81 m/s².</li>
             </ul><br>
         </div>
         <div id="robControls_if" class="help beginner">
