@@ -62,7 +62,6 @@ import de.fhg.iais.roberta.syntax.sensor.generic.TimerSensor;
 import de.fhg.iais.roberta.syntax.sensor.thymio.TapSensor;
 import de.fhg.iais.roberta.typecheck.BlocklyType;
 import de.fhg.iais.roberta.util.dbc.DbcException;
-import de.fhg.iais.roberta.util.syntax.BlocklyConstants;
 import de.fhg.iais.roberta.util.syntax.SC;
 import de.fhg.iais.roberta.visitor.validate.CommonNepoValidatorAndCollectorVisitor;
 
@@ -75,7 +74,6 @@ public class ThymioValidatorAndCollectorVisitor extends CommonNepoValidatorAndCo
 
     public ThymioValidatorAndCollectorVisitor(ConfigurationAst robotConfiguration, ClassToInstanceMap<IProjectBean.IBuilder> beanBuilders) {
         super(robotConfiguration, beanBuilders);
-        usedMethodBuilder.addUsedMethod(ThymioMethods.CLOSE);
     }
 
     @Override
@@ -173,6 +171,9 @@ public class ThymioValidatorAndCollectorVisitor extends CommonNepoValidatorAndCo
     @Override
     public Void visitVarDeclaration(VarDeclaration varDeclaration) {
         super.visitVarDeclaration(varDeclaration);
+        if ( (varDeclaration.typeVar == BlocklyType.NUMBER && !varDeclaration.value.getKind().hasName("NUM_CONST")) || (varDeclaration.typeVar == BlocklyType.COLOR && !varDeclaration.value.getKind().hasName("COLOR_CONST")) ) {
+            addErrorToPhrase(varDeclaration.value, "NO_CONST_NOT_SUPPORTED");
+        }
         usedHardwareBuilder.addMarkedVariableAsGlobal(varDeclaration.name);
         return null;
     }
@@ -194,6 +195,8 @@ public class ThymioValidatorAndCollectorVisitor extends CommonNepoValidatorAndCo
             requiredComponentVisited(curveAction, curveAction.paramRight.getDuration().getValue());
             usedMethodBuilder.addUsedMethod(ThymioMethods.STOP);
             usedHardwareBuilder.addDeclaredVariable("duration_");
+        } else {
+            usedHardwareBuilder.addUsedActor(new UsedActor(SC.BOTH, SC.MOTOR));
         }
         return null;
     }
@@ -205,6 +208,8 @@ public class ThymioValidatorAndCollectorVisitor extends CommonNepoValidatorAndCo
             requiredComponentVisited(driveAction, driveAction.param.getDuration().getValue());
             usedMethodBuilder.addUsedMethod(ThymioMethods.STOP);
             usedHardwareBuilder.addDeclaredVariable("duration_");
+        } else {
+            usedHardwareBuilder.addUsedActor(new UsedActor(SC.BOTH, SC.MOTOR));
         }
         return null;
     }
@@ -222,7 +227,8 @@ public class ThymioValidatorAndCollectorVisitor extends CommonNepoValidatorAndCo
     @Override
     public Void visitLightAction(LightAction lightAction) {
         requiredComponentVisited(lightAction, lightAction.rgbLedColor);
-        usedHardwareBuilder.addUsedActor(new UsedActor(BlocklyConstants.EMPTY_PORT, SC.RGBLED));
+        usedHardwareBuilder.addUsedActor(new UsedActor(lightAction.port, SC.RGBLED));
+        usedHardwareBuilder.addDeclaredVariable("color_");
         return null;
     }
 
@@ -254,6 +260,8 @@ public class ThymioValidatorAndCollectorVisitor extends CommonNepoValidatorAndCo
         if ( motorOnAction.param.getDuration() != null ) {
             requiredComponentVisited(motorOnAction, motorOnAction.param.getDuration().getValue());
             usedHardwareBuilder.addDeclaredVariable("duration_");
+        } else {
+            usedHardwareBuilder.addUsedActor(new UsedActor(SC.BOTH, SC.MOTOR));
         }
         return null;
     }
@@ -288,6 +296,7 @@ public class ThymioValidatorAndCollectorVisitor extends CommonNepoValidatorAndCo
     @Override
     public Void visitLedButtonOnAction(LedButtonOnAction ledButtonOnAction) {
         usedHardwareBuilder.addDeclaredVariable("led_");
+        usedHardwareBuilder.addUsedActor(new UsedActor(ledButtonOnAction.getKind().getName(), ledButtonOnAction.getKind().getName()));
         return null;
     }
 
@@ -327,6 +336,8 @@ public class ThymioValidatorAndCollectorVisitor extends CommonNepoValidatorAndCo
             requiredComponentVisited(turnAction, turnAction.param.getDuration().getValue());
             usedMethodBuilder.addUsedMethod(ThymioMethods.STOP);
             usedHardwareBuilder.addDeclaredVariable("duration_");
+        } else {
+            usedHardwareBuilder.addUsedActor(new UsedActor(SC.BOTH, SC.MOTOR));
         }
         return null;
     }
@@ -340,12 +351,14 @@ public class ThymioValidatorAndCollectorVisitor extends CommonNepoValidatorAndCo
     public Void visitLedCircleOnAction(LedCircleOnAction ledCircleOnAction) {
         requiredComponentVisited(ledCircleOnAction, ledCircleOnAction.led1, ledCircleOnAction.led2, ledCircleOnAction.led3, ledCircleOnAction.led4, ledCircleOnAction.led5, ledCircleOnAction.led6, ledCircleOnAction.led7, ledCircleOnAction.led8);
         usedHardwareBuilder.addDeclaredVariable("led_");
+        usedHardwareBuilder.addUsedActor(new UsedActor(ledCircleOnAction.getKind().getName(), ledCircleOnAction.getKind().getName()));
         return null;
     }
 
     @Override
     public Void visitLedSoundOnAction(LedSoundOnAction ledSoundOnAction) {
         requiredComponentVisited(ledSoundOnAction, ledSoundOnAction.led1);
+        usedHardwareBuilder.addUsedActor(new UsedActor(ledSoundOnAction.getKind().getName(), ledSoundOnAction.getKind().getName()));
         usedHardwareBuilder.addDeclaredVariable("led_");
         return null;
     }
@@ -353,6 +366,7 @@ public class ThymioValidatorAndCollectorVisitor extends CommonNepoValidatorAndCo
     @Override
     public Void visitLedTemperatureOnAction(LedTemperatureOnAction ledTemperatureOnAction) {
         requiredComponentVisited(ledTemperatureOnAction, ledTemperatureOnAction.led1, ledTemperatureOnAction.led2);
+        usedHardwareBuilder.addUsedActor(new UsedActor(ledTemperatureOnAction.getKind().getName(), ledTemperatureOnAction.getKind().getName()));
         usedHardwareBuilder.addDeclaredVariable("led_");
         return null;
     }
@@ -360,6 +374,7 @@ public class ThymioValidatorAndCollectorVisitor extends CommonNepoValidatorAndCo
     @Override
     public Void visitLedProxHOnAction(LedProxHOnAction ledProxHOnAction) {
         requiredComponentVisited(ledProxHOnAction, ledProxHOnAction.led1, ledProxHOnAction.led2, ledProxHOnAction.led3, ledProxHOnAction.led4, ledProxHOnAction.led5, ledProxHOnAction.led6, ledProxHOnAction.led7, ledProxHOnAction.led8);
+        usedHardwareBuilder.addUsedActor(new UsedActor(ledProxHOnAction.getKind().getName(), ledProxHOnAction.getKind().getName()));
         usedHardwareBuilder.addDeclaredVariable("led_");
         return null;
     }
@@ -367,6 +382,7 @@ public class ThymioValidatorAndCollectorVisitor extends CommonNepoValidatorAndCo
     @Override
     public Void visitLedProxVOnAction(LedProxVOnAction ledProxVOnAction) {
         requiredComponentVisited(ledProxVOnAction, ledProxVOnAction.led1, ledProxVOnAction.led2);
+        usedHardwareBuilder.addUsedActor(new UsedActor(ledProxVOnAction.getKind().getName(), ledProxVOnAction.getKind().getName()));
         usedHardwareBuilder.addDeclaredVariable("led_");
         return null;
     }

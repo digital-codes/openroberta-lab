@@ -692,6 +692,52 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
             this.sb.append(helperMethodImpls);
         }
         nlIndent();
+        this.sb.append("sub thymio_close");
+        incrIndentation();
+        nlIndent();
+        this.sb.append("timer.period[0] = 0");
+        nlIndent();
+        this.getBean(UsedHardwareBean.class).getUsedActors().stream().forEach(actuator -> {
+            switch ( actuator.getType() ) {
+                case "LED_CIRCLE_ON_ACTION":
+                    this.sb.append("call leds.circle(0, 0, 0, 0, 0, 0, 0, 0)");
+                    nlIndent();
+                    break;
+                case "LED_BUTTON_ON_ACTION":
+                    this.sb.append("call leds.buttons(0, 0, 0, 0)");
+                    nlIndent();
+                    break;
+                case "LED_TEMPERATURE_ON_ACTION":
+                    this.sb.append("call leds.temperature(0, 0)");
+                    nlIndent();
+                    break;
+                case "LED_SOUND_ON_ACTION":
+                    this.sb.append("call leds.sound(0)");
+                    nlIndent();
+                    break;
+                case "LED_PROXH_ON_ACTION":
+                    this.sb.append("call leds.prox.h(0, 0, 0, 0, 0, 0, 0, 0)");
+                    nlIndent();
+                    break;
+                case "LED_PROXV_ON_ACTION":
+                    this.sb.append("call leds.prox.v(0, 0)");
+                    nlIndent();
+                    break;
+                case SC.RGBLED:
+                    this.sb.append("call leds.").append(actuator.getPort().toLowerCase()).append("(0, 0, 0)");
+                    nlIndent();
+                    break;
+                case SC.MOTOR:
+                    this.sb.append("motor.left.target = 0");
+                    nlIndent();
+                    this.sb.append("motor.right.target = 0");
+                    nlIndent();
+                    break;
+                default:
+                    // Nothing to do
+            }
+        });
+        decrIndentation();
        /* this.sb.append("]]></node>");
         nlIndent();
         this.sb.append("</network>");

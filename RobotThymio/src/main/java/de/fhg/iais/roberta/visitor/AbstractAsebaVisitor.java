@@ -1182,6 +1182,8 @@ public abstract class AbstractAsebaVisitor extends AbstractLanguageVisitor {
             } else {
                 throw new DbcException("Unsupported list type");
             }
+        } else {
+            throw new DbcException("Unsupported variable declaration constant");
         }
         return null;
     }
