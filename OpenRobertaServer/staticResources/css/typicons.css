@@ -1,10 +1,10 @@
 @font-face {
     font-family: 'typicons';
-    src: url('fonts/typicons.eot?wqgxlz');
-    src: url('fonts/typicons.eot?wqgxlz#iefix') format('embedded-opentype'),
-    url('fonts/typicons.ttf?wqgxlz') format('truetype'),
-    url('fonts/typicons.woff?wqgxlz') format('woff'),
-    url('fonts/typicons.svg?wqgxlz#typicons') format('svg');
+    src: url('fonts/typicons.eot?xy4bfp');
+    src: url('fonts/typicons.eot?xy4bfp#iefix') format('embedded-opentype'),
+    url('fonts/typicons.ttf?xy4bfp') format('truetype'),
+    url('fonts/typicons.woff?xy4bfp') format('woff'),
+    url('fonts/typicons.svg?xy4bfp#typicons') format('svg');
     font-weight: normal;
     font-style: normal;
     font-display: block;
@@ -25,51 +25,8 @@
     -moz-osx-font-smoothing: grayscale;
 }
 
-.typcn-thymio .path1:before {
+.typcn-thymio:before {
     content: "\ea78";
-    color: rgb(255, 255, 255);
-}
-
-.typcn-thymio .path2:before {
-    content: "\ea79";
-    margin-left: -1em;
-    color: rgb(0, 0, 0);
-}
-
-.typcn-thymio .path3:before {
-    content: "\ea7a";
-    margin-left: -1em;
-    color: rgb(255, 255, 255);
-}
-
-.typcn-thymio .path4:before {
-    content: "\ea7b";
-    margin-left: -1em;
-    color: rgb(0, 0, 0);
-}
-
-.typcn-thymio .path5:before {
-    content: "\ea7c";
-    margin-left: -1em;
-    color: rgb(255, 255, 255);
-}
-
-.typcn-thymio .path6:before {
-    content: "\ea7d";
-    margin-left: -1em;
-    color: rgb(0, 0, 0);
-}
-
-.typcn-thymio .path7:before {
-    content: "\ea7e";
-    margin-left: -1em;
-    color: rgb(0, 0, 0);
-}
-
-.typcn-thymio .path8:before {
-    content: "\ea7f";
-    margin-left: -1em;
-    color: rgb(0, 0, 0);
 }
 
 .typcn-xNN:before {
