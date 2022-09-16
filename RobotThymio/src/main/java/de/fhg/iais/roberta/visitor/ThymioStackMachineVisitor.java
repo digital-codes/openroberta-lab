@@ -33,6 +33,7 @@ import de.fhg.iais.roberta.syntax.action.thymio.PlayRecordingAction;
 import de.fhg.iais.roberta.syntax.action.thymio.RecordStartAction;
 import de.fhg.iais.roberta.syntax.action.thymio.RecordStopAction;
 import de.fhg.iais.roberta.syntax.sensor.generic.InfraredSensor;
+import de.fhg.iais.roberta.syntax.sensor.generic.KeysSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.SoundSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.TimerSensor;
 import de.fhg.iais.roberta.syntax.sensor.thymio.TapSensor;
@@ -50,6 +51,13 @@ public final class ThymioStackMachineVisitor extends AbstractStackMachineVisitor
     @Override
     public Void visitClearDisplayAction(ClearDisplayAction clearDisplayAction) {
         return null;
+    }
+
+    @Override
+    public Void visitKeysSensor(KeysSensor keysSensor) {
+        String mode = keysSensor.getUserDefinedPort().toLowerCase();
+        JSONObject o = makeNode(C.GET_SAMPLE).put(C.GET_SAMPLE, C.BUTTONS).put(C.MODE, mode);
+        return add(o);
     }
 
     @Override

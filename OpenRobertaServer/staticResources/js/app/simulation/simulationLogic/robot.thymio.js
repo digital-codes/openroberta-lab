@@ -13,7 +13,7 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-define(["require", "exports", "robot.ev3", "./robot.actuators", "robot.sensors"], function (require, exports, robot_ev3_1, robot_actuators_1, robot_sensors_1) {
+define(["require", "exports", "robot.ev3", "./robot.actuators", "robot.sensors", "jquery"], function (require, exports, robot_ev3_1, robot_actuators_1, robot_sensors_1, $) {
     Object.defineProperty(exports, "__esModule", { value: true });
     var RobotThymio = /** @class */ (function (_super) {
         __extends(RobotThymio, _super);
@@ -89,16 +89,40 @@ define(["require", "exports", "robot.ev3", "./robot.actuators", "robot.sensors"]
                         break;
                     }
                 }
-            }
-            let myButton: TouchKey[] = [
+            }*/
+            var myButtons = [
+                {
+                    name: 'forward',
+                    value: false
+                },
+                {
+                    name: 'backward',
+                    value: false
+                },
+                {
+                    name: 'left',
+                    value: false
+                },
+                {
+                    name: 'right',
+                    value: false
+                },
                 {
                     name: 'center',
-                    value: false,
-                    port: 'center',
-                    touchColors: ['#000000ff'],
-                },
+                    value: false
+                }
             ];
-            this.buttons = new MbotButton(myButton, this.id);*/
+            this.buttons = new robot_sensors_1.EV3Keys(myButtons, this.id);
+            var thymio = this;
+            for (var property in this['buttons']['keys']) {
+                var $property = $('#' + this['buttons']['keys'][property].name + thymio.id);
+                $property.on('mousedown touchstart', function () {
+                    thymio['buttons']['keys'][this.id.replace(/\d+$/, '')]['value'] = true;
+                });
+                $property.on('mouseup touchend', function () {
+                    thymio['buttons']['keys'][this.id.replace(/\d+$/, '')]['value'] = false;
+                });
+            }
         };
         return RobotThymio;
     }(robot_ev3_1.default));

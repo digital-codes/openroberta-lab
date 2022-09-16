@@ -2,7 +2,8 @@ import { SelectionListener } from 'robot.base';
 import { Interpreter } from 'interpreter.interpreter';
 import RobotEv3 from 'robot.ev3';
 import { ThymioChassis, WebAudio } from './robot.actuators';
-import { TapSensor, ThymioInfraredSensors, ThymioLineSensor, VolumeMeterSensor } from 'robot.sensors';
+import { EV3Keys, TapSensor, ThymioInfraredSensors, ThymioLineSensor, VolumeMeterSensor } from 'robot.sensors';
+import * as $ from 'jquery';
 
 export default class RobotThymio extends RobotEv3 {
     override readonly imgList = ['simpleBackgroundSmall', 'drawBackground', 'rescueBackground', 'mathBackground'];
@@ -83,15 +84,39 @@ export default class RobotThymio extends RobotEv3 {
                     break;
                 }
             }
-        }
-        let myButton: TouchKey[] = [
+        }*/
+        let myButtons = [
+            {
+                name: 'forward',
+                value: false
+            },
+            {
+                name: 'backward',
+                value: false
+            },
+            {
+                name: 'left',
+                value: false
+            },
+            {
+                name: 'right',
+                value: false
+            },
             {
                 name: 'center',
-                value: false,
-                port: 'center',
-                touchColors: ['#000000ff'],
-            },
+                value: false
+            }
         ];
-        this.buttons = new MbotButton(myButton, this.id);*/
+        this.buttons = new EV3Keys(myButtons, this.id);
+        let thymio = this;
+        for (let property in this['buttons']['keys']) {
+            let $property = $('#' + this['buttons']['keys'][property].name + thymio.id);
+            $property.on('mousedown touchstart', function() {
+                thymio['buttons']['keys'][this.id.replace(/\d+$/, '')]['value'] = true;
+            });
+            $property.on('mouseup touchend', function() {
+                thymio['buttons']['keys'][this.id.replace(/\d+$/, '')]['value'] = false;
+            });
+        }
     }
 }
