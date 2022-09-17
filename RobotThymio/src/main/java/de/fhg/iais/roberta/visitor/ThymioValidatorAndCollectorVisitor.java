@@ -278,11 +278,13 @@ public class ThymioValidatorAndCollectorVisitor extends CommonNepoValidatorAndCo
 
     @Override
     public Void visitPlayFileAction(PlayFileAction playFileAction) {
+        usedHardwareBuilder.addDeclaredVariable("duration_");
         return null;
     }
 
     @Override
     public Void visitPlayNoteAction(PlayNoteAction playNoteAction) {
+        usedHardwareBuilder.addDeclaredVariable("duration_");
         return null;
     }
 

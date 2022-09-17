@@ -123,6 +123,7 @@ define(["require", "exports", "robot.ev3", "./robot.actuators", "robot.sensors",
                     thymio['buttons']['keys'][this.id.replace(/\d+$/, '')]['value'] = false;
                 });
             }
+            this.topLed = new robot_actuators_1.ThymioRGBLeds({ x: 5, y: 7.5 });
         };
         return RobotThymio;
     }(robot_ev3_1.default));

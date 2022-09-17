@@ -202,7 +202,7 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
             this.sb.append("motor.").append(motorSide).append(".target = _M_MAX * _A");
             nlIndent();
             motorOnAction.getDurationValue().accept(this);
-            this.sb.append("___duration_ = _A");
+            this.sb.append("___duration_ = _A / timer.period[0]");
             nlIndent();
             this.stateCounter++;
             this.sb.append("_state = ").append(this.stateCounter);
@@ -211,7 +211,7 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
             this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
             incrIndentation();
             nlIndent();
-            this.sb.append("if _time == ___duration_ / timer.period[0] then");
+            this.sb.append("if _time == ___duration_ then");
             incrIndentation();
             nlIndent();
             this.sb.append("motor.").append(motorSide).append(".target = 0");
@@ -261,6 +261,8 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
         nlIndent();
         this.sb.append("call sound.system(").append(playFileAction.fileName).append(")");
         nlIndent();
+        this.sb.append("___duration_ = 1000 / timer.period[0]");
+        nlIndent();
         this.stateCounter++;
         this.sb.append("_state = ").append(this.stateCounter);
         decrIndentation();
@@ -268,7 +270,7 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
         this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
         incrIndentation();
         nlIndent();
-        this.sb.append("if _time == ").append("1000 / timer.period[0] then");
+        this.sb.append("if _time == ").append("___duration_ then");
         incrIndentation();
         addCheckTimeState();
         return null;
@@ -277,6 +279,8 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
     @Override
     public Void visitPlayNoteAction(PlayNoteAction playNoteAction) {
         this.sb.append("_time = 0");
+        nlIndent();
+        this.sb.append("___duration_ = ").append(playNoteAction.duration).append(" / timer.period[0]");
         nlIndent();
         this.sb.append("call sound.freq(").append(playNoteAction.frequency.split("\\.")[0]).append(", ").append(playNoteAction.duration).append("/16)");
         nlIndent();
@@ -287,7 +291,7 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
         this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
         incrIndentation();
         nlIndent();
-        this.sb.append("if _time == ").append(playNoteAction.duration).append("/timer.period[0] then");
+        this.sb.append("if _time == ").append("___duration_ then");
         incrIndentation();
         addCheckTimeState();
         return null;
@@ -390,6 +394,8 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
         toneAction.frequency.accept(this);
         this.sb.append("call sound.freq(_A, ___duration_ / 16)");
         nlIndent();
+        this.sb.append("___duration_ /= timer.period[0]");
+        nlIndent();
         this.stateCounter++;
         this.sb.append("_state = ").append(this.stateCounter);
         decrIndentation();
@@ -397,7 +403,7 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
         this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
         incrIndentation();
         nlIndent();
-        this.sb.append("if _time == ___duration_ / timer.period[0] then");
+        this.sb.append("if _time == ___duration_ then");
         incrIndentation();
         addCheckTimeState();
         return null;
@@ -421,7 +427,7 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
             this.sb.append("motor.right.target = _M_MAX * ").append(multRight).append("_A");
             nlIndent();
             duration.getValue().accept(this);
-            this.sb.append("___duration_ = _A");
+            this.sb.append("___duration_ = _A / timer.period[0]");
             nlIndent();
             this.stateCounter++;
             this.sb.append("_state = ").append(this.stateCounter);
@@ -430,7 +436,7 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
             this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
             incrIndentation();
             nlIndent();
-            this.sb.append("if _time == ___duration_ / timer.period[0] then");
+            this.sb.append("if _time == ___duration_ then");
             incrIndentation();
             nlIndent();
             this.sb.append("callsub diffdrive_stop");
@@ -454,7 +460,7 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
             this.sb.append("motor.right.target = _M_MAX * ").append(multRight).append("_A");
             nlIndent();
             duration.getValue().accept(this);
-            this.sb.append("___duration_ = _A");
+            this.sb.append("___duration_ = _A / timer.period[0]");
             nlIndent();
             this.stateCounter++;
             this.sb.append("_state = ").append(this.stateCounter);
@@ -463,7 +469,7 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
             this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
             incrIndentation();
             nlIndent();
-            this.sb.append("if _time == ___duration_ / timer.period[0] then");
+            this.sb.append("if _time == ___duration_ then");
             incrIndentation();
             nlIndent();
             this.sb.append("callsub diffdrive_stop");
@@ -487,7 +493,7 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
         this.sb.append("_time = 0");
         nlIndent();
         waitTimeStmt.time.accept(this);
-        this.sb.append("___duration_ = _A");
+        this.sb.append("___duration_ = _A / timer.period[0]");
         nlIndent();
         this.stateCounter++;
         this.sb.append("_state = ").append(this.stateCounter);
@@ -496,7 +502,7 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
         this.sb.append("elseif _state == ").append(this.stateCounter).append(" then");
         incrIndentation();
         nlIndent();
-        this.sb.append("if _time == ___duration_ / timer.period[0] then");
+        this.sb.append("if _time == ___duration_ then");
         incrIndentation();
         addCheckTimeState();
         return null;

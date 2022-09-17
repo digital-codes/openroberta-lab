@@ -1,7 +1,9 @@
 package de.fhg.iais.roberta.visitor;
 
+import java.util.Arrays;
 import java.util.List;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import de.fhg.iais.roberta.components.ConfigurationAst;
@@ -11,6 +13,7 @@ import de.fhg.iais.roberta.syntax.Phrase;
 import de.fhg.iais.roberta.syntax.action.display.ClearDisplayAction;
 import de.fhg.iais.roberta.syntax.action.display.ShowTextAction;
 import de.fhg.iais.roberta.syntax.action.light.LedsOffAction;
+import de.fhg.iais.roberta.syntax.action.light.LightAction;
 import de.fhg.iais.roberta.syntax.action.motor.MotorGetPowerAction;
 import de.fhg.iais.roberta.syntax.action.motor.MotorOnAction;
 import de.fhg.iais.roberta.syntax.action.motor.MotorSetPowerAction;
@@ -32,6 +35,7 @@ import de.fhg.iais.roberta.syntax.action.thymio.LedTemperatureOnAction;
 import de.fhg.iais.roberta.syntax.action.thymio.PlayRecordingAction;
 import de.fhg.iais.roberta.syntax.action.thymio.RecordStartAction;
 import de.fhg.iais.roberta.syntax.action.thymio.RecordStopAction;
+import de.fhg.iais.roberta.syntax.lang.expr.ColorConst;
 import de.fhg.iais.roberta.syntax.sensor.generic.InfraredSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.KeysSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.SoundSensor;
@@ -103,6 +107,24 @@ public final class ThymioStackMachineVisitor extends AbstractStackMachineVisitor
     }
 
     @Override
+    public Void visitLightAction(LightAction lightAction) {
+        lightAction.rgbLedColor.accept(this);
+        String port = lightAction.port.toString().toLowerCase();
+        JSONObject o = makeNode(C.LED_ON_ACTION).put(C.PORT, port);
+        return add(o);
+    }
+
+    @Override
+    public Void visitColorConst(ColorConst colorConst) {
+        int r = colorConst.getRedChannelInt();
+        int g = colorConst.getGreenChannelInt();
+        int b = colorConst.getBlueChannelInt();
+
+        JSONObject o = makeNode(C.EXPR).put(C.EXPR, "COLOR_CONST").put(C.VALUE, new JSONArray(Arrays.asList(r, g, b)));
+        return add(o);
+    }
+
+    @Override
     public Void visitSoundSensor(SoundSensor soundSensor) {
         return add(makeNode(C.GET_SAMPLE).put(C.GET_SAMPLE, C.SOUND).put(C.MODE, C.VOLUME));
     }
@@ -156,7 +178,9 @@ public final class ThymioStackMachineVisitor extends AbstractStackMachineVisitor
 
     @Override
     public Void visitLedsOffAction(LedsOffAction ledsOffAction) {
-        return null;
+        String port = ledsOffAction.port.toString().toLowerCase();
+        JSONObject o = makeNode(C.STATUS_LIGHT_ACTION).put(C.PORT, port);
+        return add(o);
     }
 
     @Override
