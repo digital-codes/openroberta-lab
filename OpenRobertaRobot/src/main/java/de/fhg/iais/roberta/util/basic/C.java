@@ -39,6 +39,7 @@ public class C {
     public static final String CAST_STRING_NUMBER = "textStringCastNumberFunct";
     public static final String CAST_CHAR_NUMBER = "textCharCastNumberFunct";
     public static final String CHARACTER = "character";
+    public static final String CIRCLE_LED_ACTION = "cirleLedAction";
     public static final String CLEAR_DISPLAY_ACTION = "ClearDisplay";
     public static final String COLOR = "color";
     public static final String COLOR_CONST = "COLOR_CONST";

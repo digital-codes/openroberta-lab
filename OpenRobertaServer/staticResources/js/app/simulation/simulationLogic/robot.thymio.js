@@ -124,6 +124,7 @@ define(["require", "exports", "robot.ev3", "./robot.actuators", "robot.sensors",
                 });
             }
             this.topLed = new robot_actuators_1.ThymioRGBLeds({ x: 5, y: 7.5 });
+            this.circleLeds = new robot_actuators_1.ThymioCircleLeds(this.id);
         };
         return RobotThymio;
     }(robot_ev3_1.default));

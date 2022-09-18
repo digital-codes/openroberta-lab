@@ -175,6 +175,9 @@ define(["require", "exports", "./interpreter.aRobotBehaviour", "./interpreter.co
             var robotText = '> Assertion failed: ' + _msg + ' ' + _left + ' ' + _op + ' ' + _right;
             U.info(' assert action ' + robotText);
         };
+        RobotWeDoBehaviourTest.prototype.circleLedAction = function (ledValues) {
+            throw new Error('Method not implemented.');
+        };
         return RobotWeDoBehaviourTest;
     }(interpreter_aRobotBehaviour_1.ARobotBehaviour));
     exports.RobotWeDoBehaviourTest = RobotWeDoBehaviourTest;

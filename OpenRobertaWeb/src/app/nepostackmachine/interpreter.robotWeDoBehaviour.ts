@@ -18,7 +18,7 @@ export class RobotWeDoBehaviour extends ARobotBehaviour {
         DOWN: '9.0',
         BACK: '5.0',
         FRONT: '7.0',
-        NO: '0.0',
+        NO: '0.0'
     };
 
     constructor(btInterfaceFct: any, toDisplayFct: any) {
@@ -229,7 +229,7 @@ export class RobotWeDoBehaviour extends ARobotBehaviour {
             action: 'on',
             id: port,
             direction: speed < 0 ? 1 : 0,
-            power: Math.abs(speed),
+            power: Math.abs(speed)
         };
         this.btInterfaceFct(cmd);
         return 0;
@@ -369,5 +369,9 @@ export class RobotWeDoBehaviour extends ARobotBehaviour {
         if (!_value) {
             this.showTextAction('> Assertion failed: ' + _msg + ' ' + _left + ' ' + _op + ' ' + _right, undefined);
         }
+    }
+
+    circleLedAction(ledValues: number[]): void {
+        throw new Error('Method not implemented.');
     }
 }

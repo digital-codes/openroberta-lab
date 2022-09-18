@@ -447,6 +447,14 @@ define(["require", "exports", "./interpreter.state", "./interpreter.constants", 
                     case C.STATUS_LIGHT_ACTION:
                         this.robotBehaviour.statusLightOffAction(stmt[C.NAME], stmt[C.PORT]);
                         return [0, true];
+                    case C.CIRCLE_LED_ACTION:
+                        var ledValues = new Array(8);
+                        for (var i = 0; i < 8; i++) {
+                            var val = this.state.pop();
+                            ledValues[7 - i] = val;
+                        }
+                        this.robotBehaviour.circleLedAction(ledValues);
+                        return [0, true];
                     case C.STOP:
                         U.debug('PROGRAM TERMINATED. stop op');
                         this.terminated = true;
@@ -1099,7 +1107,7 @@ define(["require", "exports", "./interpreter.state", "./interpreter.constants", 
                         array.shift();
                         array.push(0);
                     });
-                },
+                }
             };
             if (nShift < 0) {
                 nShift *= -1;
@@ -1143,7 +1151,7 @@ define(["require", "exports", "./interpreter.state", "./interpreter.constants", 
                         array.shift();
                         array.push(0);
                     });
-                },
+                }
             };
             if (nShift < 0) {
                 nShift *= -1;

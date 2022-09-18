@@ -422,4 +422,8 @@ export class RobotSimBehaviour extends ARobotBehaviour {
     remember(num: number): void {
         globalThis.rob3rtaNumber = num;
     }
+
+    circleLedAction(ledValues: number[]): void {
+        this.hardwareState.actions.cirleLeds = ledValues;
+    }
 }

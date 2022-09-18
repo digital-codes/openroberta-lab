@@ -162,12 +162,10 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
         this.sb.append("onevent timer0");
         incrIndentation();
         nlIndent();
-        if ( !this
+        if ( !(this
             .getBean(UsedHardwareBean.class)
             .getUsedSensors()
-            .stream()
-            .filter(usedSensor -> usedSensor.getType().equals(SC.TIMER))
-            .collect(Collectors.toList()).isEmpty() ) {
+            .stream().noneMatch(usedSensor -> usedSensor.getType().equals(SC.TIMER))) ) {
             this.sb.append("_timer += 10");
             nlIndent();
         }
@@ -703,7 +701,7 @@ public final class ThymioAsebaVisitor extends AbstractAsebaVisitor implements IT
         nlIndent();
         this.sb.append("timer.period[0] = 0");
         nlIndent();
-        this.getBean(UsedHardwareBean.class).getUsedActors().stream().forEach(actuator -> {
+        this.getBean(UsedHardwareBean.class).getUsedActors().forEach(actuator -> {
             switch ( actuator.getType() ) {
                 case "LED_CIRCLE_ON_ACTION":
                     this.sb.append("call leds.circle(0, 0, 0, 0, 0, 0, 0, 0)");

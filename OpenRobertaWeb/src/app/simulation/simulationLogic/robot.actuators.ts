@@ -836,14 +836,14 @@ export class ThymioChassis extends ChassisDiffDrive {
         + '            <g class="simKey" id="backward' + this.id + '" transform="matrix(0,1,1,0,-140.47879,302.97336)"><path d="m -540.398,465.656 h -9.899 l 2.477,-4.285 2.472,-4.285 2.477,4.285 z" style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#e1e1e1;stroke-width:18.6392;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" id="path1950-2"/></g>'
         + '            <g class="simKey" id="right' + this.id + '" transform="matrix(-1,0,0,1,-140.47879,302.97336)"><path d="m -496.27,-581.387 h -9.898 l 2.473,-4.285 2.476,-4.289 2.473,4.289 z" style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#e1e1e1;stroke-width:18.6392;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" id="path1954-09"/></g>'
         + '            <ellipse class="simKey" id="center' + this.id + '" style="fill: rgb(225, 225, 225);" transform="matrix(0, -1, -1, 0, 673.966797, 323.265869)" cx="565.5" cy="313" rx="20" ry="20"></ellipse>'
-        + '            <g id="g1962-8" transform="matrix(-1,-0.383864,-0.383864,1,-140.47879,302.97336)"><path d="m -192.384,-643.373 c -0.002,15.117 -5.326,29.749 -15.044,41.327" style="fill:none;stroke:#ffec7a;stroke-width:4.20567;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" id="path1964-1"/></g>'
-        + '            <g id="g1966-4" transform="matrix(-0.383864,1,1,0.383864,-140.47879,302.97336)"><path d="m -581.138,253.215 c -0.002,15.117 -5.327,29.752 -15.045,41.33" style="fill:none;stroke:#ffec7a;stroke-width:4.20567;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" id="path1968-1"/></g>'
-        + '            <g id="g1970-6" transform="matrix(-1,0.445229,0.445229,1,-140.47879,302.97336)"><path d="m -559.912,-270.028 c 0.001,14.793 -5.211,29.11 -14.721,40.441" style="fill:none;stroke:#ffec7a;stroke-width:4.11542;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" id="path1972-7"/></g>'
-        + '            <g id="g1974-5" transform="matrix(0.445229,1,1,-0.445229,-140.47879,302.97336)"><path d="m -208.55,620.505 c 0,14.793 -5.211,29.109 -14.72,40.444" style="fill:none;stroke:#ffec7a;stroke-width:4.11542;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" id="path1976-5"/></g>'
-        + '            <g id="g1978-7" transform="matrix(1,0.383864,0.383864,-1,-140.47879,302.97336)"><path d="m 316.272,643.46 c 0.002,15.118 -5.327,29.752 -15.041,41.332" style="fill:none;stroke:#ffec7a;stroke-width:4.20567;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" id="path1980-7"/></g>'
-        + '            <g id="g1982-5" transform="matrix(-0.445229,-1,-1,0.445229,-140.47879,302.97336)"><path d="m 329.897,-621.856 c 0.001,14.793 -5.21,29.112 -14.719,40.444" style="fill:none;stroke:#ffec7a;stroke-width:4.11542;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" id="path1984-8"/></g>'
-        + '            <g id="g1986-5" transform="matrix(1,-0.445229,-0.445229,-1,-140.47879,302.97336)"><path d="m 682.227,268.491 c 10e-4,14.793 -5.21,29.113 -14.716,40.443" style="fill:none;stroke:#ffec7a;stroke-width:4.11542;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" id="path1988-09"/></g>'
-        + '            <g id="g1990-3" transform="matrix(0.383864,-1,-1,-0.383864,-140.47879,302.97336)"><path d="m 705.591,-255.231 c 0.002,15.118 -5.327,29.752 -15.041,41.332" style="fill:none;stroke:#ffec7a;stroke-width:4.20567;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" id="path1992-2"/></g>'
+        + '            <g id="g1962-8" transform="matrix(-1,-0.383864,-0.383864,1,-140.47879,302.97336)"><path d="m -192.384,-643.373 c -0.002,15.117 -5.326,29.749 -15.044,41.327" style="fill:none;stroke:#ffec7a;stroke-width:4.20567;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" id="cLed4-' + this.id + '"/></g>'
+        + '            <g id="g1966-4" transform="matrix(-0.383864,1,1,0.383864,-140.47879,302.97336)"><path d="m -581.138,253.215 c -0.002,15.117 -5.327,29.752 -15.045,41.33" style="fill:none;stroke:#ffec7a;stroke-width:4.20567;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" id="cLed6-' + this.id + '"/></g>'
+        + '            <g id="g1970-6" transform="matrix(-1,0.445229,0.445229,1,-140.47879,302.97336)"><path d="m -559.912,-270.028 c 0.001,14.793 -5.211,29.11 -14.721,40.441" style="fill:none;stroke:#ffec7a;stroke-width:4.11542;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" id="cLed5-' + this.id + '"/></g>'
+        + '            <g id="g1974-5" transform="matrix(0.445229,1,1,-0.445229,-140.47879,302.97336)"><path d="m -208.55,620.505 c 0,14.793 -5.211,29.109 -14.72,40.444" style="fill:none;stroke:#ffec7a;stroke-width:4.11542;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" id="cLed7-' + this.id + '"/></g>'
+        + '            <g id="g1978-7" transform="matrix(1,0.383864,0.383864,-1,-140.47879,302.97336)"><path d="m 316.272,643.46 c 0.002,15.118 -5.327,29.752 -15.041,41.332" style="fill:none;stroke:#ffec7a;stroke-width:4.20567;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" id="cLed0-' + this.id + '"/></g>'
+        + '            <g id="g1982-5" transform="matrix(-0.445229,-1,-1,0.445229,-140.47879,302.97336)"><path d="m 329.897,-621.856 c 0.001,14.793 -5.21,29.112 -14.719,40.444" style="fill:none;stroke:#ffec7a;stroke-width:4.11542;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" id="cLed3-' + this.id + '"/></g>'
+        + '            <g id="g1986-5" transform="matrix(1,-0.445229,-0.445229,-1,-140.47879,302.97336)"><path d="m 682.227,268.491 c 10e-4,14.793 -5.21,29.113 -14.716,40.443" style="fill:none;stroke:#ffec7a;stroke-width:4.11542;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" id="cLed1-' + this.id + '"/></g>'
+        + '            <g id="g1990-3" transform="matrix(0.383864,-1,-1,-0.383864,-140.47879,302.97336)"><path d="m 705.591,-255.231 c 0.002,15.118 -5.327,29.752 -15.041,41.332" style="fill:none;stroke:#ffec7a;stroke-width:4.20567;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" id="cLed2-' + this.id + '"/></g>'
         + '            <g id="g1915-4"><path d="m 330.48621,-110.69067 c -3.125,0 -5.66,2.535 -5.66,5.66 0,3.125 2.535,5.656 5.66,5.656 3.125,0 5.656,-2.531 5.656,-5.656 0,-3.125 -2.531,-5.66 -5.656,-5.66 z" style="fill:#e1e1e1;fill-opacity:0.992157;fill-rule:nonzero;stroke:none" id="path1994-3"/>'
         + '                <g id="g1996-6" transform="matrix(0,-1,-1,0,-140.47879,302.97336)"><path d="m 413.664,-470.965 c 0,3.125 -2.535,5.66 -5.66,5.66 -3.125,0 -5.656,-2.535 -5.656,-5.66 0,-3.125 2.531,-5.656 5.656,-5.656 3.125,0 5.66,2.531 5.66,5.656 z" style="fill:none;stroke:#e1e1e1;stroke-width:2.10875;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.992157" id="path1998-2"/></g>'
         + '                <path d="m 330.48621,-128.66367 c -3.125,0 -5.66,2.535 -5.66,5.66 0,3.125 2.535,5.657 5.66,5.657 3.125,0 5.656,-2.532 5.656,-5.657 0,-3.125 -2.531,-5.66 -5.656,-5.66 z" style="fill:#e1e1e1;fill-opacity:0.992157;fill-rule:nonzero;stroke:none" id="path2000-3"/>'
@@ -1885,6 +1885,41 @@ export class ThymioRGBLeds implements IUpdateAction, IDrawable, IReset {
                     this.color = led.color;
                 }
             }
+        }
+    }
+}
+
+export class ThymioCircleLeds implements IUpdateAction, IDrawable, IReset {
+    leds: number[] = [0, 0, 0, 0, 0, 0, 0, 0];
+    myRobotId: number;
+
+    constructor(id: number) {
+        this.myRobotId = id;
+        this.change();
+    }
+
+    draw(rCtx: CanvasRenderingContext2D, myRobot: RobotBase): void {
+        // TODO on robot?
+    }
+
+    drawPriority: number = 11;
+
+    reset(): void {
+        this.leds = [0, 0, 0, 0, 0, 0, 0, 0];
+        this.change();
+    }
+
+    change(): void {
+        for (let i = 0; i < 8; i++) {
+            $('#cLed' + i + '-' + this.myRobotId).css({ 'stroke': 'rgba(255, 236, 122,' + this.leds[i] / 100 });
+        }
+    }
+
+    updateAction(myRobot: RobotBase, dt: number, interpreterRunning: boolean): void {
+        let circleLeds = myRobot.interpreter.getRobotBehaviour().getActionState('cirleLeds', true);
+        if (circleLeds) {
+            this.leds = circleLeds;
+            this.change();
         }
     }
 }

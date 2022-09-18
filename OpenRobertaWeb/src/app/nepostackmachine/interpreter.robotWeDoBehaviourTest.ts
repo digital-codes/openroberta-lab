@@ -201,4 +201,8 @@ export class RobotWeDoBehaviourTest extends ARobotBehaviour {
         const robotText = '> Assertion failed: ' + _msg + ' ' + _left + ' ' + _op + ' ' + _right;
         U.info(' assert action ' + robotText);
     }
+
+    circleLedAction(ledValues: number[]): void {
+        throw new Error('Method not implemented.');
+    }
 }

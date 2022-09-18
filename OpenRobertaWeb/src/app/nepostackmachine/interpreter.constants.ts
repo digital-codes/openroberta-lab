@@ -37,6 +37,7 @@ export const CAST_STRING: string = "mathCastStringFunct";
 export const CAST_STRING_NUMBER: string = "textStringCastNumberFunct";
 export const CAST_CHAR_NUMBER: string = "textCharCastNumberFunct";
 export const CHARACTER: string = "character";
+export const CIRCLE_LED_ACTION: string = "cirleLedAction";
 export const CLEAR_DISPLAY_ACTION: string = "ClearDisplay";
 export const COLOR: string = "color";
 export const COLOR_CONST: string = "COLOR_CONST";

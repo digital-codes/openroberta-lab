@@ -153,7 +153,15 @@ public final class ThymioStackMachineVisitor extends AbstractStackMachineVisitor
 
     @Override
     public Void visitLedCircleOnAction(LedCircleOnAction ledCircleOnAction) {
-        return null;
+        ledCircleOnAction.led1.accept(this);
+        ledCircleOnAction.led2.accept(this);
+        ledCircleOnAction.led3.accept(this);
+        ledCircleOnAction.led4.accept(this);
+        ledCircleOnAction.led5.accept(this);
+        ledCircleOnAction.led6.accept(this);
+        ledCircleOnAction.led7.accept(this);
+        ledCircleOnAction.led8.accept(this);
+        return add(makeNode(C.CIRCLE_LED_ACTION));
     }
 
     @Override

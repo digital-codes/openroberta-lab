@@ -397,6 +397,9 @@ define(["require", "exports", "./interpreter.aRobotBehaviour", "./interpreter.co
         RobotSimBehaviour.prototype.remember = function (num) {
             globalThis.rob3rtaNumber = num;
         };
+        RobotSimBehaviour.prototype.circleLedAction = function (ledValues) {
+            this.hardwareState.actions.cirleLeds = ledValues;
+        };
         return RobotSimBehaviour;
     }(interpreter_aRobotBehaviour_1.ARobotBehaviour));
     exports.RobotSimBehaviour = RobotSimBehaviour;
