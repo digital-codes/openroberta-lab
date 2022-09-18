@@ -148,7 +148,11 @@ public final class ThymioStackMachineVisitor extends AbstractStackMachineVisitor
 
     @Override
     public Void visitLedButtonOnAction(LedButtonOnAction ledButtonOnAction) {
-        return null;
+        ledButtonOnAction.led1.accept(this);
+        ledButtonOnAction.led2.accept(this);
+        ledButtonOnAction.led3.accept(this);
+        ledButtonOnAction.led4.accept(this);
+        return add(makeNode(C.BUTTON_LED_ACTION));
     }
 
     @Override
@@ -176,7 +180,15 @@ public final class ThymioStackMachineVisitor extends AbstractStackMachineVisitor
 
     @Override
     public Void visitLedProxHOnAction(LedProxHOnAction ledProxHOnAction) {
-        return null;
+        ledProxHOnAction.led1.accept(this);
+        ledProxHOnAction.led2.accept(this);
+        ledProxHOnAction.led3.accept(this);
+        ledProxHOnAction.led4.accept(this);
+        ledProxHOnAction.led5.accept(this);
+        ledProxHOnAction.led6.accept(this);
+        ledProxHOnAction.led7.accept(this);
+        ledProxHOnAction.led8.accept(this);
+        return add(makeNode(C.PROXH_LED_ACTION));
     }
 
     @Override

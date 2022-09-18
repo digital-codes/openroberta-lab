@@ -205,4 +205,10 @@ export class RobotWeDoBehaviourTest extends ARobotBehaviour {
     circleLedAction(ledValues: number[]): void {
         throw new Error('Method not implemented.');
     }
+
+    buttonLedAction(ledValues: number[]): void {
+    }
+
+    proxHLedAction(ledValues: number[]): void {
+    }
 }

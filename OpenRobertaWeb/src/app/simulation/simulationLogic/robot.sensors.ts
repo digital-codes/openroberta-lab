@@ -199,31 +199,31 @@ export abstract class DistanceSensor implements IExternalSensor, IDrawable {
                 x1: this.rx,
                 y1: this.ry,
                 x2: this.rx + this.maxLength * Math.cos(robot.pose.theta + this.theta),
-                y2: this.ry + this.maxLength * Math.sin(robot.pose.theta + this.theta),
+                y2: this.ry + this.maxLength * Math.sin(robot.pose.theta + this.theta)
             };
             let u1 = {
                 x1: this.rx,
                 y1: this.ry,
                 x2: this.rx + this.maxLength * Math.cos(robot.pose.theta - Math.PI / 8 + this.theta),
-                y2: this.ry + this.maxLength * Math.sin(robot.pose.theta - Math.PI / 8 + this.theta),
+                y2: this.ry + this.maxLength * Math.sin(robot.pose.theta - Math.PI / 8 + this.theta)
             };
             let u2 = {
                 x1: this.rx,
                 y1: this.ry,
                 x2: this.rx + this.maxLength * Math.cos(robot.pose.theta - Math.PI / 16 + this.theta),
-                y2: this.ry + this.maxLength * Math.sin(robot.pose.theta - Math.PI / 16 + this.theta),
+                y2: this.ry + this.maxLength * Math.sin(robot.pose.theta - Math.PI / 16 + this.theta)
             };
             let u5 = {
                 x1: this.rx,
                 y1: this.ry,
                 x2: this.rx + this.maxLength * Math.cos(robot.pose.theta + Math.PI / 8 + this.theta),
-                y2: this.ry + this.maxLength * Math.sin(robot.pose.theta + Math.PI / 8 + this.theta),
+                y2: this.ry + this.maxLength * Math.sin(robot.pose.theta + Math.PI / 8 + this.theta)
             };
             let u4 = {
                 x1: this.rx,
                 y1: this.ry,
                 x2: this.rx + this.maxLength * Math.cos(robot.pose.theta + Math.PI / 16 + this.theta),
-                y2: this.ry + this.maxLength * Math.sin(robot.pose.theta + Math.PI / 16 + this.theta),
+                y2: this.ry + this.maxLength * Math.sin(robot.pose.theta + Math.PI / 16 + this.theta)
             };
 
             let uA = [u1, u2, u3, u4, u5];
@@ -401,6 +401,8 @@ export class ThymioInfraredSensor extends DistanceSensor {
             rCtx.lineTo(this.cx, this.cy);
             rCtx.stroke();
         }
+        rCtx.restore();
+        rCtx.save();
         rCtx.translate(myRobot.pose.x, myRobot.pose.y);
         rCtx.rotate(myRobot.pose.theta);
     }
@@ -431,7 +433,8 @@ export class ThymioLineSensor implements ISensor, IDrawable, ILabel {
         rCtx.beginPath();
         rCtx.lineWidth = 0.1;
         rCtx.arc(this.x, this.y - this.dy / 2, this.r, 0, Math.PI * 2);
-        rCtx.fillStyle = 'rgba(255, 0, 0, ' + this.left.light / 100 + ')';
+        let leftLight = this.left.light / 100 * 255;
+        rCtx.fillStyle = 'rgb(' + leftLight + ', ' + leftLight + ', ' + leftLight + ')';
         rCtx.fill();
         rCtx.strokeStyle = 'black';
         rCtx.stroke();
@@ -439,7 +442,8 @@ export class ThymioLineSensor implements ISensor, IDrawable, ILabel {
         rCtx.beginPath();
         rCtx.lineWidth = 0.1;
         rCtx.arc(this.x, this.y + this.dy / 2, this.r, 0, Math.PI * 2);
-        rCtx.fillStyle = 'rgba(255, 0, 0, ' + this.right.light / 100 + ')';
+        let leftRight = this.right.light / 100 * 255;
+        rCtx.fillStyle = 'rgb(' + leftRight + ', ' + leftRight + ', ' + leftRight + ')';
         rCtx.fill();
         rCtx.strokeStyle = 'black';
         rCtx.stroke();
@@ -551,8 +555,8 @@ export class ThymioInfraredSensors implements ISensor, IDrawable, ILabel {
     constructor() {
         this.infraredSensorArray[0] = new ThymioInfraredSensor(
             '0',
-            26 * Math.cos(-Math.PI / 4),
-            26 * Math.sin(-Math.PI / 4),
+            24 * Math.cos(-Math.PI / 4),
+            24 * Math.sin(-Math.PI / 4),
             -Math.PI / 4,
             14,
             Blockly.Msg.FRONT_LEFT
@@ -576,8 +580,8 @@ export class ThymioInfraredSensors implements ISensor, IDrawable, ILabel {
         );
         this.infraredSensorArray[4] = new ThymioInfraredSensor(
             '4',
-            26 * Math.cos(Math.PI / 4),
-            26 * Math.sin(Math.PI / 4),
+            24 * Math.cos(Math.PI / 4),
+            24 * Math.sin(Math.PI / 4),
             Math.PI / 4,
             14,
             Blockly.Msg.FRONT_RIGHT
@@ -1159,7 +1163,7 @@ export class TouchKeys extends Keys implements IMouse {
         let myEvent = e as unknown as SimMouseEvent;
         this.lastMousePosition = {
             x: myEvent.startX,
-            y: myEvent.startY,
+            y: myEvent.startY
         };
         if (this.uCtx !== undefined) {
             let myMouseColorData = this.uCtx.getImageData(this.lastMousePosition.x, this.lastMousePosition.y, 1, 1).data;
@@ -1184,7 +1188,7 @@ export class TouchKeys extends Keys implements IMouse {
         let myEvent = e as unknown as SimMouseEvent;
         this.lastMousePosition = {
             x: myEvent.startX,
-            y: myEvent.startY,
+            y: myEvent.startY
         };
         if (this.uCtx !== undefined) {
             let myMouseColorData = this.uCtx.getImageData(this.lastMousePosition.x, this.lastMousePosition.y, 1, 1).data;
@@ -1250,10 +1254,10 @@ export class Pins extends TouchKeys implements IDrawable {
                 }
                 $mySensorGenerator.append(
                     '<input type="text" value="0" style="margin-bottom: 8px;margin-top: 12px; min-width: 45px; width: 45px; display: inline-block; border: 1px solid #333; border-radius: 2px; text-align: right; float: right; padding: 0" id="rangePin' +
-                        pin.port +
-                        '" name="rangePin' +
-                        pin.port +
-                        '" class="range" />'
+                    pin.port +
+                    '" name="rangePin' +
+                    pin.port +
+                    '" class="range" />'
                 );
                 $mySensorGenerator.append(
                     '<div style="margin:8px 0;"><input id="sliderPin' + pin.port + '" type="range" min="0" max="' + range + '" value="0" step="1" /></div>'
@@ -1418,7 +1422,7 @@ export class MbotButton extends TouchKeys {
         let myEvent = e as unknown as SimMouseEvent;
         this.lastMousePosition = {
             x: myEvent.startX,
-            y: myEvent.startY,
+            y: myEvent.startY
         };
         let myCtx = (this.$touchLayer as any).get(0).getContext('2d');
         let myMouseColorData = myCtx.getImageData(this.lastMousePosition.x, this.lastMousePosition.y, 1, 1).data;
@@ -1442,7 +1446,7 @@ export class MbotButton extends TouchKeys {
         let myEvent = e as unknown as SimMouseEvent;
         this.lastMousePosition = {
             x: myEvent.startX,
-            y: myEvent.startY,
+            y: myEvent.startY
         };
         let myKeys: string[] = this.color2Keys[this.lastMouseColor];
         let myCtx = (this.$touchLayer as any).get(0).getContext('2d');
@@ -1483,29 +1487,29 @@ export class GestureSensor implements ISensor, ILabel {
     constructor() {
         $('#mbedButtons').append(
             '<label style="margin: 12px 8px 8px 0">' +
-                Blockly.Msg.SENSOR_GESTURE +
-                '</label>' + //
-                '<label class="btn simbtn active"><input type="radio" id="up" name="options" autocomplete="off">' +
-                Blockly.Msg.SENSOR_GESTURE_UP +
-                '</label>' + //
-                '<label class="btn simbtn"><input type="radio" id="down" name="options" autocomplete="off" >' +
-                Blockly.Msg.SENSOR_GESTURE_DOWN +
-                '</label>' + //
-                '<label class="btn simbtn"><input type="radio" id="face_down" name="options" autocomplete="off" >' +
-                Blockly.Msg.SENSOR_GESTURE_FACE_DOWN +
-                '</label>' + //
-                '<label class="btn simbtn"><input type="radio" id="face_up" name="options" autocomplete="off" >' +
-                Blockly.Msg.SENSOR_GESTURE_FACE_UP +
-                '</label>' + //
-                '<label class="btn simbtn"><input type="radio" id="shake" name="options" autocomplete="off" >' +
-                Blockly.Msg.SENSOR_GESTURE_SHAKE +
-                '</label>' + //
-                '<label class="btn simbtn"><input type="radio" id="freefall" name="options" autocomplete="off" >' +
-                Blockly.Msg.SENSOR_GESTURE_FREEFALL +
-                '</label>'
+            Blockly.Msg.SENSOR_GESTURE +
+            '</label>' + //
+            '<label class="btn simbtn active"><input type="radio" id="up" name="options" autocomplete="off">' +
+            Blockly.Msg.SENSOR_GESTURE_UP +
+            '</label>' + //
+            '<label class="btn simbtn"><input type="radio" id="down" name="options" autocomplete="off" >' +
+            Blockly.Msg.SENSOR_GESTURE_DOWN +
+            '</label>' + //
+            '<label class="btn simbtn"><input type="radio" id="face_down" name="options" autocomplete="off" >' +
+            Blockly.Msg.SENSOR_GESTURE_FACE_DOWN +
+            '</label>' + //
+            '<label class="btn simbtn"><input type="radio" id="face_up" name="options" autocomplete="off" >' +
+            Blockly.Msg.SENSOR_GESTURE_FACE_UP +
+            '</label>' + //
+            '<label class="btn simbtn"><input type="radio" id="shake" name="options" autocomplete="off" >' +
+            Blockly.Msg.SENSOR_GESTURE_SHAKE +
+            '</label>' + //
+            '<label class="btn simbtn"><input type="radio" id="freefall" name="options" autocomplete="off" >' +
+            Blockly.Msg.SENSOR_GESTURE_FREEFALL +
+            '</label>'
         );
         let gestureSensor = this;
-        $('input[name="options"]').on('change', function (e) {
+        $('input[name="options"]').on('change', function(e) {
             gestureSensor.gesture = {};
             gestureSensor.gesture[e.currentTarget.id] = true;
         });
@@ -1544,9 +1548,9 @@ export class CompassSensor implements ISensor, ILabel {
     constructor() {
         $('#mbedButtons').append(
             '<label for="rangeCompass" style="margin: 12px 8px 8px 0">' +
-                Blockly.Msg.SENSOR_COMPASS +
-                '</label><input type="text" value="0" style="margin-bottom: 8px;margin-top: 12px; min-width: 45px; width: 45px; display: inline-block; border: 1px solid #333; border-radius: 2px; text-align: right; float: right; padding: 0" id="rangeCompass" name="rangeCompass" class="range" />' +
-                '<div style="margin:8px 0; "><input id="sliderCompass" type="range" min="0" max="360" value="0" step="5" /></div>'
+            Blockly.Msg.SENSOR_COMPASS +
+            '</label><input type="text" value="0" style="margin-bottom: 8px;margin-top: 12px; min-width: 45px; width: 45px; display: inline-block; border: 1px solid #333; border-radius: 2px; text-align: right; float: right; padding: 0" id="rangeCompass" name="rangeCompass" class="range" />' +
+            '<div style="margin:8px 0; "><input id="sliderCompass" type="range" min="0" max="360" value="0" step="5" /></div>'
         );
         createSlider($('#sliderCompass'), $('#rangeCompass'), this, 'degree', { min: 0, max: 360 });
     }
@@ -1581,9 +1585,9 @@ export class CalliopeLightSensor implements ISensor, ILabel, IDrawable {
     constructor() {
         $('#mbedButtons').append(
             '<label for="rangeLight" style="margin: 12px 8px 8px 0">' +
-                Blockly.Msg.SENSOR_LIGHT +
-                '</label><input type="text" value="0" style="margin-bottom: 8px;margin-top: 12px; min-width: 45px; width: 45px; display: inline-block; border: 1px solid #333; border-radius: 2px; text-align: right; float: right; padding: 0;" id="rangeLight" name="rangeLight" class="range" />' +
-                '<div style="margin:8px 0; "><input id="sliderLight" type="range" min="0" max="100" value="0" /></div>'
+            Blockly.Msg.SENSOR_LIGHT +
+            '</label><input type="text" value="0" style="margin-bottom: 8px;margin-top: 12px; min-width: 45px; width: 45px; display: inline-block; border: 1px solid #333; border-radius: 2px; text-align: right; float: right; padding: 0;" id="rangeLight" name="rangeLight" class="range" />' +
+            '<div style="margin:8px 0; "><input id="sliderLight" type="range" min="0" max="100" value="0" /></div>'
         );
         createSlider($('#sliderLight'), $('#rangeLight'), this, 'lightLevel', { min: 0, max: 100 });
     }
@@ -1631,9 +1635,9 @@ export class Rob3rtaInfraredSensor implements ISensor, ILabel {
     constructor() {
         $('#mbedButtons').append(
             '<label for="rangeLight" style="margin: 12px 8px 8px 0">' +
-                Blockly.Msg.SENSOR_INFRARED +
-                '</label><input type="text" value="0" style="margin-bottom: 8px;margin-top: 12px; min-width: 45px; width: 45px; display: inline-block; border: 1px solid #333; border-radius: 2px; text-align: right; float: right; padding: 0;" id="rangeLight" name="rangeLight" class="range" />' +
-                '<div style="margin:8px 0; "><input id="sliderLight" type="range" min="0" max="1023" value="0" /></div>'
+            Blockly.Msg.SENSOR_INFRARED +
+            '</label><input type="text" value="0" style="margin-bottom: 8px;margin-top: 12px; min-width: 45px; width: 45px; display: inline-block; border: 1px solid #333; border-radius: 2px; text-align: right; float: right; padding: 0;" id="rangeLight" name="rangeLight" class="range" />' +
+            '<div style="margin:8px 0; "><input id="sliderLight" type="range" min="0" max="1023" value="0" /></div>'
         );
         createSlider($('#sliderLight'), $('#rangeLight'), this, 'lightLevel', { min: 0, max: 1023 });
     }
@@ -1665,9 +1669,9 @@ export class TemperatureSensor implements ISensor, ILabel {
     constructor() {
         $('#mbedButtons').append(
             '<label for="rangeTemperature" style="margin: 12px 8px 8px 0">' +
-                Blockly.Msg.SENSOR_TEMPERATURE +
-                '</label><input type="text" value="0" style="margin-bottom: 8px;margin-top: 12px; min-width: 45px; width: 45px; display: inline-block; border: 1px solid #333; border-radius: 2px; text-align: right; float: right; padding: 0;" id="rangeTemperature" name="rangeTemperature" class="range" />' +
-                '<div style="margin:8px 0; "><input id="sliderTemperature" type="range" min="-25" max="75" value="0" step="1" /></div>'
+            Blockly.Msg.SENSOR_TEMPERATURE +
+            '</label><input type="text" value="0" style="margin-bottom: 8px;margin-top: 12px; min-width: 45px; width: 45px; display: inline-block; border: 1px solid #333; border-radius: 2px; text-align: right; float: right; padding: 0;" id="rangeTemperature" name="rangeTemperature" class="range" />' +
+            '<div style="margin:8px 0; "><input id="sliderTemperature" type="range" min="-25" max="75" value="0" step="1" /></div>'
         );
         createSlider($('#sliderTemperature'), $('#rangeTemperature'), this, 'degree', { min: -15, max: 75 });
     }
@@ -1714,19 +1718,19 @@ export class VolumeMeterSensor implements ISensor, ILabel {
                             googEchoCancellation: 'false',
                             googAutoGainControl: 'false',
                             googNoiseSuppression: 'false',
-                            googHighpassFilter: 'false',
+                            googHighpassFilter: 'false'
                         },
-                        optional: [],
-                    },
+                        optional: []
+                    }
                 })
                 .then(
-                    function (stream) {
+                    function(stream) {
                         var mediaStreamSource = sensor.webAudio.context.createMediaStreamSource(stream);
                         sensor.sound = VolumeMeter.createAudioMeter(sensor.webAudio.context);
                         // @ts-ignore
                         mediaStreamSource.connect(sensor.sound);
                     },
-                    function () {
+                    function() {
                         console.log('Sorry, but there is no microphone available on your system');
                     }
                 );
@@ -1781,16 +1785,16 @@ export class SoundSensor extends VolumeMeterSensor implements IExternalSensor {
 }
 
 function createSlider($slider: JQuery<HTMLElement>, $range: JQuery<HTMLElement>, sensor: ISensor, value: string, range: { min: number; max: number }) {
-    $slider.on('mousedown touchstart', function (e) {
+    $slider.on('mousedown touchstart', function(e) {
         e.stopPropagation();
     });
-    $slider.on('input change', function (e) {
+    $slider.on('input change', function(e) {
         e.preventDefault();
         $range.val($slider.val());
         sensor[value] = Number($slider.val());
         e.stopPropagation();
     });
-    $range.on('change', function (e) {
+    $range.on('change', function(e) {
         e.preventDefault();
         let myValue = Number($range.val());
         if (!$range.valid()) {
@@ -1813,7 +1817,7 @@ function createSlider($slider: JQuery<HTMLElement>, $range: JQuery<HTMLElement>,
     $range.rules('add', {
         messages: {
             required: false,
-            number: false,
-        },
+            number: false
+        }
     });
 }

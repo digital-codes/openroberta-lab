@@ -99,4 +99,7 @@ export abstract class ARobotBehaviour {
 
     abstract circleLedAction(ledValues: number[]): void;
 
+    abstract buttonLedAction(ledValues: number[]): void;
+
+    abstract proxHLedAction(ledValues: number[]): void;
 }

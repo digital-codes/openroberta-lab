@@ -1,7 +1,7 @@
 import { SelectionListener } from 'robot.base';
 import { Interpreter } from 'interpreter.interpreter';
 import RobotEv3 from 'robot.ev3';
-import { ThymioChassis, ThymioCircleLeds, ThymioRGBLeds, WebAudio } from './robot.actuators';
+import { ThymioButtonLeds, ThymioChassis, ThymioCircleLeds, ThymioProxHLeds, ThymioRGBLeds, WebAudio } from './robot.actuators';
 import { EV3Keys, TapSensor, ThymioInfraredSensors, ThymioLineSensor, VolumeMeterSensor } from 'robot.sensors';
 import * as $ from 'jquery';
 
@@ -14,6 +14,8 @@ export default class RobotThymio extends RobotEv3 {
     private soundSensor: VolumeMeterSensor;
     private topLed: ThymioRGBLeds;
     private circleLeds: ThymioCircleLeds;
+    private buttonLeds: ThymioButtonLeds;
+    private a: ThymioProxHLeds;
 
     constructor(id: number, configuration: object, interpreter: Interpreter, savedName: string, myListener: SelectionListener) {
         super(id, configuration, interpreter, savedName, myListener);
@@ -120,7 +122,9 @@ export default class RobotThymio extends RobotEv3 {
                 thymio['buttons']['keys'][this.id.replace(/\d+$/, '')]['value'] = false;
             });
         }
-        this.topLed = new ThymioRGBLeds({ x: 5, y: 7.5 });
+        this.topLed = new ThymioRGBLeds({ x: 2, y: 7.5 });
         this.circleLeds = new ThymioCircleLeds(this.id);
+        this.buttonLeds = new ThymioButtonLeds(this.id);
+        this.a = new ThymioProxHLeds(this.id);
     }
 }

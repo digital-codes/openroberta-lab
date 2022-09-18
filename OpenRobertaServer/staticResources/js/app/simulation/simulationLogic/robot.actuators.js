@@ -15,7 +15,7 @@ var __extends = (this && this.__extends) || (function () {
 })();
 define(["require", "exports", "interpreter.constants", "simulation.math", "guiState.controller", "./simulation.objects", "util", "jquery", "blockly"], function (require, exports, C, SIMATH, GUISTATE_C, simulation_objects_1, UTIL, $, Blockly) {
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.Motors = exports.PinActuators = exports.MbotRGBLed = exports.ThymioCircleLeds = exports.ThymioRGBLeds = exports.RGBLed = exports.MbotDisplay = exports.MbedDisplay = exports.MatrixDisplay = exports.WebAudio = exports.TTS = exports.StatusLed = exports.MbotChassis = exports.ThymioChassis = exports.NXTChassis = exports.EV3Chassis = exports.LegoChassis = exports.ChassisDiffDrive = void 0;
+    exports.Motors = exports.PinActuators = exports.MbotRGBLed = exports.ThymioProxHLeds = exports.ThymioButtonLeds = exports.ThymioCircleLeds = exports.ThymioRGBLeds = exports.RGBLed = exports.MbotDisplay = exports.MbedDisplay = exports.MatrixDisplay = exports.WebAudio = exports.TTS = exports.StatusLed = exports.MbotChassis = exports.ThymioChassis = exports.NXTChassis = exports.EV3Chassis = exports.LegoChassis = exports.ChassisDiffDrive = void 0;
     var ChassisDiffDrive = /** @class */ (function () {
         function ChassisDiffDrive(id, configuration) {
             this.left = { port: '', speed: 0 };
@@ -790,7 +790,7 @@ define(["require", "exports", "interpreter.constants", "simulation.math", "guiSt
                 + '            <g class="simKey" id="left' + _this.id + '" transform="matrix(1,0,0,-1,-140.47879,302.97336)"><path d="m 506.168,509.211 h -9.898 l 2.476,-4.285 2.473,-4.289 2.476,4.289 z" style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#e1e1e1;stroke-width:18.6392;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" id="path1946-8"/></g>'
                 + '            <g class="simKey" id="backward' + _this.id + '" transform="matrix(0,1,1,0,-140.47879,302.97336)"><path d="m -540.398,465.656 h -9.899 l 2.477,-4.285 2.472,-4.285 2.477,4.285 z" style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#e1e1e1;stroke-width:18.6392;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" id="path1950-2"/></g>'
                 + '            <g class="simKey" id="right' + _this.id + '" transform="matrix(-1,0,0,1,-140.47879,302.97336)"><path d="m -496.27,-581.387 h -9.898 l 2.473,-4.285 2.476,-4.289 2.473,4.289 z" style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#e1e1e1;stroke-width:18.6392;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" id="path1954-09"/></g>'
-                + '            <ellipse class="simKey" id="center' + _this.id + '" style="fill: rgb(225, 225, 225);" transform="matrix(0, -1, -1, 0, 673.966797, 323.265869)" cx="565.5" cy="313" rx="20" ry="20"></ellipse>'
+                + '            <ellipse class="simKey" id="center' + _this.id + '" style="fill: rgb(225, 225, 225);" transform="matrix(0, -1, -1, 0, 673.966797, 323.265869)" cx="565.5" cy="313" rx="18" ry="18"></ellipse>'
                 + '            <g id="g1962-8" transform="matrix(-1,-0.383864,-0.383864,1,-140.47879,302.97336)"><path d="m -192.384,-643.373 c -0.002,15.117 -5.326,29.749 -15.044,41.327" style="fill:none;stroke:#ffec7a;stroke-width:4.20567;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" id="cLed4-' + _this.id + '"/></g>'
                 + '            <g id="g1966-4" transform="matrix(-0.383864,1,1,0.383864,-140.47879,302.97336)"><path d="m -581.138,253.215 c -0.002,15.117 -5.327,29.752 -15.045,41.33" style="fill:none;stroke:#ffec7a;stroke-width:4.20567;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" id="cLed6-' + _this.id + '"/></g>'
                 + '            <g id="g1970-6" transform="matrix(-1,0.445229,0.445229,1,-140.47879,302.97336)"><path d="m -559.912,-270.028 c 0.001,14.793 -5.211,29.11 -14.721,40.441" style="fill:none;stroke:#ffec7a;stroke-width:4.11542;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" id="cLed5-' + _this.id + '"/></g>'
@@ -858,6 +858,10 @@ define(["require", "exports", "interpreter.constants", "simulation.math", "guiSt
                 + '        </g>'
                 + '        <circle r="54.952305" cy="364.71353" cx="1601.1842" id="path6434" style="fill:url(#radialGradient12979);fill-opacity:1;stroke:none;stroke-width:0.800002" transform="scale(1,-1)"/>'
                 + '        <circle r="54.952305" cy="364.71353" cx="1757.96" id="path6434-6" style="fill:url(#radialGradient12981);fill-opacity:1;stroke:none;stroke-width:0.800002" transform="scale(1,-1)"/>'
+                + '        <line id="bLed0-' + _this.id + '" style="stroke-width:5; stroke-linecap:round;stroke: rgb(255, 0, 0);" x1="1673" y1="-230" x2="1693" y2="-230"></line>'
+                + '        <line id="bLed1-' + _this.id + '" style="stroke-width:5; stroke-linecap:round;stroke: rgb(255, 0, 0);" x1="1705" y1="-243" x2="1705" y2="-263"></line>'
+                + '        <line id="bLed2-' + _this.id + '" style="stroke-width:5; stroke-linecap:round;stroke: rgb(255, 0, 0);" x1="1673" y1="-274" x2="1693" y2="-274"></line>'
+                + '        <line id="bLed3-' + _this.id + '" style="stroke-width:5; stroke-linecap:round;stroke: rgb(255, 0, 0);" x1="1661" y1="-243" x2="1661" y2="-263"></line>'
                 + '    </g>'
                 + '</svg>';
             _this.wheelBack = {
@@ -1803,12 +1807,22 @@ define(["require", "exports", "interpreter.constants", "simulation.math", "guiSt
     var ThymioCircleLeds = /** @class */ (function () {
         function ThymioCircleLeds(id) {
             this.leds = [0, 0, 0, 0, 0, 0, 0, 0];
-            this.drawPriority = 11;
+            this.drawPriority = 1;
             this.myRobotId = id;
             this.change();
         }
         ThymioCircleLeds.prototype.draw = function (rCtx, myRobot) {
-            // TODO on robot?
+            rCtx.save();
+            for (var i = 0; i < 8; i++) {
+                if (this.leds[i] > 0) {
+                    rCtx.beginPath();
+                    rCtx.lineWidth = 1.5;
+                    rCtx.arc(15, 0, 7, (i * 2 - 1) * Math.PI / 8, (i * 2 + 1) * Math.PI / 8);
+                    rCtx.strokeStyle = 'rgba(255, 236, 122,' + this.leds[i] / 100;
+                    rCtx.stroke();
+                }
+            }
+            rCtx.restore();
         };
         ThymioCircleLeds.prototype.reset = function () {
             this.leds = [0, 0, 0, 0, 0, 0, 0, 0];
@@ -1829,6 +1843,108 @@ define(["require", "exports", "interpreter.constants", "simulation.math", "guiSt
         return ThymioCircleLeds;
     }());
     exports.ThymioCircleLeds = ThymioCircleLeds;
+    var ThymioButtonLeds = /** @class */ (function () {
+        function ThymioButtonLeds(id) {
+            this.leds = [0, 0, 0, 0];
+            this.drawPriority = 11;
+            this.myRobotId = id;
+            this.change();
+        }
+        ThymioButtonLeds.prototype.draw = function (rCtx, myRobot) {
+            rCtx.save();
+            for (var i = 0; i < 4; i++) {
+                if (this.leds[i] > 0) {
+                    rCtx.beginPath();
+                    rCtx.lineWidth = 0.75;
+                    rCtx.arc(15, 0, 3, (i * 8 - 1) * Math.PI / 16, (i * 8 + 1) * Math.PI / 16);
+                    rCtx.strokeStyle = 'rgba(255, 0, 0,' + this.leds[i] / 100;
+                    rCtx.stroke();
+                }
+            }
+            rCtx.restore();
+        };
+        ThymioButtonLeds.prototype.reset = function () {
+            this.leds = [0, 0, 0, 0];
+            this.change();
+        };
+        ThymioButtonLeds.prototype.change = function () {
+            for (var i = 0; i < 4; i++) {
+                $('#bLed' + i + '-' + this.myRobotId).css({ 'stroke': 'rgba(255, 0, 0,' + this.leds[i] / 100 });
+            }
+        };
+        ThymioButtonLeds.prototype.updateAction = function (myRobot, dt, interpreterRunning) {
+            var buttonLeds = myRobot.interpreter.getRobotBehaviour().getActionState('buttonLeds', true);
+            if (buttonLeds) {
+                this.leds = buttonLeds;
+                this.change();
+            }
+        };
+        return ThymioButtonLeds;
+    }());
+    exports.ThymioButtonLeds = ThymioButtonLeds;
+    var ThymioProxHLeds = /** @class */ (function () {
+        function ThymioProxHLeds(id) {
+            this.leds = [
+                {
+                    x: 24 * Math.cos(-Math.PI / 4), y: 24 * Math.sin(-Math.PI / 4), theta: -Math.PI / 4
+                }, {
+                    x: 26 * Math.cos(-Math.PI / 8),
+                    y: 26 * Math.sin(-Math.PI / 8),
+                    theta: -Math.PI / 8
+                }, {
+                    x: 26, y: -1, theta: 0
+                }, {
+                    x: 26, y: 1, theta: 0
+                },
+                {
+                    x: 26 * Math.cos(Math.PI / 8),
+                    y: 26 * Math.sin(Math.PI / 8),
+                    theta: Math.PI / 8
+                }, {
+                    x: 24 * Math.cos(Math.PI / 4),
+                    y: 24 * Math.sin(Math.PI / 4),
+                    theta: Math.PI / 4
+                }, {
+                    x: -9, y: -13, theta: Math.PI
+                }, {
+                    x: -9, y: 13, theta: Math.PI
+                }
+            ];
+            this.values = [0, 0, 0, 0, 0, 0, 0, 0];
+            this.r = 1;
+            this.drawPriority = 11;
+            this.myRobotId = id;
+            this.change();
+        }
+        ThymioProxHLeds.prototype.draw = function (rCtx, myRobot) {
+            rCtx.save();
+            for (var i = 0; i < 8; i++) {
+                if (this.values[i] > 0) {
+                    rCtx.beginPath();
+                    rCtx.lineWidth = 0.75;
+                    rCtx.arc(this.leds[i].x, this.leds[i].y, this.r, this.leds[i].theta - Math.PI / 2, this.leds[i].theta + Math.PI / 2);
+                    rCtx.fillStyle = 'rgba(255, 0, 0,' + this.values[i] / 100 + ')';
+                    rCtx.fill();
+                }
+            }
+            rCtx.restore();
+        };
+        ThymioProxHLeds.prototype.reset = function () {
+            this.values = [0, 0, 0, 0, 0, 0, 0, 0];
+        };
+        ThymioProxHLeds.prototype.change = function () {
+            // TODO
+        };
+        ThymioProxHLeds.prototype.updateAction = function (myRobot, dt, interpreterRunning) {
+            var proxHLeds = myRobot.interpreter.getRobotBehaviour().getActionState('proxHLeds', true);
+            if (proxHLeds) {
+                this.values = proxHLeds;
+                this.change();
+            }
+        };
+        return ThymioProxHLeds;
+    }());
+    exports.ThymioProxHLeds = ThymioProxHLeds;
     var MbotRGBLed = /** @class */ (function (_super) {
         __extends(MbotRGBLed, _super);
         function MbotRGBLed() {

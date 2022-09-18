@@ -480,12 +480,25 @@ export class Interpreter {
                     this.robotBehaviour.statusLightOffAction(stmt[C.NAME], stmt[C.PORT]);
                     return [0, true];
                 case C.CIRCLE_LED_ACTION:
+                case C.PROXH_LED_ACTION:
                     var ledValues = new Array(8);
                     for (let i = 0; i < 8; i++) {
                         const val = this.state.pop();
                         ledValues[7 - i] = val;
                     }
-                    this.robotBehaviour.circleLedAction(ledValues);
+                    if (opCode === C.CIRCLE_LED_ACTION) {
+                        this.robotBehaviour.circleLedAction(ledValues);
+                    } else {
+                        this.robotBehaviour.proxHLedAction(ledValues);
+                    }
+                    return [0, true];
+                case C.BUTTON_LED_ACTION:
+                    var ledValues = new Array(4);
+                    for (let i = 0; i < 4; i++) {
+                        const val = this.state.pop();
+                        ledValues[3 - i] = val;
+                    }
+                    this.robotBehaviour.buttonLedAction(ledValues);
                     return [0, true];
                 case C.STOP:
                     U.debug('PROGRAM TERMINATED. stop op');

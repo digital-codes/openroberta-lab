@@ -426,4 +426,12 @@ export class RobotSimBehaviour extends ARobotBehaviour {
     circleLedAction(ledValues: number[]): void {
         this.hardwareState.actions.cirleLeds = ledValues;
     }
+
+    buttonLedAction(ledValues: number[]): void {
+        this.hardwareState.actions.buttonLeds = ledValues;
+    }
+
+    proxHLedAction(ledValues: number[]): void {
+        this.hardwareState.actions.proxHLeds = ledValues;
+    }
 }

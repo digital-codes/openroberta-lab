@@ -130,31 +130,31 @@ define(["require", "exports", "robot.base.mobile", "simulation.math", "util", "r
                     x1: this.rx,
                     y1: this.ry,
                     x2: this.rx + this.maxLength * Math.cos(robot.pose.theta + this.theta),
-                    y2: this.ry + this.maxLength * Math.sin(robot.pose.theta + this.theta),
+                    y2: this.ry + this.maxLength * Math.sin(robot.pose.theta + this.theta)
                 };
                 var u1 = {
                     x1: this.rx,
                     y1: this.ry,
                     x2: this.rx + this.maxLength * Math.cos(robot.pose.theta - Math.PI / 8 + this.theta),
-                    y2: this.ry + this.maxLength * Math.sin(robot.pose.theta - Math.PI / 8 + this.theta),
+                    y2: this.ry + this.maxLength * Math.sin(robot.pose.theta - Math.PI / 8 + this.theta)
                 };
                 var u2 = {
                     x1: this.rx,
                     y1: this.ry,
                     x2: this.rx + this.maxLength * Math.cos(robot.pose.theta - Math.PI / 16 + this.theta),
-                    y2: this.ry + this.maxLength * Math.sin(robot.pose.theta - Math.PI / 16 + this.theta),
+                    y2: this.ry + this.maxLength * Math.sin(robot.pose.theta - Math.PI / 16 + this.theta)
                 };
                 var u5 = {
                     x1: this.rx,
                     y1: this.ry,
                     x2: this.rx + this.maxLength * Math.cos(robot.pose.theta + Math.PI / 8 + this.theta),
-                    y2: this.ry + this.maxLength * Math.sin(robot.pose.theta + Math.PI / 8 + this.theta),
+                    y2: this.ry + this.maxLength * Math.sin(robot.pose.theta + Math.PI / 8 + this.theta)
                 };
                 var u4 = {
                     x1: this.rx,
                     y1: this.ry,
                     x2: this.rx + this.maxLength * Math.cos(robot.pose.theta + Math.PI / 16 + this.theta),
-                    y2: this.ry + this.maxLength * Math.sin(robot.pose.theta + Math.PI / 16 + this.theta),
+                    y2: this.ry + this.maxLength * Math.sin(robot.pose.theta + Math.PI / 16 + this.theta)
                 };
                 var uA = [u1, u2, u3, u4, u5];
                 this.distance = this.maxLength;
@@ -315,6 +315,8 @@ define(["require", "exports", "robot.base.mobile", "simulation.math", "util", "r
                 rCtx.lineTo(this.cx, this.cy);
                 rCtx.stroke();
             }
+            rCtx.restore();
+            rCtx.save();
             rCtx.translate(myRobot.pose.x, myRobot.pose.y);
             rCtx.rotate(myRobot.pose.theta);
         };
@@ -338,7 +340,8 @@ define(["require", "exports", "robot.base.mobile", "simulation.math", "util", "r
             rCtx.beginPath();
             rCtx.lineWidth = 0.1;
             rCtx.arc(this.x, this.y - this.dy / 2, this.r, 0, Math.PI * 2);
-            rCtx.fillStyle = 'rgba(255, 0, 0, ' + this.left.light / 100 + ')';
+            var leftLight = this.left.light / 100 * 255;
+            rCtx.fillStyle = 'rgb(' + leftLight + ', ' + leftLight + ', ' + leftLight + ')';
             rCtx.fill();
             rCtx.strokeStyle = 'black';
             rCtx.stroke();
@@ -346,7 +349,8 @@ define(["require", "exports", "robot.base.mobile", "simulation.math", "util", "r
             rCtx.beginPath();
             rCtx.lineWidth = 0.1;
             rCtx.arc(this.x, this.y + this.dy / 2, this.r, 0, Math.PI * 2);
-            rCtx.fillStyle = 'rgba(255, 0, 0, ' + this.right.light / 100 + ')';
+            var leftRight = this.right.light / 100 * 255;
+            rCtx.fillStyle = 'rgb(' + leftRight + ', ' + leftRight + ', ' + leftRight + ')';
             rCtx.fill();
             rCtx.strokeStyle = 'black';
             rCtx.stroke();
@@ -441,11 +445,11 @@ define(["require", "exports", "robot.base.mobile", "simulation.math", "util", "r
     var ThymioInfraredSensors = /** @class */ (function () {
         function ThymioInfraredSensors() {
             this.infraredSensorArray = [];
-            this.infraredSensorArray[0] = new ThymioInfraredSensor('0', 26 * Math.cos(-Math.PI / 4), 26 * Math.sin(-Math.PI / 4), -Math.PI / 4, 14, Blockly.Msg.FRONT_LEFT);
+            this.infraredSensorArray[0] = new ThymioInfraredSensor('0', 24 * Math.cos(-Math.PI / 4), 24 * Math.sin(-Math.PI / 4), -Math.PI / 4, 14, Blockly.Msg.FRONT_LEFT);
             this.infraredSensorArray[1] = new ThymioInfraredSensor('1', 26 * Math.cos(-Math.PI / 8), 26 * Math.sin(-Math.PI / 8), -Math.PI / 8, 14, Blockly.Msg.FRONT_LEFT_MIDDLE);
             this.infraredSensorArray[2] = new ThymioInfraredSensor('2', 26, 0, 0, 14, Blockly.Msg.FRONT_MIDDLE);
             this.infraredSensorArray[3] = new ThymioInfraredSensor('3', 26 * Math.cos(Math.PI / 8), 26 * Math.sin(Math.PI / 8), Math.PI / 8, 14, Blockly.Msg.FRONT_RIGHT_MIDDLE);
-            this.infraredSensorArray[4] = new ThymioInfraredSensor('4', 26 * Math.cos(Math.PI / 4), 26 * Math.sin(Math.PI / 4), Math.PI / 4, 14, Blockly.Msg.FRONT_RIGHT);
+            this.infraredSensorArray[4] = new ThymioInfraredSensor('4', 24 * Math.cos(Math.PI / 4), 24 * Math.sin(Math.PI / 4), Math.PI / 4, 14, Blockly.Msg.FRONT_RIGHT);
             this.infraredSensorArray[5] = new ThymioInfraredSensor('5', -9, -13, Math.PI, 14, Blockly.Msg.BACK_LEFT);
             this.infraredSensorArray[6] = new ThymioInfraredSensor('6', -9, 13, Math.PI, 14, Blockly.Msg.BACK_RIGHT);
         }
@@ -923,7 +927,7 @@ define(["require", "exports", "robot.base.mobile", "simulation.math", "util", "r
             var myEvent = e;
             this.lastMousePosition = {
                 x: myEvent.startX,
-                y: myEvent.startY,
+                y: myEvent.startY
             };
             if (this.uCtx !== undefined) {
                 var myMouseColorData = this.uCtx.getImageData(this.lastMousePosition.x, this.lastMousePosition.y, 1, 1).data;
@@ -947,7 +951,7 @@ define(["require", "exports", "robot.base.mobile", "simulation.math", "util", "r
             var myEvent = e;
             this.lastMousePosition = {
                 x: myEvent.startX,
-                y: myEvent.startY,
+                y: myEvent.startY
             };
             if (this.uCtx !== undefined) {
                 var myMouseColorData = this.uCtx.getImageData(this.lastMousePosition.x, this.lastMousePosition.y, 1, 1).data;
@@ -1159,7 +1163,7 @@ define(["require", "exports", "robot.base.mobile", "simulation.math", "util", "r
             var myEvent = e;
             this.lastMousePosition = {
                 x: myEvent.startX,
-                y: myEvent.startY,
+                y: myEvent.startY
             };
             var myCtx = this.$touchLayer.get(0).getContext('2d');
             var myMouseColorData = myCtx.getImageData(this.lastMousePosition.x, this.lastMousePosition.y, 1, 1).data;
@@ -1182,7 +1186,7 @@ define(["require", "exports", "robot.base.mobile", "simulation.math", "util", "r
             var myEvent = e;
             this.lastMousePosition = {
                 x: myEvent.startX,
-                y: myEvent.startY,
+                y: myEvent.startY
             };
             var myKeys = this.color2Keys[this.lastMouseColor];
             var myCtx = this.$touchLayer.get(0).getContext('2d');
@@ -1375,10 +1379,10 @@ define(["require", "exports", "robot.base.mobile", "simulation.math", "util", "r
                             googEchoCancellation: 'false',
                             googAutoGainControl: 'false',
                             googNoiseSuppression: 'false',
-                            googHighpassFilter: 'false',
+                            googHighpassFilter: 'false'
                         },
-                        optional: [],
-                    },
+                        optional: []
+                    }
                 })
                     .then(function (stream) {
                     var mediaStreamSource = sensor.webAudio.context.createMediaStreamSource(stream);
@@ -1462,8 +1466,8 @@ define(["require", "exports", "robot.base.mobile", "simulation.math", "util", "r
         $range.rules('add', {
             messages: {
                 required: false,
-                number: false,
-            },
+                number: false
+            }
         });
     }
 });

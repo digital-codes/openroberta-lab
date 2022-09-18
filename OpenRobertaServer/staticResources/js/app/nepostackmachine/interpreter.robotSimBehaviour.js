@@ -400,6 +400,12 @@ define(["require", "exports", "./interpreter.aRobotBehaviour", "./interpreter.co
         RobotSimBehaviour.prototype.circleLedAction = function (ledValues) {
             this.hardwareState.actions.cirleLeds = ledValues;
         };
+        RobotSimBehaviour.prototype.buttonLedAction = function (ledValues) {
+            this.hardwareState.actions.buttonLeds = ledValues;
+        };
+        RobotSimBehaviour.prototype.proxHLedAction = function (ledValues) {
+            this.hardwareState.actions.proxHLeds = ledValues;
+        };
         return RobotSimBehaviour;
     }(interpreter_aRobotBehaviour_1.ARobotBehaviour));
     exports.RobotSimBehaviour = RobotSimBehaviour;

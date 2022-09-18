@@ -343,6 +343,11 @@ define(["require", "exports", "./interpreter.aRobotBehaviour", "./interpreter.co
         RobotWeDoBehaviour.prototype.circleLedAction = function (ledValues) {
             throw new Error('Method not implemented.');
         };
+        RobotWeDoBehaviour.prototype.buttonLedAction = function (ledValues) {
+            throw new Error('Method not implemented.');
+        };
+        RobotWeDoBehaviour.prototype.proxHLedAction = function (ledValues) {
+        };
         return RobotWeDoBehaviour;
     }(interpreter_aRobotBehaviour_1.ARobotBehaviour));
     exports.RobotWeDoBehaviour = RobotWeDoBehaviour;

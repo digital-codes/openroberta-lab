@@ -33,6 +33,7 @@ public class C {
     public static final String BUTTONS = "buttons";
     public static final String BUTTON_A = "A";
     public static final String BUTTON_B = "B";
+    public static final String BUTTON_LED_ACTION = "buttonLedAction";
     public static final String CALL = "call";
     public static final String CAST_CHAR = "mathCastCharFunct";
     public static final String CAST_STRING = "mathCastStringFunct";
@@ -238,6 +239,7 @@ public class C {
     public static final String POSITION = "position";
     public static final String POWER = "POWER";
     public static final String PRESENCE = "presence";
+    public static final String PROXH_LED_ACTION = "proxHLedAction";
     public static final String RANDOM = "random";
     public static final String RANDOM_DOUBLE = "randDouble";
     public static final String RANDOM_INT = "randInt";
