@@ -895,6 +895,10 @@ define(["require", "exports", "interpreter.constants", "simulation.math", "guiSt
             SIMATH.transform(pose, _this.wheelBackRight);
             SIMATH.transform(pose, _this.wheelFrontLeft);
             SIMATH.transform(pose, _this.wheelBackLeft);
+            _this.right.port = C.RIGHT;
+            _this.right.speed = 0;
+            _this.left.port = C.LEFT;
+            _this.left.speed = 0;
             $('#simRobotContent').append(_this.topView);
             $('#brick' + _this.id).hide();
             return _this;

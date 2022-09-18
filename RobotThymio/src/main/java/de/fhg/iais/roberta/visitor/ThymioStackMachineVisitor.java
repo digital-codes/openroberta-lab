@@ -76,7 +76,7 @@ public final class ThymioStackMachineVisitor extends AbstractStackMachineVisitor
         boolean speedOnly = !processOptionalDuration(duration);
         String port = motorOnAction.getUserDefinedPort();
 
-        JSONObject o = makeNode(C.MOTOR_ON_ACTION).put(C.PORT, port.toLowerCase()).put(C.NAME, "mbot").put(C.SPEED_ONLY, speedOnly);
+        JSONObject o = makeNode(C.MOTOR_ON_ACTION).put(C.PORT, port.toLowerCase()).put(C.SPEED_ONLY, speedOnly);
         if ( speedOnly ) {
             return add(o.put(C.SET_TIME, false));
         } else {
@@ -216,12 +216,12 @@ public final class ThymioStackMachineVisitor extends AbstractStackMachineVisitor
         driveAction.param.getSpeed().accept(this);
         boolean speedOnly = !processOptionalDuration(driveAction.param.getDuration());
         DriveDirection driveDirection = (DriveDirection) driveAction.direction;
-        JSONObject o = makeNode(C.DRIVE_ACTION).put(C.DRIVE_DIRECTION, driveDirection).put(C.NAME, "mbot").put(C.SPEED_ONLY, speedOnly);
+        JSONObject o = makeNode(C.DRIVE_ACTION).put(C.DRIVE_DIRECTION, driveDirection).put(C.SPEED_ONLY, speedOnly);
         if ( speedOnly ) {
             return add(o.put(C.SET_TIME, false));
         } else {
             add(o.put(C.SET_TIME, true));
-            return add(makeNode(C.STOP_DRIVE).put(C.NAME, "mbot"));
+            return add(makeNode(C.STOP_DRIVE));
         }
     }
 
@@ -232,12 +232,12 @@ public final class ThymioStackMachineVisitor extends AbstractStackMachineVisitor
         boolean speedOnly = !processOptionalDuration(curveAction.paramLeft.getDuration());
         DriveDirection driveDirection = (DriveDirection) curveAction.direction;
 
-        JSONObject o = makeNode(C.CURVE_ACTION).put(C.DRIVE_DIRECTION, driveDirection).put(C.NAME, "mbot").put(C.SPEED_ONLY, speedOnly);
+        JSONObject o = makeNode(C.CURVE_ACTION).put(C.DRIVE_DIRECTION, driveDirection).put(C.SPEED_ONLY, speedOnly);
         if ( speedOnly ) {
             return add(o.put(C.SET_TIME, false));
         } else {
             add(o.put(C.SET_TIME, true));
-            return add(makeNode(C.STOP_DRIVE).put(C.NAME, "mbot"));
+            return add(makeNode(C.STOP_DRIVE));
         }
     }
 
@@ -262,18 +262,18 @@ public final class ThymioStackMachineVisitor extends AbstractStackMachineVisitor
         boolean speedOnly = !processOptionalDuration(turnAction.param.getDuration());
         ITurnDirection turnDirection = turnAction.direction;
         JSONObject o =
-            makeNode(C.TURN_ACTION).put(C.TURN_DIRECTION, turnDirection.toString().toLowerCase()).put(C.NAME, "mbot").put(C.SPEED_ONLY, speedOnly);
+            makeNode(C.TURN_ACTION).put(C.TURN_DIRECTION, turnDirection.toString().toLowerCase()).put(C.SPEED_ONLY, speedOnly);
         if ( speedOnly ) {
             return add(o.put(C.SET_TIME, false));
         } else {
             add(o.put(C.SET_TIME, true));
-            return add(makeNode(C.STOP_DRIVE).put(C.NAME, "mbot"));
+            return add(makeNode(C.STOP_DRIVE));
         }
     }
 
     @Override
     public Void visitMotorDriveStopAction(MotorDriveStopAction stopAction) {
-        JSONObject o = makeNode(C.STOP_DRIVE).put(C.NAME, "mbot");
+        JSONObject o = makeNode(C.STOP_DRIVE);
         return add(o);
     }
 

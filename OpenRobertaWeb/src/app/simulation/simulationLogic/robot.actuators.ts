@@ -943,6 +943,10 @@ export class ThymioChassis extends ChassisDiffDrive {
         SIMATH.transform(pose, this.wheelBackRight);
         SIMATH.transform(pose, this.wheelFrontLeft);
         SIMATH.transform(pose, this.wheelBackLeft);
+        this.right.port = C.RIGHT;
+        this.right.speed = 0;
+        this.left.port = C.LEFT;
+        this.left.speed = 0;
         $('#simRobotContent').append(this.topView);
         $('#brick' + this.id).hide();
     }
