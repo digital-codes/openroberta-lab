@@ -434,4 +434,12 @@ export class RobotSimBehaviour extends ARobotBehaviour {
     proxHLedAction(ledValues: number[]): void {
         this.hardwareState.actions.proxHLeds = ledValues;
     }
+
+    soundLedAction(val: number): void {
+        this.hardwareState.actions.soundLed = val;
+    }
+
+    temperatureLedAction(blue: number, red: number): void {
+        this.hardwareState.actions.temperatureLeds = [red, blue];
+    }
 }

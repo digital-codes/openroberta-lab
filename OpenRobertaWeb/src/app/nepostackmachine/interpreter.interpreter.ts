@@ -500,6 +500,15 @@ export class Interpreter {
                     }
                     this.robotBehaviour.buttonLedAction(ledValues);
                     return [0, true];
+                case C.SOUND_LED_ACTION:
+                    const val = this.state.pop();
+                    this.robotBehaviour.soundLedAction(val);
+                    return [0, true];
+                case C.TEMPERATURE_LED_ACTION:
+                    const red = this.state.pop();
+                    const blue = this.state.pop();
+                    this.robotBehaviour.temperatureLedAction(blue, red);
+                    return [0, true];
                 case C.STOP:
                     U.debug('PROGRAM TERMINATED. stop op');
                     this.terminated = true;

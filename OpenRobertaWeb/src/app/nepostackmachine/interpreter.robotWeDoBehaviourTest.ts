@@ -4,6 +4,14 @@ import * as C from './interpreter.constants';
 import * as U from './interpreter.util';
 
 export class RobotWeDoBehaviourTest extends ARobotBehaviour {
+    temperatureLedAction(blue: number, red: number): void {
+        throw new Error('Method not implemented.');
+    }
+
+    soundLedAction(val: number): void {
+        throw new Error('Method not implemented.');
+    }
+
     private timers;
 
     constructor(opLog, debug) {

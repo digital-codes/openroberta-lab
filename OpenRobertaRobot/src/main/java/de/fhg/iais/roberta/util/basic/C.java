@@ -276,6 +276,7 @@ public class C {
     public static final String SIZE = "size";
     public static final String SLOT = "slot";
     public static final String SOUND = "sound";
+    public static final String SOUND_LED_ACTION = "soundLedAction";
     public static final String SPEED = "speed";
     public static final String SPEED_L = "speedL";
     public static final String SPEED_ONLY = "speedOnly";
@@ -293,6 +294,7 @@ public class C {
     public static final String TARGET = "target";
     public static final String TERMINATE_BLOCK = "TERMINATE_BLOCK";
     public static final String TEMPERATURE = "temperature";
+    public static final String TEMPERATURE_LED_ACTION = "temperatureLedAction";
     public static final String TERNARY = "ternary";
     public static final String TERNARY_EXPR = "createTernaryExpr";
     public static final String TEXT = "text";

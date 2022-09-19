@@ -25,6 +25,12 @@ define(["require", "exports", "./interpreter.aRobotBehaviour", "./interpreter.co
             U.loggingEnabled(opLog, debug);
             return _this;
         }
+        RobotWeDoBehaviourTest.prototype.temperatureLedAction = function (blue, red) {
+            throw new Error('Method not implemented.');
+        };
+        RobotWeDoBehaviourTest.prototype.soundLedAction = function (val) {
+            throw new Error('Method not implemented.');
+        };
         RobotWeDoBehaviourTest.prototype.clearDisplay = function () {
             U.debug('clear display');
         };

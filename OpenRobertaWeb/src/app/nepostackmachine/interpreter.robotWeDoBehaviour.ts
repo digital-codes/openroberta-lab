@@ -4,6 +4,14 @@ import * as C from './interpreter.constants';
 import * as U from './interpreter.util';
 
 export class RobotWeDoBehaviour extends ARobotBehaviour {
+    temperatureLedAction(blue: number, red: number): void {
+        throw new Error('Method not implemented.');
+    }
+
+    soundLedAction(val: number): void {
+        throw new Error('Method not implemented.');
+    }
+
     /*
      * represents the state of connected wedo devices with the following
      * structure: {<name of the device> { 1 : { tiltsensor : "0.0" }, 2 : {

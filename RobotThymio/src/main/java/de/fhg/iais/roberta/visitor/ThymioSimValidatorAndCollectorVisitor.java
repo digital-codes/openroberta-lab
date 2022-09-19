@@ -10,7 +10,9 @@ import de.fhg.iais.roberta.syntax.action.thymio.PlayRecordingAction;
 import de.fhg.iais.roberta.syntax.action.thymio.RecordStartAction;
 import de.fhg.iais.roberta.syntax.action.thymio.RecordStopAction;
 import de.fhg.iais.roberta.syntax.sensor.generic.AccelerometerSensor;
+import de.fhg.iais.roberta.syntax.sensor.generic.InfraredSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.TemperatureSensor;
+import de.fhg.iais.roberta.util.basic.C;
 
 public class ThymioSimValidatorAndCollectorVisitor extends ThymioValidatorAndCollectorVisitor {
     public ThymioSimValidatorAndCollectorVisitor(ConfigurationAst brickConfiguration, ClassToInstanceMap<IProjectBean.IBuilder> beanBuilders) {
@@ -59,6 +61,16 @@ public class ThymioSimValidatorAndCollectorVisitor extends ThymioValidatorAndCol
     public Void visitPlayRecordingAction(PlayRecordingAction playRecordingAction) {
         super.visitPlayRecordingAction(playRecordingAction);
         addWarningToPhrase(playRecordingAction, "SIM_BLOCK_NOT_SUPPORTED");
+        return null;
+    }
+
+    @Override
+    public Void visitInfraredSensor(InfraredSensor infraredSensor) {
+        super.visitInfraredSensor(infraredSensor);
+        String mode = infraredSensor.getMode().toLowerCase();
+        if ( mode.equals(C.AMBIENTLIGHT) ) {
+            addErrorToPhrase(infraredSensor, "SIM_BLOCK_NOT_SUPPORTED");
+        }
         return null;
     }
 }

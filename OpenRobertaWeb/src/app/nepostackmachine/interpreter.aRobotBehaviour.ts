@@ -102,4 +102,8 @@ export abstract class ARobotBehaviour {
     abstract buttonLedAction(ledValues: number[]): void;
 
     abstract proxHLedAction(ledValues: number[]): void;
+
+    abstract temperatureLedAction(blue: number, red: number): void;
+
+    abstract soundLedAction(val: number): void;
 }

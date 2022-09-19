@@ -35,6 +35,12 @@ define(["require", "exports", "./interpreter.aRobotBehaviour", "./interpreter.co
             U.loggingEnabled(true, true);
             return _this;
         }
+        RobotWeDoBehaviour.prototype.temperatureLedAction = function (blue, red) {
+            throw new Error('Method not implemented.');
+        };
+        RobotWeDoBehaviour.prototype.soundLedAction = function (val) {
+            throw new Error('Method not implemented.');
+        };
         RobotWeDoBehaviour.prototype.update = function (data) {
             U.info('update type:' + data.type + ' state:' + data.state + ' sensor:' + data.sensor + ' actor:' + data.actuator);
             if (data.target !== 'wedo') {

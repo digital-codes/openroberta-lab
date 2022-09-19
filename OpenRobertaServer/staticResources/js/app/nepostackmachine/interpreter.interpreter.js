@@ -451,8 +451,8 @@ define(["require", "exports", "./interpreter.state", "./interpreter.constants", 
                     case C.PROXH_LED_ACTION:
                         var ledValues = new Array(8);
                         for (var i = 0; i < 8; i++) {
-                            var val = this.state.pop();
-                            ledValues[7 - i] = val;
+                            var val_1 = this.state.pop();
+                            ledValues[7 - i] = val_1;
                         }
                         if (opCode === C.CIRCLE_LED_ACTION) {
                             this.robotBehaviour.circleLedAction(ledValues);
@@ -464,10 +464,19 @@ define(["require", "exports", "./interpreter.state", "./interpreter.constants", 
                     case C.BUTTON_LED_ACTION:
                         var ledValues = new Array(4);
                         for (var i = 0; i < 4; i++) {
-                            var val = this.state.pop();
-                            ledValues[3 - i] = val;
+                            var val_2 = this.state.pop();
+                            ledValues[3 - i] = val_2;
                         }
                         this.robotBehaviour.buttonLedAction(ledValues);
+                        return [0, true];
+                    case C.SOUND_LED_ACTION:
+                        var val = this.state.pop();
+                        this.robotBehaviour.soundLedAction(val);
+                        return [0, true];
+                    case C.TEMPERATURE_LED_ACTION:
+                        var red = this.state.pop();
+                        var blue = this.state.pop();
+                        this.robotBehaviour.temperatureLedAction(blue, red);
                         return [0, true];
                     case C.STOP:
                         U.debug('PROGRAM TERMINATED. stop op');

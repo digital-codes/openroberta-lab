@@ -103,10 +103,20 @@ public final class ThymioStackMachineVisitor extends AbstractStackMachineVisitor
     public Void visitInfraredSensor(InfraredSensor infraredSensor) {
         String mode = infraredSensor.getMode().toLowerCase();
         String slot = infraredSensor.getSlot().toLowerCase();
-        if ( slot.equals("0") ) {
-            slot = C.LEFT;
-        } else if ( slot.equals("1") ) {
-            slot = C.RIGHT;
+        switch ( mode ) {
+            case C.DISTANCE:
+                break;
+            case C.LINE:
+            case C.LIGHT:
+            case C.AMBIENTLIGHT:
+                if ( slot.equals("0") ) {
+                    slot = C.LEFT;
+                } else if ( slot.equals("1") ) {
+                    slot = C.RIGHT;
+                }
+                break;
+            default:
+                throw new DbcException("Invalid infrared sensor mode!");
         }
         JSONObject o = makeNode(C.GET_SAMPLE).put(C.GET_SAMPLE, C.INFRARED).put(C.MODE, mode).put(C.SLOT, slot);
         return add(o);
@@ -161,13 +171,15 @@ public final class ThymioStackMachineVisitor extends AbstractStackMachineVisitor
 
     @Override
     public Void visitLedSoundOnAction(LedSoundOnAction ledSoundOnAction) {
-        // TODO
-        return null;
+        ledSoundOnAction.led1.accept(this);
+        return add(makeNode(C.SOUND_LED_ACTION));
     }
 
     @Override
     public Void visitLedTemperatureOnAction(LedTemperatureOnAction ledTemperatureOnAction) {
-        return null;
+        ledTemperatureOnAction.led1.accept(this);
+        ledTemperatureOnAction.led2.accept(this);
+        return add(makeNode(C.TEMPERATURE_LED_ACTION));
     }
 
     @Override

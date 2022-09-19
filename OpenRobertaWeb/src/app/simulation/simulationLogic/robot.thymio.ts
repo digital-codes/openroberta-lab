@@ -1,7 +1,7 @@
 import { SelectionListener } from 'robot.base';
 import { Interpreter } from 'interpreter.interpreter';
 import RobotEv3 from 'robot.ev3';
-import { ThymioButtonLeds, ThymioChassis, ThymioCircleLeds, ThymioProxHLeds, ThymioRGBLeds, WebAudio } from './robot.actuators';
+import { ThymioButtonLeds, ThymioChassis, ThymioCircleLeds, ThymioProxHLeds, ThymioRGBLeds, ThymioSoundLed, ThymioTemperatureLeds, WebAudio } from './robot.actuators';
 import { EV3Keys, TapSensor, ThymioInfraredSensors, ThymioLineSensor, VolumeMeterSensor } from 'robot.sensors';
 import * as $ from 'jquery';
 
@@ -15,7 +15,9 @@ export default class RobotThymio extends RobotEv3 {
     private topLed: ThymioRGBLeds;
     private circleLeds: ThymioCircleLeds;
     private buttonLeds: ThymioButtonLeds;
-    private a: ThymioProxHLeds;
+    private proxHLeds: ThymioProxHLeds;
+    private temperatureLeds: ThymioTemperatureLeds;
+    private soundLed: ThymioSoundLed;
 
     constructor(id: number, configuration: object, interpreter: Interpreter, savedName: string, myListener: SelectionListener) {
         super(id, configuration, interpreter, savedName, myListener);
@@ -31,64 +33,7 @@ export default class RobotThymio extends RobotEv3 {
         this.infraredSensors = new ThymioInfraredSensors();
         this.tapSensor = new TapSensor();
         this.soundSensor = new VolumeMeterSensor(this);
-        /*this.RGBLedLeft = new MbotRGBLed({ x: 20, y: -10 }, 2);
-        this.RGBLedRight = new MbotRGBLed({ x: 20, y: 10 }, 1);
-        this.display = new MbotDisplay(this.id, { x: 15, y: 50 });
-        let sensors: object = configuration['SENSORS'];
-        for (const c in sensors) {
-            switch (sensors[c]) {
-                case 'ULTRASONIC': {
-                    let myUltraSensors = [];
-                    let mbot = this;
-                    Object.keys(this).forEach((x) => {
-                        if (mbot[x] && mbot[x] instanceof DistanceSensor) {
-                            myUltraSensors.push(mbot[x]);
-                        }
-                    });
-                    const ord = myUltraSensors.length + 1;
-                    const num = Object.keys(sensors).filter((type) => sensors[type] == 'ULTRASONIC').length;
-                    let position: Pose = new Pose(this.chassis.geom.x + this.chassis.geom.w, 0, 0);
-                    if (num == 3) {
-                        if (ord == 1) {
-                            position = new Pose(this.chassis.geom.h / 2, -this.chassis.geom.h / 2, -Math.PI / 4);
-                        } else if (ord == 2) {
-                            position = new Pose(this.chassis.geom.h / 2, this.chassis.geom.h / 2, Math.PI / 4);
-                        }
-                    } else if (num % 2 === 0) {
-                        switch (ord) {
-                            case 1:
-                                position = new Pose(this.chassis.geom.x + this.chassis.geom.w, -this.chassis.geom.h / 2, -Math.PI / 4);
-                                break;
-                            case 2:
-                                position = new Pose(this.chassis.geom.x + this.chassis.geom.w, this.chassis.geom.h / 2, Math.PI / 4);
-                                break;
-                            case 3:
-                                position = new Pose(this.chassis.geom.x, -this.chassis.geom.h / 2, (-3 * Math.PI) / 4);
-                                break;
-                            case 4:
-                                position = new Pose(this.chassis.geom.x, this.chassis.geom.h / 2, (3 * Math.PI) / 4);
-                                break;
-                        }
-                    }
-                    this[c] = new UltrasonicSensor(c, position.x, position.y, position.theta, 255, 'Ultra Sensor');
-                    break;
-                }
-                case 'INFRARED': {
-                    // only one is supported in the simulation
-                    let myInfraredSensors = [];
-                    let mbot = this;
-                    Object.keys(this).forEach((x) => {
-                        if (mbot[x] && mbot[x] instanceof MbotInfraredSensor) {
-                            myInfraredSensors.push(mbot[x]);
-                        }
-                    });
-                    if (myInfraredSensors.length == 0) {
-                        this[c] = new MbotInfraredSensor(c, { x: 26, y: 0 });
-                    }
-                    break;
-                }
-            }
-        }*/
+
         let myButtons = [
             {
                 name: 'forward',
@@ -122,9 +67,11 @@ export default class RobotThymio extends RobotEv3 {
                 thymio['buttons']['keys'][this.id.replace(/\d+$/, '')]['value'] = false;
             });
         }
-        this.topLed = new ThymioRGBLeds({ x: 2, y: 7.5 });
+        this.topLed = new ThymioRGBLeds({ x: 2, y: 7.5 }, this.id, this.chassis.geom.color);
         this.circleLeds = new ThymioCircleLeds(this.id);
         this.buttonLeds = new ThymioButtonLeds(this.id);
-        this.a = new ThymioProxHLeds(this.id);
+        this.proxHLeds = new ThymioProxHLeds(this.id);
+        this.temperatureLeds = new ThymioTemperatureLeds(this.id);
+        this.soundLed = new ThymioSoundLed(this.id);
     }
 }

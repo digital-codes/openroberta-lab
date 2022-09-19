@@ -15,7 +15,7 @@ var __extends = (this && this.__extends) || (function () {
 })();
 define(["require", "exports", "interpreter.constants", "simulation.math", "guiState.controller", "./simulation.objects", "util", "jquery", "blockly"], function (require, exports, C, SIMATH, GUISTATE_C, simulation_objects_1, UTIL, $, Blockly) {
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.Motors = exports.PinActuators = exports.MbotRGBLed = exports.ThymioProxHLeds = exports.ThymioButtonLeds = exports.ThymioCircleLeds = exports.ThymioRGBLeds = exports.RGBLed = exports.MbotDisplay = exports.MbedDisplay = exports.MatrixDisplay = exports.WebAudio = exports.TTS = exports.StatusLed = exports.MbotChassis = exports.ThymioChassis = exports.NXTChassis = exports.EV3Chassis = exports.LegoChassis = exports.ChassisDiffDrive = void 0;
+    exports.Motors = exports.PinActuators = exports.MbotRGBLed = exports.ThymioSoundLed = exports.ThymioTemperatureLeds = exports.ThymioProxHLeds = exports.ThymioButtonLeds = exports.ThymioCircleLeds = exports.ThymioRGBLeds = exports.RGBLed = exports.MbotDisplay = exports.MbedDisplay = exports.MatrixDisplay = exports.WebAudio = exports.TTS = exports.StatusLed = exports.MbotChassis = exports.ThymioChassis = exports.NXTChassis = exports.EV3Chassis = exports.LegoChassis = exports.ChassisDiffDrive = void 0;
     var ChassisDiffDrive = /** @class */ (function () {
         function ChassisDiffDrive(id, configuration) {
             this.left = { port: '', speed: 0 };
@@ -772,12 +772,12 @@ define(["require", "exports", "interpreter.constants", "simulation.math", "guiSt
             };
             _this.topView = '<svg width="114.00105mm" height="108.29441mm" viewBox="0 0 114.00105 108.29441" version="1.1" id="brick' + _this.id + '" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">'
                 + '    <defs id="defs1608">'
-                + '        <radialGradient id="radialGradient12979" gradientUnits="userSpaceOnUse" cx="-295.9747" cy="513.95087" r="89.90358" gradientTransform="matrix(0.611236,0,0,0.611236,1782.0945,50.568234)" xlink:href="#linearGradient' + _this.id + '"/>'
+                + '        <radialGradient id="radialGradientL' + _this.id + '" gradientUnits="userSpaceOnUse" cx="-295.9747" cy="513.95087" r="89.90358" gradientTransform="matrix(0.611236,0,0,0.611236,1782.0945,50.568234)" xlink:href="#linearGradient' + _this.id + '"/>'
                 + '        <linearGradient id="linearGradient' + _this.id + '">'
                 + '            <stop id="stopOn' + _this.id + '" offset="0" style="stop-color:#00ff00;stop-opacity:1;"/>'
                 + '            <stop id="stopOff' + _this.id + '" offset="1" style="stop-color:#00ff00;stop-opacity:0;"/>'
                 + '        </linearGradient>'
-                + '        <radialGradient id="radialGradient12981" gradientUnits="userSpaceOnUse" cx="-295.9747" cy="513.95087" r="89.90358" gradientTransform="matrix(0.611236,0,0,0.611236,1938.8702,50.568234)" xlink:href="#linearGradient' + _this.id + '"/>'
+                + '        <radialGradient id="radialGradientR' + _this.id + '" gradientUnits="userSpaceOnUse" cx="-295.9747" cy="513.95087" r="89.90358" gradientTransform="matrix(0.611236,0,0,0.611236,1938.8702,50.568234)" xlink:href="#linearGradient' + _this.id + '"/>'
                 + '    </defs>'
                 + '    <g id="g3040" transform="matrix(0.352778, 0, 0, -0.352778, -536.984924, -59.907566)">'
                 + '        <g id="g2035-4" transform="rotate(90,1027.2503,413.68387)">'
@@ -856,13 +856,24 @@ define(["require", "exports", "interpreter.constants", "simulation.math", "guiSt
                 + '                <g id="g2086-2-9" transform="matrix(0,-1,-1,0,-287.08823,300.74111)"><path d="m 668.621,-452.641 c 0,3.125 -2.531,5.657 -5.656,5.657 -3.125,0 -5.66,-2.532 -5.66,-5.657 0,-3.125 2.535,-5.66 5.66,-5.66 3.125,0 5.656,2.535 5.656,5.66 z" style="fill:none;stroke:#e1e1e1;stroke-width:2.10875;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.992157" id="path2088-1-2"/>'
                 + '                </g></g>'
                 + '        </g>'
-                + '        <circle r="54.952305" cy="364.71353" cx="1601.1842" id="path6434" style="fill:url(#radialGradient12979);fill-opacity:1;stroke:none;stroke-width:0.800002" transform="scale(1,-1)"/>'
-                + '        <circle r="54.952305" cy="364.71353" cx="1757.96" id="path6434-6" style="fill:url(#radialGradient12981);fill-opacity:1;stroke:none;stroke-width:0.800002" transform="scale(1,-1)"/>'
+                + '        <circle r="54.952305" cy="364.71353" cx="1601.1842" id="path6434" style="fill:url(#radialGradientL' + _this.id + ');fill-opacity:1;stroke:none;stroke-width:0.800002" transform="scale(1,-1)"/>'
+                + '        <circle r="54.952305" cy="364.71353" cx="1757.96" id="path6434-6" style="fill:url(#radialGradientR' + _this.id + ');fill-opacity:1;stroke:none;stroke-width:0.800002" transform="scale(1,-1)"/>'
                 + '        <line id="bLed0-' + _this.id + '" style="stroke-width:5; stroke-linecap:round;stroke: rgb(255, 0, 0);" x1="1673" y1="-230" x2="1693" y2="-230"></line>'
                 + '        <line id="bLed1-' + _this.id + '" style="stroke-width:5; stroke-linecap:round;stroke: rgb(255, 0, 0);" x1="1705" y1="-243" x2="1705" y2="-263"></line>'
                 + '        <line id="bLed2-' + _this.id + '" style="stroke-width:5; stroke-linecap:round;stroke: rgb(255, 0, 0);" x1="1673" y1="-274" x2="1693" y2="-274"></line>'
                 + '        <line id="bLed3-' + _this.id + '" style="stroke-width:5; stroke-linecap:round;stroke: rgb(255, 0, 0);" x1="1661" y1="-243" x2="1661" y2="-263"></line>'
                 + '    </g>'
+                + '    <path id="hLed0-' + _this.id + '" style="fill: rgb(255, 0, 0);" d="M 0.845 25.085 C 1.338 24.657 5.74 29.616 5.247 30.044 C 3.594 31.623 -0.808 26.664 0.845 25.085 Z" transform="matrix(-0.490385, -0.871506, 0.871506, -0.490385, -19.848418, 43.802865)"></path>'
+                + '    <path id="hLed5-' + _this.id + '" style="fill: rgb(255, 0, 0);" d="M 109.103 25.178 C 109.596 24.75 113.998 29.709 113.505 30.137 C 111.852 31.716 107.45 26.757 109.103 25.178 Z" transform="matrix(0.925951, 0.377644, -0.377644, 0.925951, 18.727479, -39.913222)"/>'
+                + '    <path id="hLed2-' + _this.id + '" style="fill: rgb(255, 0, 0);" d="M 51.475 -0.953 C 51.968 -1.381 56.37 3.578 55.877 4.006 C 54.224 5.585 49.822 0.626 51.475 -0.953 Z" transform="matrix(0.640245, -0.76817, 0.76817, 0.640245, 17.971182, 41.706459)"/>'
+                + '    <path id="hLed3-' + _this.id + '" style="fill: rgb(255, 0, 0);" d="M 58.28 -0.954 C 58.773 -1.382 63.175 3.577 62.682 4.005 C 61.029 5.584 56.627 0.625 58.28 -0.954 Z" transform="matrix(0.695244, -0.718774, 0.718774, 0.695244, 17.184968, 43.8624)"/>'
+                + '    <path id="hLed4-' + _this.id + '" style="fill: rgb(255, 0, 0);" d="M 88.15 5.504 C 88.643 5.076 93.045 10.035 92.552 10.463 C 90.899 12.042 86.497 7.083 88.15 5.504 Z" transform="matrix(0.907046, -0.421032, 0.421032, 0.907046, 4.963018, 38.72704)"/>'
+                + '    <path id="hLed1-' + _this.id + '" style="fill: rgb(255, 0, 0);" d="M 19.875 6.311 C 20.368 5.883 24.77 10.842 24.277 11.27 C 22.624 12.849 18.222 7.89 19.875 6.311 Z" transform="matrix(0.268223, -0.963357, 0.963357, 0.268223, 7.431825, 27.64499)"/>'
+                + '    <path id="hLed6-' + _this.id + '" style="fill: rgb(255, 0, 0);" d="M 12.855 103.913 C 12.891 103.9 17.296 108.856 17.257 108.872 C 15.604 110.451 11.202 105.492 12.855 103.913 Z" transform="matrix(-0.65239, 0.757884, -0.757884, -0.65239, 104.870708, 165.265308)" bx:origin="0.429 0.526"/>'
+                + '    <path id="hLed7-' + _this.id + '" style="fill: rgb(255, 0, 0);" d="M 97.274 103.987 C 97.31 103.974 101.715 108.93 101.676 108.946 C 100.023 110.525 95.621 105.566 97.274 103.987 Z" transform="matrix(-0.65239, 0.757884, -0.757884, -0.65239, 244.419879, 101.407797)" bx:origin="0.429 0.526"/>'
+                + '    <path id="tLed0-' + _this.id + '" style="fill: rgb(255, 0, 0);" d="M -0.673 38.228 C -0.691 38.085 2.477 41.649 2.492 41.794 C 1.303 42.929 -1.862 39.364 -0.673 38.228 Z" transform="matrix(-0.740169, -0.672421, 0.672421, -0.740169, -25.197944, 70.940976)" bx:origin="0.596 0.558"/>'
+                + '    <path id="tLed1-' + _this.id + '" style="fill: rgb(0, 0, 255);" d="M -0.646 43.304 C -0.664 43.161 2.504 46.725 2.519 46.87 C 1.33 48.005 -1.835 44.44 -0.646 43.304 Z" transform="matrix(-0.743328, -0.668927, 0.668927, -0.743328, -28.40192, 79.931728)" bx:origin="0.596 0.558"/>'
+                + '    <path id="mLed0-' + _this.id + '" style="fill: rgb(0, 0, 255);" d="M 111.126 43.978 C 111.108 43.835 114.276 47.399 114.291 47.544 C 113.102 48.679 109.937 45.114 111.126 43.978 Z" transform="matrix(0.74996, 0.661483, -0.661483, 0.74996, 58.718071, -63.1615)" bx:origin="0.596 0.558"/>'
                 + '</svg>';
             _this.wheelBack = {
                 x: 0,
@@ -1752,13 +1763,15 @@ define(["require", "exports", "interpreter.constants", "simulation.math", "guiSt
     }());
     exports.RGBLed = RGBLed;
     var ThymioRGBLeds = /** @class */ (function () {
-        function ThymioRGBLeds(p, port) {
+        function ThymioRGBLeds(p, id, chassisColor) {
             this.r = 7.5;
             this.drawPriority = 11;
             this.xR = this.xL = p.x;
             this.yR = p.y;
             this.yL = -p.y;
-            this.port = port || 0;
+            this.myRobotId = id;
+            this.chassisColor = chassisColor;
+            this.change();
         }
         ThymioRGBLeds.prototype.draw = function (rCtx, myRobot) {
             if (this.color) {
@@ -1776,16 +1789,21 @@ define(["require", "exports", "interpreter.constants", "simulation.math", "guiSt
                 rCtx.beginPath();
                 rCtx.arc(this.xL, this.yL, this.r * 1.5, 0, Math.PI * 2);
                 rCtx.fill();
-                $('#stopOn' + myRobot.id).css({ 'stop-color': 'rgb(' + this.color[0] + ',' + this.color[1] + ',' + this.color[2] + ')', 'stop-opacity': 1 });
-                $('#stopOff' + myRobot.id).css({ 'stop-color': 'rgb(' + this.color[0] + ',' + this.color[1] + ',' + this.color[2] + ')', 'stop-opacity': 0 });
-            }
-            else {
-                $('#stopOn' + myRobot.id).css({ 'stop-color': myRobot.chassis.geom.color, 'stop-opacity': 1 });
-                $('#stopOff' + myRobot.id).css({ 'stop-color': myRobot.chassis.geom.color, 'stop-opacity': 0 });
             }
         };
         ThymioRGBLeds.prototype.reset = function () {
             this.color = null;
+            this.change();
+        };
+        ThymioRGBLeds.prototype.change = function () {
+            if (this.color) {
+                $('#stopOn' + this.myRobotId).css({ 'stop-color': 'rgb(' + this.color[0] + ',' + this.color[1] + ',' + this.color[2] + ')', 'stop-opacity': 1 });
+                $('#stopOff' + this.myRobotId).css({ 'stop-color': 'rgb(' + this.color[0] + ',' + this.color[1] + ',' + this.color[2] + ')', 'stop-opacity': 0 });
+            }
+            else {
+                $('#stopOn' + this.myRobotId).css({ 'stop-color': this.chassisColor, 'stop-opacity': 1 });
+                $('#stopOff' + this.myRobotId).css({ 'stop-color': this.chassisColor, 'stop-opacity': 0 });
+            }
         };
         ThymioRGBLeds.prototype.updateAction = function (myRobot, dt, interpreterRunning) {
             var led = myRobot.interpreter.getRobotBehaviour().getActionState('led', true);
@@ -1799,6 +1817,7 @@ define(["require", "exports", "interpreter.constants", "simulation.math", "guiSt
                         this.color = led.color;
                     }
                 }
+                this.change();
             }
         };
         return ThymioRGBLeds;
@@ -1922,7 +1941,7 @@ define(["require", "exports", "interpreter.constants", "simulation.math", "guiSt
                 if (this.values[i] > 0) {
                     rCtx.beginPath();
                     rCtx.lineWidth = 0.75;
-                    rCtx.arc(this.leds[i].x, this.leds[i].y, this.r, this.leds[i].theta - Math.PI / 2, this.leds[i].theta + Math.PI / 2);
+                    rCtx.arc(this.leds[i].x, this.leds[i].y, this.r, this.leds[i].theta + Math.PI / 2, this.leds[i].theta - Math.PI / 2);
                     rCtx.fillStyle = 'rgba(255, 0, 0,' + this.values[i] / 100 + ')';
                     rCtx.fill();
                 }
@@ -1933,7 +1952,9 @@ define(["require", "exports", "interpreter.constants", "simulation.math", "guiSt
             this.values = [0, 0, 0, 0, 0, 0, 0, 0];
         };
         ThymioProxHLeds.prototype.change = function () {
-            // TODO
+            for (var i = 0; i < 8; i++) {
+                $('#hLed' + i + '-' + this.myRobotId).css({ 'fill': 'rgba(255, 0, 0,' + this.values[i] / 100 });
+            }
         };
         ThymioProxHLeds.prototype.updateAction = function (myRobot, dt, interpreterRunning) {
             var proxHLeds = myRobot.interpreter.getRobotBehaviour().getActionState('proxHLeds', true);
@@ -1945,6 +1966,99 @@ define(["require", "exports", "interpreter.constants", "simulation.math", "guiSt
         return ThymioProxHLeds;
     }());
     exports.ThymioProxHLeds = ThymioProxHLeds;
+    var ThymioTemperatureLeds = /** @class */ (function () {
+        function ThymioTemperatureLeds(id) {
+            this.leds = [
+                {
+                    x: 10, y: -17, theta: -Math.PI / 2
+                }, {
+                    x: 12,
+                    y: -17,
+                    theta: -Math.PI / 2
+                }
+            ];
+            this.values = [0, 0];
+            this.r = 1;
+            this.drawPriority = 11;
+            this.myRobotId = id;
+            this.change();
+        }
+        ThymioTemperatureLeds.prototype.draw = function (rCtx, myRobot) {
+            rCtx.save();
+            for (var i = 0; i < 2; i++) {
+                if (this.values[i] > 0) {
+                    rCtx.beginPath();
+                    rCtx.lineWidth = 0.75;
+                    rCtx.arc(this.leds[i].x, this.leds[i].y, this.r, this.leds[i].theta + Math.PI / 2, this.leds[i].theta - Math.PI / 2);
+                    var color = 'rgba(0, 0, 255,' + this.values[i] / 100 + ')';
+                    if (i === 1) {
+                        color = 'rgba(255, 0, 0,' + this.values[i] / 100 + ')';
+                    }
+                    rCtx.fillStyle = color;
+                    rCtx.fill();
+                }
+            }
+            rCtx.restore();
+        };
+        ThymioTemperatureLeds.prototype.reset = function () {
+            this.values = [0, 0];
+        };
+        ThymioTemperatureLeds.prototype.change = function () {
+            $('#tLed0-' + this.myRobotId).css({ 'fill': 'rgba(255, 0, 0,' + this.values[1] / 100 });
+            $('#tLed1-' + this.myRobotId).css({ 'fill': 'rgba(0, 0, 255,' + this.values[0] / 100 });
+        };
+        ThymioTemperatureLeds.prototype.updateAction = function (myRobot, dt, interpreterRunning) {
+            var temperatureLeds = myRobot.interpreter.getRobotBehaviour().getActionState('temperatureLeds', true);
+            if (temperatureLeds) {
+                this.values = temperatureLeds;
+                this.change();
+            }
+        };
+        return ThymioTemperatureLeds;
+    }());
+    exports.ThymioTemperatureLeds = ThymioTemperatureLeds;
+    var ThymioSoundLed = /** @class */ (function () {
+        function ThymioSoundLed(id) {
+            this.leds = [
+                {
+                    x: 12,
+                    y: 17,
+                    theta: Math.PI / 2
+                }
+            ];
+            this.value = 0;
+            this.r = 1;
+            this.drawPriority = 11;
+            this.myRobotId = id;
+            this.change();
+        }
+        ThymioSoundLed.prototype.draw = function (rCtx, myRobot) {
+            rCtx.save();
+            if (this.value > 0) {
+                rCtx.beginPath();
+                rCtx.lineWidth = 0.75;
+                rCtx.arc(this.leds[0].x, this.leds[0].y, this.r, this.leds[0].theta + Math.PI / 2, this.leds[0].theta - Math.PI / 2);
+                rCtx.fillStyle = 'rgba(0, 0, 255,' + this.value / 100 + ')';
+                rCtx.fill();
+            }
+            rCtx.restore();
+        };
+        ThymioSoundLed.prototype.reset = function () {
+            this.value = 0;
+        };
+        ThymioSoundLed.prototype.change = function () {
+            $('#mLed0-' + this.myRobotId).css({ 'fill': 'rgba(0, 0, 255,' + this.value / 100 });
+        };
+        ThymioSoundLed.prototype.updateAction = function (myRobot, dt, interpreterRunning) {
+            var soundLed = myRobot.interpreter.getRobotBehaviour().getActionState('soundLed', true);
+            if (soundLed) {
+                this.value = soundLed;
+                this.change();
+            }
+        };
+        return ThymioSoundLed;
+    }());
+    exports.ThymioSoundLed = ThymioSoundLed;
     var MbotRGBLed = /** @class */ (function (_super) {
         __extends(MbotRGBLed, _super);
         function MbotRGBLed() {
