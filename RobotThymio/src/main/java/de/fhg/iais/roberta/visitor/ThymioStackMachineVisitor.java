@@ -43,7 +43,9 @@ import de.fhg.iais.roberta.syntax.sensor.generic.TimerSensor;
 import de.fhg.iais.roberta.syntax.sensor.thymio.TapSensor;
 import de.fhg.iais.roberta.util.basic.C;
 import de.fhg.iais.roberta.util.dbc.Assert;
+import de.fhg.iais.roberta.util.dbc.DbcException;
 import de.fhg.iais.roberta.util.syntax.MotorDuration;
+import de.fhg.iais.roberta.util.syntax.SC;
 import de.fhg.iais.roberta.visitor.lang.codegen.AbstractStackMachineVisitor;
 
 public final class ThymioStackMachineVisitor extends AbstractStackMachineVisitor implements IThymioVisitor<Void> {
@@ -54,42 +56,46 @@ public final class ThymioStackMachineVisitor extends AbstractStackMachineVisitor
 
     @Override
     public Void visitClearDisplayAction(ClearDisplayAction clearDisplayAction) {
-        return null;
+        throw new DbcException("Not supported!");
     }
 
     @Override
-    public Void visitKeysSensor(KeysSensor keysSensor) {
-        String mode = keysSensor.getUserDefinedPort().toLowerCase();
-        JSONObject o = makeNode(C.GET_SAMPLE).put(C.GET_SAMPLE, C.BUTTONS).put(C.MODE, mode);
+    public Void visitColorConst(ColorConst colorConst) {
+        int r = colorConst.getRedChannelInt();
+        int g = colorConst.getGreenChannelInt();
+        int b = colorConst.getBlueChannelInt();
+
+        JSONObject o = makeNode(C.EXPR).put(C.EXPR, "COLOR_CONST").put(C.VALUE, new JSONArray(Arrays.asList(r, g, b)));
         return add(o);
     }
 
     @Override
-    public Void visitMotorGetPowerAction(MotorGetPowerAction motorGetPowerAction) {
-        return null;
-    }
+    public Void visitCurveAction(CurveAction curveAction) {
+        curveAction.paramLeft.getSpeed().accept(this);
+        curveAction.paramRight.getSpeed().accept(this);
+        boolean speedOnly = !processOptionalDuration(curveAction.paramLeft.getDuration());
+        DriveDirection driveDirection = (DriveDirection) curveAction.direction;
 
-    @Override
-    public Void visitMotorOnAction(MotorOnAction motorOnAction) {
-        motorOnAction.param.getSpeed().accept(this);
-        MotorDuration duration = motorOnAction.param.getDuration();
-        boolean speedOnly = !processOptionalDuration(duration);
-        String port = motorOnAction.getUserDefinedPort();
-
-        JSONObject o = makeNode(C.MOTOR_ON_ACTION).put(C.PORT, port.toLowerCase()).put(C.SPEED_ONLY, speedOnly);
+        JSONObject o = makeNode(C.CURVE_ACTION).put(C.DRIVE_DIRECTION, driveDirection).put(C.SPEED_ONLY, speedOnly);
         if ( speedOnly ) {
             return add(o.put(C.SET_TIME, false));
         } else {
             add(o.put(C.SET_TIME, true));
-            if ( duration.getType() == null ) {
-                o.put(C.MOTOR_DURATION, C.TIME);
+            return add(makeNode(C.STOP_DRIVE));
+        }
+    }
 
-            } else {
-                String durationType = duration.getType().toString().toLowerCase();
-                o.put(C.MOTOR_DURATION, durationType);
-            }
-            add(o);
-            return add(makeNode(C.MOTOR_STOP).put(C.PORT, port.toLowerCase()));
+    @Override
+    public Void visitDriveAction(DriveAction driveAction) {
+        driveAction.param.getSpeed().accept(this);
+        boolean speedOnly = !processOptionalDuration(driveAction.param.getDuration());
+        DriveDirection driveDirection = (DriveDirection) driveAction.direction;
+        JSONObject o = makeNode(C.DRIVE_ACTION).put(C.DRIVE_DIRECTION, driveDirection).put(C.SPEED_ONLY, speedOnly);
+        if ( speedOnly ) {
+            return add(o.put(C.SET_TIME, false));
+        } else {
+            add(o.put(C.SET_TIME, true));
+            return add(makeNode(C.STOP_DRIVE));
         }
     }
 
@@ -107,43 +113,10 @@ public final class ThymioStackMachineVisitor extends AbstractStackMachineVisitor
     }
 
     @Override
-    public Void visitLightAction(LightAction lightAction) {
-        lightAction.rgbLedColor.accept(this);
-        String port = lightAction.port.toString().toLowerCase();
-        JSONObject o = makeNode(C.LED_ON_ACTION).put(C.PORT, port);
+    public Void visitKeysSensor(KeysSensor keysSensor) {
+        String mode = keysSensor.getUserDefinedPort().toLowerCase();
+        JSONObject o = makeNode(C.GET_SAMPLE).put(C.GET_SAMPLE, C.BUTTONS).put(C.MODE, mode);
         return add(o);
-    }
-
-    @Override
-    public Void visitColorConst(ColorConst colorConst) {
-        int r = colorConst.getRedChannelInt();
-        int g = colorConst.getGreenChannelInt();
-        int b = colorConst.getBlueChannelInt();
-
-        JSONObject o = makeNode(C.EXPR).put(C.EXPR, "COLOR_CONST").put(C.VALUE, new JSONArray(Arrays.asList(r, g, b)));
-        return add(o);
-    }
-
-    @Override
-    public Void visitSoundSensor(SoundSensor soundSensor) {
-        return add(makeNode(C.GET_SAMPLE).put(C.GET_SAMPLE, C.SOUND).put(C.MODE, C.VOLUME));
-    }
-
-    @Override
-    public Void visitMotorSetPowerAction(MotorSetPowerAction motorSetPowerAction) {
-        return null;
-    }
-
-    @Override
-    public Void visitMotorStopAction(MotorStopAction motorStopAction) {
-        String port = motorStopAction.getUserDefinedPort();
-        JSONObject o = makeNode(C.MOTOR_STOP).put(C.PORT, port.toLowerCase());
-        return add(o);
-    }
-
-    @Override
-    public Void visitPlayRecordingAction(PlayRecordingAction playRecordingAction) {
-        return null;
     }
 
     @Override
@@ -169,16 +142,6 @@ public final class ThymioStackMachineVisitor extends AbstractStackMachineVisitor
     }
 
     @Override
-    public Void visitLedSoundOnAction(LedSoundOnAction ledSoundOnAction) {
-        return null;
-    }
-
-    @Override
-    public Void visitLedTemperatureOnAction(LedTemperatureOnAction ledTemperatureOnAction) {
-        return null;
-    }
-
-    @Override
     public Void visitLedProxHOnAction(LedProxHOnAction ledProxHOnAction) {
         ledProxHOnAction.led1.accept(this);
         ledProxHOnAction.led2.accept(this);
@@ -197,15 +160,96 @@ public final class ThymioStackMachineVisitor extends AbstractStackMachineVisitor
     }
 
     @Override
+    public Void visitLedSoundOnAction(LedSoundOnAction ledSoundOnAction) {
+        // TODO
+        return null;
+    }
+
+    @Override
+    public Void visitLedTemperatureOnAction(LedTemperatureOnAction ledTemperatureOnAction) {
+        return null;
+    }
+
+    @Override
     public Void visitLedsOffAction(LedsOffAction ledsOffAction) {
-        String port = ledsOffAction.port.toString().toLowerCase();
+        String port = ledsOffAction.port.toLowerCase();
         JSONObject o = makeNode(C.STATUS_LIGHT_ACTION).put(C.PORT, port);
         return add(o);
     }
 
     @Override
-    public Void visitTapSensor(TapSensor tapSensor) {
-        return add(makeNode(C.GET_SAMPLE).put(C.GET_SAMPLE, C.TOUCH));
+    public Void visitLightAction(LightAction lightAction) {
+        lightAction.rgbLedColor.accept(this);
+        String port = lightAction.port.toLowerCase();
+        JSONObject o = makeNode(C.LED_ON_ACTION).put(C.PORT, port);
+        return add(o);
+    }
+
+    @Override
+    public Void visitMotorDriveStopAction(MotorDriveStopAction stopAction) {
+        JSONObject o = makeNode(C.STOP_DRIVE);
+        return add(o);
+    }
+
+    @Override
+    public Void visitMotorGetPowerAction(MotorGetPowerAction motorGetPowerAction) {
+        throw new DbcException("Not supported!");
+    }
+
+    @Override
+    public Void visitMotorOnAction(MotorOnAction motorOnAction) {
+        motorOnAction.param.getSpeed().accept(this);
+        MotorDuration<?> duration = motorOnAction.param.getDuration();
+        boolean speedOnly = !processOptionalDuration(duration);
+        String port = motorOnAction.getUserDefinedPort();
+
+        JSONObject o = makeNode(C.MOTOR_ON_ACTION).put(C.PORT, port.toLowerCase()).put(C.SPEED_ONLY, speedOnly);
+        if ( speedOnly ) {
+            return add(o.put(C.SET_TIME, false));
+        } else {
+            add(o.put(C.SET_TIME, true));
+            if ( duration.getType() == null ) {
+                o.put(C.MOTOR_DURATION, C.TIME);
+
+            } else {
+                String durationType = duration.getType().toString().toLowerCase();
+                o.put(C.MOTOR_DURATION, durationType);
+            }
+            add(o);
+            return add(makeNode(C.MOTOR_STOP).put(C.PORT, port.toLowerCase()));
+        }
+    }
+
+    @Override
+    public Void visitMotorSetPowerAction(MotorSetPowerAction motorSetPowerAction) {
+        throw new DbcException("Not supported!");
+    }
+
+    @Override
+    public Void visitMotorStopAction(MotorStopAction motorStopAction) {
+        String port = motorStopAction.getUserDefinedPort();
+        JSONObject o = makeNode(C.MOTOR_STOP).put(C.PORT, port.toLowerCase());
+        return add(o);
+    }
+
+    @Override
+    public Void visitPlayFileAction(PlayFileAction playFileAction) {
+        return null;
+    }
+
+    @Override
+    public Void visitPlayNoteAction(PlayNoteAction playNoteAction) {
+        String freq = playNoteAction.frequency;
+        String duration = playNoteAction.duration;
+        add(makeNode(C.EXPR).put(C.EXPR, C.NUM_CONST).put(C.VALUE, freq));
+        add(makeNode(C.EXPR).put(C.EXPR, C.NUM_CONST).put(C.VALUE, duration));
+        JSONObject o = makeNode(C.TONE_ACTION);
+        return add(o);
+    }
+
+    @Override
+    public Void visitPlayRecordingAction(PlayRecordingAction playRecordingAction) {
+        return null;
     }
 
     @Override
@@ -220,52 +264,37 @@ public final class ThymioStackMachineVisitor extends AbstractStackMachineVisitor
 
     @Override
     public Void visitShowTextAction(ShowTextAction showTextAction) {
-        return null;
+        throw new DbcException("Not supported!");
     }
 
     @Override
-    public Void visitDriveAction(DriveAction driveAction) {
-        driveAction.param.getSpeed().accept(this);
-        boolean speedOnly = !processOptionalDuration(driveAction.param.getDuration());
-        DriveDirection driveDirection = (DriveDirection) driveAction.direction;
-        JSONObject o = makeNode(C.DRIVE_ACTION).put(C.DRIVE_DIRECTION, driveDirection).put(C.SPEED_ONLY, speedOnly);
-        if ( speedOnly ) {
-            return add(o.put(C.SET_TIME, false));
-        } else {
-            add(o.put(C.SET_TIME, true));
-            return add(makeNode(C.STOP_DRIVE));
-        }
+    public Void visitSoundSensor(SoundSensor soundSensor) {
+        return add(makeNode(C.GET_SAMPLE).put(C.GET_SAMPLE, C.SOUND).put(C.MODE, C.VOLUME));
     }
 
     @Override
-    public Void visitCurveAction(CurveAction curveAction) {
-        curveAction.paramLeft.getSpeed().accept(this);
-        curveAction.paramRight.getSpeed().accept(this);
-        boolean speedOnly = !processOptionalDuration(curveAction.paramLeft.getDuration());
-        DriveDirection driveDirection = (DriveDirection) curveAction.direction;
-
-        JSONObject o = makeNode(C.CURVE_ACTION).put(C.DRIVE_DIRECTION, driveDirection).put(C.SPEED_ONLY, speedOnly);
-        if ( speedOnly ) {
-            return add(o.put(C.SET_TIME, false));
-        } else {
-            add(o.put(C.SET_TIME, true));
-            return add(makeNode(C.STOP_DRIVE));
-        }
+    public Void visitTapSensor(TapSensor tapSensor) {
+        return add(makeNode(C.GET_SAMPLE).put(C.GET_SAMPLE, C.TOUCH));
     }
 
     @Override
     public Void visitTimerSensor(TimerSensor timerSensor) {
-        return null;
+        String port = timerSensor.getUserDefinedPort();
+        JSONObject o;
+        if ( timerSensor.getMode().equals(SC.DEFAULT) || timerSensor.getMode().equals(SC.VALUE) ) {
+            o = makeNode(C.GET_SAMPLE).put(C.GET_SAMPLE, C.TIMER).put(C.PORT, port);
+        } else {
+            o = makeNode(C.TIMER_SENSOR_RESET).put(C.PORT, port);
+        }
+        return add(o);
     }
 
     @Override
     public Void visitToneAction(ToneAction toneAction) {
-        return null;
-    }
-
-    @Override
-    public Void visitPlayNoteAction(PlayNoteAction playNoteAction) {
-        return null;
+        toneAction.frequency.accept(this);
+        toneAction.duration.accept(this);
+        JSONObject o = makeNode(C.TONE_ACTION);
+        return add(o);
     }
 
     @Override
@@ -284,18 +313,7 @@ public final class ThymioStackMachineVisitor extends AbstractStackMachineVisitor
     }
 
     @Override
-    public Void visitMotorDriveStopAction(MotorDriveStopAction stopAction) {
-        JSONObject o = makeNode(C.STOP_DRIVE);
-        return add(o);
-    }
-
-    @Override
     public Void visitVolumeAction(VolumeAction volumeAction) {
-        return null;
-    }
-
-    @Override
-    public Void visitPlayFileAction(PlayFileAction playFileAction) {
-        return null;
+        throw new DbcException("Not supported!");
     }
 }
