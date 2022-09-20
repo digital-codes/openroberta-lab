@@ -197,6 +197,9 @@ onevent timer0
     elseif _state == 13 then
         _state = 14
     elseif _state == 14 then
+        _A = 1
+        call sound.record(_A)
+        call sound.record(-1)
         callsub thymio_close
     end
 

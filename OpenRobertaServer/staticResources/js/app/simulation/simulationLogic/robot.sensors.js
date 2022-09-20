@@ -1401,7 +1401,7 @@ define(["require", "exports", "robot.base.mobile", "simulation.math", "util", "r
             return '<div><label>' + Blockly.Msg['SENSOR_SOUND'] + '</label><span>' + UTIL.round(this.volume, 0) + ' %</span></div>';
         };
         VolumeMeterSensor.prototype.updateSensor = function (running, dt, myRobot, values, uCtx, udCtx, personalObstacleList) {
-            this.volume = this.sound ? UTIL.round(this.sound['volume'] * 10000, 0) : 0;
+            this.volume = this.sound ? UTIL.round(this.sound['volume'] * 100, 0) : 0;
             values['sound'] = {};
             values['sound']['volume'] = this.volume;
         };
@@ -1427,6 +1427,12 @@ define(["require", "exports", "robot.base.mobile", "simulation.math", "util", "r
                 '</label><span>' +
                 UTIL.round(this.volume, 0) +
                 ' %</span></div>');
+        };
+        SoundSensor.prototype.updateSensor = function (running, dt, myRobot, values, uCtx, udCtx, personalObstacleList) {
+            this.volume = this.sound ? UTIL.round(this.sound['volume'] * 100, 0) : 0;
+            values['sound'] = {};
+            values['sound'][this.port] = {};
+            values['sound'][this.port]['volume'] = this.volume;
         };
         return SoundSensor;
     }(VolumeMeterSensor));

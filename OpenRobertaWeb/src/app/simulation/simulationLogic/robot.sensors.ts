@@ -1752,7 +1752,7 @@ export class VolumeMeterSensor implements ISensor, ILabel {
         udCtx: CanvasRenderingContext2D,
         personalObstacleList: any[]
     ): void {
-        this.volume = this.sound ? UTIL.round(this.sound['volume'] * 10000, 0) : 0;
+        this.volume = this.sound ? UTIL.round(this.sound['volume'] * 100, 0) : 0;
         values['sound'] = {};
         values['sound']['volume'] = this.volume;
     }
@@ -1781,6 +1781,21 @@ export class SoundSensor extends VolumeMeterSensor implements IExternalSensor {
             UTIL.round(this.volume, 0) +
             ' %</span></div>'
         );
+    }
+
+    override updateSensor(
+        running: boolean,
+        dt: number,
+        myRobot: RobotBase,
+        values: object,
+        uCtx: CanvasRenderingContext2D,
+        udCtx: CanvasRenderingContext2D,
+        personalObstacleList: any[]
+    ): void {
+        this.volume = this.sound ? UTIL.round(this.sound['volume'] * 100, 0) : 0;
+        values['sound'] = {};
+        values['sound'][this.port] = {};
+        values['sound'][this.port]['volume'] = this.volume;
     }
 }
 

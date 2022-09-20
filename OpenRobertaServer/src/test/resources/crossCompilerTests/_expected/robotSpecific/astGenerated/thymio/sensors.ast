@@ -24,3 +24,5 @@ WaitStmt [
 )
 (repeat [WAIT, Binary [EQ, SensorExpr [GetSampleSensor [KeysSensor [FORWARD, PRESSED, - EMPTY_SLOT -]]], NumConst[value: 1]]]
 )]
+RecordStartAction[filename: NumConst[value: 1]]
+RecordStopAction[]

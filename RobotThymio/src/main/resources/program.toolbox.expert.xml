@@ -408,7 +408,7 @@
         <block type='robSensors_tap_getSample'/>
         <block type="robSensors_timer_getSample"/>
         <block type="robSensors_timer_reset"/>
-        <block type='robSensors_record_start'>
+        <block type='robSensors_record_begin'>
             <value name='FILENAME'>
                 <block type='math_integer'>
                     <field name='NUM'>1</field>
