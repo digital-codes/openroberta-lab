@@ -93,6 +93,15 @@
         <block type="robSensors_timer_getSample"></block>
         <block type="robSensors_timer_reset"></block>
         <block type="robSensors_out_getSample"></block>
+        <block type="robSensors_detectmark_getSample"></block>
+        <block type="robSensors_markerinf_getSample"></block>
+        <block type="robSensors_camera_getSample">
+            <value name="VALUE">
+                <block type="math_number">
+                    <field name="NUM">0</field>
+                </block>
+            </value>
+        </block>
     </category>
     <category name="TOOLBOX_CONTROL" svg="true">
         <category name="TOOLBOX_DECISION" svg="true">

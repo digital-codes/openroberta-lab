@@ -29,7 +29,7 @@ define(["require", "exports", "robot.base.mobile", "robot.sensors", "./robot.act
                 y: 0,
                 rx: 0,
                 ry: 0,
-                r: 70,
+                r: 70
             };
             _this.configure(configuration);
             return _this;
@@ -51,6 +51,7 @@ define(["require", "exports", "robot.base.mobile", "robot.sensors", "./robot.act
             this.robotinoTouchSensor = new robot_sensors_1.RobotinoTouchSensor();
             this.infraredSensor = new robot_sensors_1.RobotinoInfraredSensor();
             this.odometrySensor = new robot_sensors_1.OdometrySensor();
+            this.cameraSensor = new robot_sensors_1.CameraSensor(new robot_base_mobile_1.Pose(40, 0, 0), 2 * Math.PI / 5);
         };
         return RobotRobotino;
     }(robot_base_mobile_1.RobotBaseMobile));

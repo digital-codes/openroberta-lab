@@ -12,15 +12,18 @@ import de.fhg.iais.roberta.constants.RobotinoConstants;
 import de.fhg.iais.roberta.syntax.action.generic.PinWriteValueAction;
 import de.fhg.iais.roberta.syntax.action.motor.differential.MotorDriveStopAction;
 import de.fhg.iais.roberta.syntax.action.motor.differential.TurnAction;
-import de.fhg.iais.roberta.syntax.action.robotino.OmnidriveAction;
-import de.fhg.iais.roberta.syntax.action.robotino.OmnidriveDistanceAction;
-import de.fhg.iais.roberta.syntax.action.robotino.OmnidrivePositionAction;
+import de.fhg.iais.roberta.syntax.actor.robotino.OmnidriveAction;
+import de.fhg.iais.roberta.syntax.actor.robotino.OmnidriveDistanceAction;
+import de.fhg.iais.roberta.syntax.actor.robotino.OmnidrivePositionAction;
 import de.fhg.iais.roberta.syntax.configuration.ConfigurationComponent;
 import de.fhg.iais.roberta.syntax.lang.expr.NumConst;
+import de.fhg.iais.roberta.syntax.sensor.generic.DetectMarkSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.InfraredSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.PinGetValueSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.TimerSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.TouchSensor;
+import de.fhg.iais.roberta.syntax.sensor.robotino.CameraSensor;
+import de.fhg.iais.roberta.syntax.sensor.robotino.MarkerInformation;
 import de.fhg.iais.roberta.syntax.sensor.robotino.OdometrySensor;
 import de.fhg.iais.roberta.syntax.sensor.robotino.OdometrySensorReset;
 import de.fhg.iais.roberta.util.syntax.SC;
@@ -77,6 +80,22 @@ public class RobotinoValidatorAndCollectorVisitor extends MotorValidatorAndColle
         addMotorMethodsAndHardware();
         usedMethodBuilder.addUsedMethod(RobotinoMethods.GETORIENTATION);
         usedMethodBuilder.addUsedMethod(RobotinoMethods.TURNFORDEGREES);
+        return null;
+    }
+
+    @Override
+    public Void visitMarkerInformation(MarkerInformation markerInformation) {
+        requiredComponentVisited(markerInformation, markerInformation.markerId);
+        return null;
+    }
+
+    @Override
+    public Void visitDetectMarkSensor(DetectMarkSensor detectMarkSensor) {
+        return null;
+    }
+
+    @Override
+    public Void visitCameraSensor(CameraSensor cameraSensor) {
         return null;
     }
 

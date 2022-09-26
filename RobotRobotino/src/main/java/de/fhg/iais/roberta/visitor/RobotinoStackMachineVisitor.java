@@ -10,13 +10,16 @@ import de.fhg.iais.roberta.syntax.Phrase;
 import de.fhg.iais.roberta.syntax.action.generic.PinWriteValueAction;
 import de.fhg.iais.roberta.syntax.action.motor.differential.MotorDriveStopAction;
 import de.fhg.iais.roberta.syntax.action.motor.differential.TurnAction;
-import de.fhg.iais.roberta.syntax.action.robotino.OmnidriveAction;
-import de.fhg.iais.roberta.syntax.action.robotino.OmnidriveDistanceAction;
-import de.fhg.iais.roberta.syntax.action.robotino.OmnidrivePositionAction;
+import de.fhg.iais.roberta.syntax.actor.robotino.OmnidriveAction;
+import de.fhg.iais.roberta.syntax.actor.robotino.OmnidriveDistanceAction;
+import de.fhg.iais.roberta.syntax.actor.robotino.OmnidrivePositionAction;
+import de.fhg.iais.roberta.syntax.sensor.generic.DetectMarkSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.InfraredSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.PinGetValueSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.TimerSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.TouchSensor;
+import de.fhg.iais.roberta.syntax.sensor.robotino.CameraSensor;
+import de.fhg.iais.roberta.syntax.sensor.robotino.MarkerInformation;
 import de.fhg.iais.roberta.syntax.sensor.robotino.OdometrySensor;
 import de.fhg.iais.roberta.syntax.sensor.robotino.OdometrySensorReset;
 import de.fhg.iais.roberta.util.basic.C;
@@ -90,6 +93,25 @@ public final class RobotinoStackMachineVisitor extends AbstractStackMachineVisit
             makeNode(C.OMNI_DRIVE_TURN)
                 .put(C.TURN_DIRECTION, turnDirection.toString().toLowerCase());
         return (add(o));
+    }
+
+    @Override
+    public Void visitMarkerInformation(MarkerInformation markerInformation) {
+        markerInformation.markerId.accept(this);
+        JSONObject o = makeNode(C.MARKER).put(C.GET_SAMPLE, C.MARKER).put(C.MODE, C.INFO);
+        return add(o);
+    }
+
+    @Override
+    public Void visitDetectMarkSensor(DetectMarkSensor detectMarkSensor) {
+        JSONObject o = makeNode(C.GET_SAMPLE).put(C.GET_SAMPLE, C.MARKER).put(C.MODE, C.ID);
+        return add(o);
+    }
+
+    @Override
+    public Void visitCameraSensor(CameraSensor cameraSensor) {
+        JSONObject o = makeNode(C.GET_SAMPLE).put(C.GET_SAMPLE, C.CAMERA).put(C.MODE, cameraSensor.getMode().toLowerCase());
+        return add(o);
     }
 
     @Override

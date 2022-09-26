@@ -5,7 +5,7 @@
  */
 define(["require", "exports", "simulation.constants", "simulation.objects"], function (require, exports, simulation_constants_1, simulation_objects_1) {
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.epsilonEqual = exports.transform = exports.getColor = exports.rgbToHsv = exports.checkInObstacle = exports.isPointInsideRectangle = exports.getDistanceToLine = exports.getDistance = exports.sqr = exports.getDistanceToCircle = exports.getLinesFromObj = exports.isLineAlignedToPoint = exports.getIntersectionPointsCircle = exports.getClosestIntersectionPointCircle = exports.getIntersectionPoint = exports.toDegree = exports.toRadians = void 0;
+    exports.epsilonEqual = exports.transform = exports.getColor = exports.rgbToHsv = exports.checkInObstacle = exports.isPointInsideRectangle = exports.getDistanceToLine = exports.getDistance = exports.sqr = exports.getDistanceToCircle = exports.getLinesFromObj = exports.isLineAlignedToPoint = exports.getIntersectionPointsCircle = exports.getMiddleIntersectionPointCircle = exports.getClosestIntersectionPointCircle = exports.getIntersectionPoint = exports.toDegree = exports.toRadians = void 0;
     /**
      * exports helper for calculations in ORsimulation
      *
@@ -87,6 +87,17 @@ define(["require", "exports", "simulation.constants", "simulation.objects"], fun
         return null; // no intersections at all
     };
     exports.getClosestIntersectionPointCircle = getClosestIntersectionPointCircle;
+    var getMiddleIntersectionPointCircle = function (line, circle) {
+        var intersections = this.getIntersectionPointsCircle(line, circle);
+        if (intersections.length == 1) {
+            return intersections[0]; // one intersection
+        }
+        if (intersections.length == 2) {
+            return ({ x: 0.5 * (intersections[0].x + intersections[1].x), y: 0.5 * (intersections[0].y + intersections[1].y) });
+        }
+        return null; // no intersections at all
+    };
+    exports.getMiddleIntersectionPointCircle = getMiddleIntersectionPointCircle;
     /**
      * Finds the intersection between a circles border
      * and a line from the origin to the otherLineEndPoint.

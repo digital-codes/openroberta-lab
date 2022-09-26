@@ -1,5 +1,5 @@
-import { RobotBaseMobile } from 'robot.base.mobile';
-import { Keys, OdometrySensor, RobotinoInfraredSensor, RobotinoTouchSensor, Timer } from 'robot.sensors';
+import { Pose, RobotBaseMobile } from 'robot.base.mobile';
+import { CameraSensor, Keys, OdometrySensor, RobotinoInfraredSensor, RobotinoTouchSensor, Timer } from 'robot.sensors';
 import { RobotinoChassis, StatusLed, TTS, WebAudio } from './robot.actuators';
 import { RobotBase, SelectionListener } from 'robot.base';
 import { Interpreter } from 'interpreter.interpreter';
@@ -16,6 +16,7 @@ export default class RobotRobotino extends RobotBaseMobile {
     private infraredSensor: RobotinoInfraredSensor;
     private robotinoTouchSensor: RobotinoTouchSensor;
     private odometrySensor: OdometrySensor;
+    private cameraSensor: CameraSensor;
 
     constructor(id: number, configuration: object, interpreter: Interpreter, savedName: string, myListener: SelectionListener) {
         super(id, configuration, interpreter, savedName, myListener);
@@ -24,7 +25,7 @@ export default class RobotRobotino extends RobotBaseMobile {
             y: 0,
             rx: 0,
             ry: 0,
-            r: 70,
+            r: 70
         };
         this.configure(configuration);
     }
@@ -48,5 +49,6 @@ export default class RobotRobotino extends RobotBaseMobile {
         this.robotinoTouchSensor = new RobotinoTouchSensor();
         this.infraredSensor = new RobotinoInfraredSensor();
         this.odometrySensor = new OdometrySensor();
+        this.cameraSensor = new CameraSensor(new Pose(40, 0, 0), 2 * Math.PI / 5);
     }
 }

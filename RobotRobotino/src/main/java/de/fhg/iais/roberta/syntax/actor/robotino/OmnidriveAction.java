@@ -1,4 +1,4 @@
-package de.fhg.iais.roberta.syntax.action.robotino;
+package de.fhg.iais.roberta.syntax.actor.robotino;
 
 import de.fhg.iais.roberta.blockly.generated.Hide;
 import de.fhg.iais.roberta.syntax.action.Action;
@@ -15,7 +15,7 @@ import de.fhg.iais.roberta.util.syntax.WithUserDefinedPort;
 
 
 @NepoPhrase(category = "ACTOR", blocklyNames = {"robActions_motorOmni_curve"}, name = "MOTOR_OMNIDRIVE_ACTION")
-public class OmnidriveAction extends Action implements WithUserDefinedPort {
+public final class OmnidriveAction extends Action implements WithUserDefinedPort {
     @NepoValue(name = BlocklyConstants.X, type = BlocklyType.NUMBER)
     public final Expr xVel;
     @NepoValue(name = BlocklyConstants.Y, type = BlocklyType.NUMBER)

@@ -276,6 +276,10 @@ export class Interpreter {
                     this.robotBehaviour.getSample(this.state, stmt[C.NAME], stmt[C.GET_SAMPLE], stmt[C.PORT], stmt[C.MODE], stmt[C.SLOT]);
                     break;
                 }
+                case C.MARKER:
+                    const markerId = this.state.pop();
+                    this.robotBehaviour.getSample(this.state, stmt[C.NAME], stmt[C.GET_SAMPLE], stmt[C.PORT], stmt[C.MODE], markerId);
+                    break;
                 case C.NN_STEP_STMT:
                     UI.getNetwork().forwardProp();
                     break;

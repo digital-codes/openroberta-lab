@@ -15,7 +15,7 @@ var __extends = (this && this.__extends) || (function () {
 })();
 define(["require", "exports", "robot.base.mobile", "interpreter.constants", "simulation.math", "util", "robot.actuators", "simulation.objects", "blockly", "volume-meter", "jquery", "simulation.roberta"], function (require, exports, robot_base_mobile_1, C, SIMATH, UTIL, robot_actuators_1, simulation_objects_1, Blockly, VolumeMeter, $, simulation_roberta_1) {
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.OdometrySensor = exports.SoundSensor = exports.VolumeMeterSensor = exports.TemperatureSensor = exports.Rob3rtaInfraredSensor = exports.CalliopeLightSensor = exports.CompassSensor = exports.GestureSensor = exports.MbotButton = exports.MicrobitPins = exports.Pins = exports.TouchKeys = exports.EV3Keys = exports.Keys = exports.GyroSensorExt = exports.GyroSensor = exports.LightSensor = exports.NXTColorSensor = exports.ColorSensor = exports.RobotinoTouchSensor = exports.TapSensor = exports.TouchSensor = exports.RobotinoInfraredSensor = exports.MbotInfraredSensor = exports.ThymioInfraredSensors = exports.ThymioLineSensor = exports.ThymioInfraredSensor = exports.InfraredSensor = exports.UltrasonicSensor = exports.DistanceSensor = exports.Timer = void 0;
+    exports.CameraSensor = exports.OdometrySensor = exports.SoundSensor = exports.VolumeMeterSensor = exports.TemperatureSensor = exports.Rob3rtaInfraredSensor = exports.CalliopeLightSensor = exports.CompassSensor = exports.GestureSensor = exports.MbotButton = exports.MicrobitPins = exports.Pins = exports.TouchKeys = exports.EV3Keys = exports.Keys = exports.GyroSensorExt = exports.GyroSensor = exports.LightSensor = exports.NXTColorSensor = exports.ColorSensor = exports.RobotinoTouchSensor = exports.TapSensor = exports.TouchSensor = exports.RobotinoInfraredSensor = exports.MbotInfraredSensor = exports.ThymioInfraredSensors = exports.ThymioLineSensor = exports.ThymioInfraredSensor = exports.InfraredSensor = exports.UltrasonicSensor = exports.DistanceSensor = exports.Timer = void 0;
     var WAVE_LENGTH = 60;
     var Timer = /** @class */ (function () {
         function Timer(num) {
@@ -678,7 +678,7 @@ define(["require", "exports", "robot.base.mobile", "interpreter.constants", "sim
         RobotinoTouchSensor.prototype.updateSensor = function (running, dt, myRobot, values, uCtx, udCtx, personalObstacleList) {
             values['touch'] = values['touch'] || {};
             values['touch'] = this.bumped =
-                myRobot.chassis.bumpedAngle !== 999 || myRobot.chassis.frontRight.bumped;
+                myRobot.chassis.bumpedAngle.length > 0;
         };
         return RobotinoTouchSensor;
     }());
@@ -1588,4 +1588,200 @@ define(["require", "exports", "robot.base.mobile", "interpreter.constants", "sim
         return OdometrySensor;
     }());
     exports.OdometrySensor = OdometrySensor;
+    var CameraSensor = /** @class */ (function () {
+        function CameraSensor(pose, aov) {
+            this.MAX_MARKER_DIST_SQR = 150 * 3 * 150 * 3;
+            this.MAX_CAM_Y = 200 * 3 * 200 * 3;
+            this.LINE_RADIUS = 50;
+            this.AOV = 2 * Math.PI / 5;
+            this.listOfMarkersFound = [];
+            this.labelPriority = 8;
+            this.THRESHOLD = 75;
+            this.drawPriority = 1;
+            this.x = pose.x;
+            this.y = pose.y;
+            this.theta = pose.theta;
+            this.AOV = aov;
+        }
+        CameraSensor.prototype.draw = function (rCtx, myRobot) {
+            rCtx.beginPath();
+            rCtx.strokeStyle = '#0000ff';
+            rCtx.beginPath();
+            rCtx.arc(this.x, this.y, 1000, Math.PI / 5, -Math.PI / 5, true);
+            rCtx.arc(this.x, this.y, 30, -Math.PI / 5, +Math.PI / 5, false);
+            rCtx.closePath();
+            rCtx.stroke();
+        };
+        CameraSensor.prototype.getLabel = function () {
+            var myLabel = '<div><label>' + 'Line Sensor' + '</label><span>' + this.line + '</span></div>';
+            myLabel += '<div><label>' + 'Marker Sensor' + '</label></div>';
+            for (var i = 0; i < this.listOfMarkersFound.length; i++) {
+                var marker = this.listOfMarkersFound[i];
+                myLabel += '<div><label>&nbsp;-&nbsp;id ';
+                myLabel += marker.markerId;
+                myLabel += '</label><span>(';
+                myLabel += UTIL.round(marker.xRel, 3);
+                myLabel += ', ';
+                myLabel += UTIL.round(marker.yRel, 3);
+                myLabel += ', 0)</span></div>';
+            }
+            return myLabel;
+        };
+        CameraSensor.prototype.reset = function () {
+        };
+        CameraSensor.prototype.updateSensor = function (running, dt, myRobot, values, uCtx, udCtx, personalObstacleList, markerList) {
+            var _this = this;
+            this.listOfMarkersFound = [];
+            var robot = myRobot;
+            SIMATH.transform(robot.pose, this);
+            var myPose = new robot_base_mobile_1.Pose(this.rx, this.ry, this.theta);
+            var left = (myRobot.pose.theta - this.AOV / 2 + 2 * Math.PI) % (2 * Math.PI);
+            var right = (myRobot.pose.theta + this.AOV / 2 + 2 * Math.PI) % (2 * Math.PI);
+            markerList.filter(function (marker) {
+                var visible = false;
+                marker.sqrDistance = SIMATH.getDistance(myPose, marker);
+                if (marker.sqrDistance <= _this.MAX_MARKER_DIST_SQR) {
+                    var myMarkerPoints = [{ x: marker.x - myPose.x, y: marker.y - myPose.y },
+                        { x: marker.x + marker.w - myPose.x, y: marker.y - myPose.y },
+                        { x: marker.x + marker.w - myPose.x, y: marker.y + marker.h - myPose.y },
+                        { x: marker.x - myPose.x, y: marker.y + marker.h - myPose.y }];
+                    var visible_1 = true;
+                    for (var i = 0; i < myMarkerPoints.length; i++) {
+                        var myAngle = (Math.atan2(myMarkerPoints[i].y, myMarkerPoints[i].x) + 2 * Math.PI) % (2 * Math.PI);
+                        if ((left < right && (myAngle > left && myAngle < right)) || (left > right && (myAngle > left || myAngle < right))) {
+                            var p = _this.checkVisibility(robot.id, marker, personalObstacleList);
+                            if (p) {
+                                visible_1 = false;
+                            }
+                        }
+                        else {
+                            visible_1 = false;
+                        }
+                    }
+                    return visible_1;
+                }
+            }).forEach(function (marker) {
+                var myAngle = (Math.atan2(marker.y + marker.h / 2 - myPose.y, marker.x + marker.w / 2 - myPose.x) + 2 * Math.PI) % (2 * Math.PI);
+                if (left > right) {
+                    right += 2 * Math.PI;
+                    if (myAngle < left) {
+                        myAngle = myAngle + 2 * Math.PI;
+                    }
+                }
+                marker.xRel = (myAngle - left) / (right - left) - 0.5;
+                marker.yRel = Math.sqrt(marker.sqrDistance) / Math.sqrt(_this.MAX_CAM_Y) - 0.5;
+                _this.listOfMarkersFound.push(marker);
+            });
+            this.line = -1;
+            var leftPoint = { x: this.LINE_RADIUS * Math.cos(left), y: this.LINE_RADIUS * Math.sin(left) };
+            var rightPoint = { x: this.LINE_RADIUS * Math.cos(right), y: this.LINE_RADIUS * Math.sin(right) };
+            var pixYWidth = Math.abs(rightPoint.y - leftPoint.y);
+            var pixXWidth = Math.abs(rightPoint.x - leftPoint.x);
+            var redPixOld = this.calculatePix(uCtx.getImageData(leftPoint.x + myPose.x, leftPoint.y + myPose.y, 1, 1).data);
+            if (pixYWidth > pixXWidth) {
+                if (leftPoint.x > 0) {
+                    for (var i = leftPoint.y + this.ry; i <= rightPoint.y + this.ry; i += 0.5) {
+                        var a = (this.LINE_RADIUS) * (this.LINE_RADIUS) - (i - this.ry) * (i - this.ry);
+                        var xi = Math.sqrt(a) + this.rx;
+                        var redPix = this.calculatePix(uCtx.getImageData(xi, i, 1, 1).data);
+                        if (Math.abs(redPix - redPixOld) > this.THRESHOLD) {
+                            this.line = Math.abs(i - leftPoint.y - this.ry) / pixYWidth - 0.5;
+                            break;
+                        }
+                        redPixOld = redPix;
+                    }
+                }
+                else {
+                    for (var i = leftPoint.y + this.ry; i >= rightPoint.y + this.ry; i -= 0.5) {
+                        var a = (this.LINE_RADIUS) * (this.LINE_RADIUS) - (i - this.ry) * (i - this.ry);
+                        var xi = -Math.sqrt(a) + this.rx;
+                        var redPix = this.calculatePix(uCtx.getImageData(xi, i, 1, 1).data);
+                        if (Math.abs(redPix - redPixOld) > this.THRESHOLD) {
+                            this.line = Math.abs(i - leftPoint.y - this.ry) / pixYWidth - 0.5;
+                            break;
+                        }
+                        redPixOld = redPix;
+                    }
+                }
+            }
+            else {
+                uCtx.fillStyle = '#00ff00';
+                if (leftPoint.y < 0) {
+                    for (var i = leftPoint.x + this.rx; i <= rightPoint.x + this.rx; i += 0.5) {
+                        var a = (this.LINE_RADIUS) * (this.LINE_RADIUS) - (i - this.rx) * (i - this.rx);
+                        var yi = -Math.sqrt(a);
+                        var redPix = this.calculatePix(uCtx.getImageData(i, yi + this.ry, 1, 1).data);
+                        if (Math.abs(redPix - redPixOld) > this.THRESHOLD) {
+                            this.line = Math.abs(i - leftPoint.x - this.rx) / pixXWidth - 0.5;
+                            break;
+                        }
+                    }
+                }
+                else {
+                    for (var i = leftPoint.x + this.rx; i >= rightPoint.x + this.rx; i -= 0.5) {
+                        var a = (this.LINE_RADIUS) * (this.LINE_RADIUS) - (i - this.rx) * (i - this.rx);
+                        var yi = Math.sqrt(a);
+                        var redPix = this.calculatePix(uCtx.getImageData(i, yi + this.ry, 1, 1).data);
+                        if (Math.abs(redPix - redPixOld) > this.THRESHOLD) {
+                            this.line = Math.abs(i - leftPoint.x - this.rx) / pixXWidth - 0.5;
+                            break;
+                        }
+                    }
+                }
+            }
+            values['marker'] = {};
+            values['marker'][C.INFO] = {};
+            for (var i = 0; i < 16; i++) {
+                values['marker'][C.INFO][i] = [-1, -1, 0];
+            }
+            if (this.listOfMarkersFound.length == 0) {
+                values['marker'][C.ID] = [-1];
+            }
+            else {
+                values['marker'][C.ID] = this.listOfMarkersFound.map(function (marker) { return marker.markerId; });
+                this.listOfMarkersFound.forEach(function (marker) {
+                    values['marker'][C.INFO][marker.markerId] = [marker.xRel, marker.yRel, 0];
+                });
+            }
+            values['camera'] = {};
+            values['camera'][C.LINE] = this.line;
+        };
+        CameraSensor.prototype.calculatePix = function (rawPix) {
+            var i = 3;
+            var pix = 0;
+            while (i--) {
+                pix += rawPix[i];
+            }
+            return pix / 3;
+        };
+        CameraSensor.prototype.checkVisibility = function (id, mP, personalObstacleList) {
+            var myIntersectionPoint;
+            var myLine = { x1: this.rx, y1: this.ry, x2: mP.x, y2: mP.y };
+            for (var i = 0; i < personalObstacleList.length - 1; i++) {
+                var obstacle = personalObstacleList[i];
+                if (obstacle instanceof robot_actuators_1.ChassisMobile && obstacle.id == id) {
+                    continue;
+                }
+                if (!(obstacle instanceof simulation_objects_1.CircleSimulationObject)) {
+                    var obstacleLines = obstacle.getLines();
+                    for (var j = 0; j < obstacleLines.length; j++) {
+                        myIntersectionPoint = SIMATH.getIntersectionPoint(myLine, obstacleLines[j]);
+                        if (myIntersectionPoint) {
+                            return myIntersectionPoint;
+                        }
+                    }
+                }
+                else {
+                    var myCircle = obstacle;
+                    myIntersectionPoint = SIMATH.getClosestIntersectionPointCircle(myLine, myCircle);
+                    if (myIntersectionPoint) {
+                        return myIntersectionPoint;
+                    }
+                }
+            }
+            return null;
+        };
+        return CameraSensor;
+    }());
+    exports.CameraSensor = CameraSensor;
 });

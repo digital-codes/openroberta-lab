@@ -150,6 +150,9 @@ define(["require", "exports", "interpreter.constants", "util", "interpreter.inte
             enumerable: false,
             configurable: true
         });
+        SimulationRoberta.prototype.addMarker = function (markerId) {
+            this.scene.addMarker(markerId);
+        };
         SimulationRoberta.prototype.addColorArea = function (shape) {
             this.scene.addColorArea(shape);
             this.enableChangeObjectButtons();
@@ -230,7 +233,7 @@ define(["require", "exports", "interpreter.constants", "util", "interpreter.inte
                         theta: object.theta,
                         color: object.color,
                         form: simulation_objects_1.SimObjectShape.Rectangle,
-                        type: object.type,
+                        type: object.type
                     };
                 }
                 else if (object instanceof simulation_objects_1.TriangleSimulationObject) {
@@ -243,7 +246,7 @@ define(["require", "exports", "interpreter.constants", "util", "interpreter.inte
                         cy: object.cy / height,
                         color: object.color,
                         form: simulation_objects_1.SimObjectShape.Triangle,
-                        type: object.type,
+                        type: object.type
                     };
                 }
                 else if (object instanceof simulation_objects_1.CircleSimulationObject) {
@@ -253,7 +256,7 @@ define(["require", "exports", "interpreter.constants", "util", "interpreter.inte
                         r: object.r / height / width,
                         color: object.color,
                         form: simulation_objects_1.SimObjectShape.Circle,
-                        type: object.type,
+                        type: object.type
                     };
                 }
             }
@@ -263,13 +266,13 @@ define(["require", "exports", "interpreter.constants", "util", "interpreter.inte
                     {
                         x: pose[0].x / width,
                         y: pose[0].y / height,
-                        theta: pose[0].theta,
+                        theta: pose[0].theta
                     },
                     {
                         x: pose[1].x / width,
                         y: pose[1].y / height,
-                        theta: pose[1].theta,
-                    },
+                        theta: pose[1].theta
+                    }
                 ];
             });
             config.obstacles = this.scene.obstacleList.map(function (object) {
@@ -296,7 +299,7 @@ define(["require", "exports", "interpreter.constants", "util", "interpreter.inte
                 UTIL.extendMouseEvent(e, this.scale, $('#robotLayer'));
                 this.lastMousePosition = {
                     x: e.startX,
-                    y: e.startY,
+                    y: e.startY
                 };
             }
             switch (e.type) {
@@ -447,7 +450,7 @@ define(["require", "exports", "interpreter.constants", "util", "interpreter.inte
                                     e.preventDefault();
                                     localStorage.setItem('customBackground', JSON.stringify({
                                         image: dataURL.replace(/^data:image\/(png|jpg);base64,/, ''),
-                                        timestamp: new Date().getTime(),
+                                        timestamp: new Date().getTime()
                                     }));
                                 });
                                 $('#confirmCancel').off();
@@ -489,14 +492,14 @@ define(["require", "exports", "interpreter.constants", "util", "interpreter.inte
                     shades: 1,
                     hues: 8,
                     customColors: robotColors,
-                    setText: false,
+                    setText: false
                 });
             }
             else {
                 this.colorpicker = new HUEBEE('#colorpicker', {
                     shades: 1,
                     hues: 8,
-                    setText: false,
+                    setText: false
                 });
             }
             this.colorpicker.on('change', function (color) {
@@ -641,7 +644,7 @@ define(["require", "exports", "interpreter.constants", "util", "interpreter.inte
                     case 'circle':
                         newObject.p = {
                             x: object.x * width,
-                            y: object.y * height,
+                            y: object.y * height
                         };
                         newObject.params = [object.r * height * width];
                         break;

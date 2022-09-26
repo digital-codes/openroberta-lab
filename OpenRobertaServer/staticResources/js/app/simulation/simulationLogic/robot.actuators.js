@@ -417,6 +417,7 @@ define(["require", "exports", "interpreter.constants", "simulation.math", "guiSt
                 radius: 68,
                 color: '#DDDDDD'
             };
+            _this.bumpedAngle = [];
             _this.xDiff = 0;
             _this.yDiff = 0;
             _this.thetaDiff = 0;
@@ -468,49 +469,31 @@ define(["require", "exports", "interpreter.constants", "simulation.math", "guiSt
             $('#display' + this.id).html('');
         };
         RobotinoChassis.prototype.checkCollisions = function (myId, myPose, dt, personalObstacleList) {
-            var ground = personalObstacleList.slice(-1)[0]; // ground is always the last element in the personal obstacle list
-            var closestX = 0;
-            var closestY = 0;
-            if (ground.x > myPose.x - this.geom.radius) {
-                closestX = ground.x;
-            }
-            else if (ground.x + ground.w < myPose.x + this.geom.radius) {
-                closestX = ground.x + ground.w;
-            }
-            else {
-                closestX = myPose.x;
-            }
-            if (ground.y > myPose.y - this.geom.radius) {
-                closestY = ground.y;
-            }
-            else if (ground.y + ground.h < myPose.y + this.geom.radius) {
-                closestY = ground.y + ground.h;
-            }
-            else {
-                closestY = myPose.y;
-            }
-            if (closestX !== myPose.x || closestY !== myPose.y) {
-                this.bumpedAngle = Math.atan2(closestY - myPose.y, closestX - myPose.x);
-            }
-            else {
-                this.bumpedAngle = 999;
-            }
-            for (var i = 0; i < personalObstacleList.length - 1; i++) {
+            this.bumpedAngle = [];
+            for (var i = 0; i < personalObstacleList.length; i++) {
                 var myObstacle = personalObstacleList[i];
-                if (this.bumpedAngle < 999) {
-                    break;
-                }
                 if (myObstacle instanceof ChassisMobile && myObstacle.id == myId) {
                     // never check if you are bumping yourself ;-)
                     continue;
                 }
-                this.bumpedAngle = this.checkCollision(myPose, myObstacle);
+                var obstacleTolerance = myObstacle.chassis && myObstacle.chassis.getTolerance() || 0;
+                myPose.radius = myPose.r = this.geom.radius + dt * (this.getTolerance() + obstacleTolerance);
+                //console.log((myPose as any).radius);
+                var bumpedAngles = this.getAnglePOI(myPose, myObstacle);
+                for (var j = 0; j < bumpedAngles.length; j++) {
+                    if (bumpedAngles[j] < 999) {
+                        this.bumpedAngle.push(bumpedAngles[j]);
+                    }
+                }
             }
         };
         RobotinoChassis.prototype.updateAction = function (myRobot, dt, interpreterRunning) {
             var robot = myRobot;
             var omniDrive = myRobot.interpreter.getRobotBehaviour().getActionState('omniDrive', true);
             if (omniDrive) {
+                this.xVel = 0;
+                this.yVel = 0;
+                this.thetaVel = 0;
                 if (omniDrive[C.X + C.SPEED] !== undefined) {
                     this.xVel = omniDrive[C.X + C.SPEED] * this.MAXPOWER;
                 }
@@ -544,12 +527,16 @@ define(["require", "exports", "interpreter.constants", "simulation.math", "guiSt
             var tempThetaVel = this.thetaVel * dt;
             var mX = Math.cos(robot.pose.theta) * tempXVel - Math.sin(robot.pose.theta) * tempYVel;
             var mY = Math.sin(robot.pose.theta) * tempXVel + Math.cos(robot.pose.theta) * tempYVel;
-            if (this.bumpedAngle < 999) {
-                var l = Math.sqrt(mX * mX + mY * mY);
-                var x = l * Math.cos(this.bumpedAngle);
-                var y = l * Math.sin(this.bumpedAngle);
-                mX -= x;
-                mY -= y;
+            var l = Math.sqrt(mX * mX + mY * mY);
+            var a = (Math.atan2(mY, mX) + 2 * Math.PI) % (2 * Math.PI);
+            for (var i = 0; i < this.bumpedAngle.length; i++) {
+                //console.log(a + ' ' + this.bumpedAngle[i]);
+                if (Math.min(Math.abs(this.bumpedAngle[i] - a), 2 * Math.PI - Math.abs(this.bumpedAngle[i] - a)) < Math.PI) {
+                    var x = l * Math.cos(this.bumpedAngle[i]);
+                    var y = l * Math.sin(this.bumpedAngle[i]);
+                    mX -= x;
+                    mY -= y;
+                }
             }
             robot.pose.x += mX;
             robot.pose.y += mY;
@@ -558,11 +545,6 @@ define(["require", "exports", "interpreter.constants", "simulation.math", "guiSt
             this.xDiff = mX;
             this.yDiff = -mY;
             this.transformNewPose(robot.pose, this);
-            /*        function resetSpeed() {
-                        this.xVel = 0;
-                        this.yVel = 0;
-                        this.thetaVel = 0;
-                    }*/
             if (this.distance) {
                 var dist = Math.sqrt(Math.pow(robot.pose.x - robot.pose.xOld, 2) + Math.pow(robot.pose.y - robot.pose.yOld, 2));
                 this.distance -= dist;
@@ -589,7 +571,7 @@ define(["require", "exports", "interpreter.constants", "simulation.math", "guiSt
         };
         RobotinoChassis.prototype.draw = function (rCtx, myRobot) {
             rCtx.save();
-            if (this.bumpedAngle < 999) {
+            if (this.bumpedAngle.length > 0) {
                 rCtx.fillStyle = '#ff0000';
                 rCtx.beginPath();
                 rCtx.arc(0, 0, this.geom.radius + 3, 0, Math.PI * 2);
@@ -601,46 +583,99 @@ define(["require", "exports", "interpreter.constants", "simulation.math", "guiSt
             rCtx.drawImage(this.img, 0, 0, this.img.width, this.img.height, this.geom.x, this.geom.y, this.geom.w, this.geom.h);
             rCtx.restore();
         };
-        RobotinoChassis.prototype.checkCollision = function (circle, rect) {
-            rect.angle = 0;
-            circle.radius = 70;
-            rect.centerY = rect.y + rect.h / 2;
-            rect.centerX = rect.x + rect.w / 2;
-            var unrotatedCircleX = Math.cos(rect.angle) * (circle.x - rect.centerX) - Math.sin(rect.angle) * (circle.y - rect.centerY) + rect.centerX;
-            var unrotatedCircleY = Math.sin(rect.angle) * (circle.x - rect.centerX) + Math.cos(rect.angle) * (circle.y - rect.centerY) + rect.centerY;
-            // Closest point in the rectangle to the center of circle rotated backwards(unrotated)
-            var closestX, closestY;
-            if (unrotatedCircleX < rect.x) {
-                closestX = rect.x;
+        RobotinoChassis.prototype.getTolerance = function () {
+            return 0.5 * (Math.abs(this.xVel) + Math.abs(this.yVel));
+        };
+        RobotinoChassis.prototype.getAnglePOI = function (circle, obstacle) {
+            var myObstacle = obstacle;
+            if (myObstacle instanceof simulation_objects_1.RectangleSimulationObject) {
+                var rect = myObstacle;
+                rect.angle = 0;
+                rect.centerY = rect.y + rect.h / 2;
+                rect.centerX = rect.x + rect.w / 2;
+                var unrotatedCircleX = Math.cos(rect.angle) * (circle.x - rect.centerX) - Math.sin(rect.angle) * (circle.y - rect.centerY) + rect.centerX;
+                var unrotatedCircleY = Math.sin(rect.angle) * (circle.x - rect.centerX) + Math.cos(rect.angle) * (circle.y - rect.centerY) + rect.centerY;
+                var closestX = void 0, closestY = void 0;
+                if (unrotatedCircleX < rect.x) {
+                    closestX = rect.x;
+                }
+                else if (unrotatedCircleX > rect.x + rect.w) {
+                    closestX = rect.x + rect.w;
+                }
+                else {
+                    closestX = unrotatedCircleX;
+                }
+                if (unrotatedCircleY < rect.y) {
+                    closestY = rect.y;
+                }
+                else if (unrotatedCircleY > rect.y + rect.h) {
+                    closestY = rect.y + rect.h;
+                }
+                else {
+                    closestY = unrotatedCircleY;
+                }
+                var distance = SIMATH.getDistance({ x: unrotatedCircleX, y: unrotatedCircleY }, { x: closestX, y: closestY });
+                var angle = void 0;
+                if (distance < circle.radius * circle.radius) {
+                    return [Math.atan2(closestY - unrotatedCircleY, closestX - unrotatedCircleX)];
+                }
+                else {
+                    return [999];
+                }
             }
-            else if (unrotatedCircleX > rect.x + rect.w) {
-                closestX = rect.x + rect.w;
+            else if (myObstacle instanceof simulation_objects_1.CircleSimulationObject || myObstacle instanceof RobotinoChassis) {
+                if (obstacle instanceof RobotinoChassis) {
+                    var x = (obstacle.frontLeft.rx + obstacle.frontRight.rx + obstacle.backLeft.rx + obstacle.backRight.rx) / 4;
+                    var y = (obstacle.frontLeft.ry + obstacle.frontRight.ry + obstacle.backLeft.ry + obstacle.backRight.ry) / 4;
+                    myObstacle = { x: x, y: y, r: 70 };
+                }
+                var distance = Math.sqrt(SIMATH.getDistance(circle, myObstacle));
+                if (distance <= circle.radius + myObstacle.r) {
+                    return [(Math.atan2(myObstacle.y - circle.y, myObstacle.x - circle.x) + 2 * Math.PI) % (2 * Math.PI)];
+                }
+                return [999];
             }
-            else {
-                closestX = unrotatedCircleX;
+            else if (myObstacle instanceof simulation_objects_1.TriangleSimulationObject || myObstacle instanceof simulation_objects_1.Ground) {
+                var triangleLines = myObstacle.getLines();
+                var minDistance = Infinity;
+                var myIP = void 0;
+                circle.r = circle.radius;
+                var as = [];
+                for (var i = 0; i < triangleLines.length; i++) {
+                    var IP = SIMATH.getMiddleIntersectionPointCircle(triangleLines[i], circle);
+                    if (IP) {
+                        as.push((Math.atan2(IP.y - circle.y, IP.x - circle.x) + 2 * Math.PI) % (2 * Math.PI));
+                    }
+                }
+                if (as.length == 0) {
+                    if (myObstacle instanceof simulation_objects_1.Ground) {
+                        var myPoints = [{ x: myObstacle.x, y: myObstacle.y }, { x: myObstacle.x + myObstacle.w, y: myObstacle.y + myObstacle.h }, { x: myObstacle.x + myObstacle.w, y: myObstacle.y }, { x: myObstacle.x, y: myObstacle.y + myObstacle.h }];
+                        for (var i = 0; i < 4; i++) {
+                            if ((myPoints[i].x - circle.x) * (myPoints[i].x - circle.x) + (myPoints[i].y - circle.y) * (myPoints[i].y - circle.y) <=
+                                circle.r * circle.r) {
+                                as.push((Math.atan2(myPoints[i].y - circle.y, myPoints[i].x - circle.x) + 2 * Math.PI) % (2 * Math.PI));
+                            }
+                        }
+                        if (as.length > 0) {
+                            return as;
+                        }
+                    }
+                    else {
+                        var myPoints = [{ x: myObstacle.ax, y: myObstacle.ay }, { x: myObstacle.bx, y: myObstacle.by }, { x: myObstacle.cx, y: myObstacle.cy }];
+                        for (var i = 0; i < 3; i++) {
+                            if ((myPoints[i].x - circle.x) * (myPoints[i].x - circle.x) + (myPoints[i].y - circle.y) * (myPoints[i].y - circle.y) <=
+                                circle.r * circle.r) {
+                                return [(Math.atan2(myPoints[i].y - circle.y, myPoints[i].x - circle.x) + 2 * Math.PI) % (2 * Math.PI)];
+                            }
+                        }
+                    }
+                    return [999];
+                }
+                else {
+                    return as;
+                }
             }
-            if (unrotatedCircleY < rect.y) {
-                closestY = rect.y;
-            }
-            else if (unrotatedCircleY > rect.y + rect.h) {
-                closestY = rect.y + rect.h;
-            }
-            else {
-                closestY = unrotatedCircleY;
-            }
-            var findDistance = function (fromX, fromY, toX, toY) {
-                var a = Math.abs(fromX - toX);
-                var b = Math.abs(fromY - toY);
-                return a * a + b * b;
-            };
-            var distance = findDistance(unrotatedCircleX, unrotatedCircleY, closestX, closestY);
-            var angle;
-            if (distance < circle.radius * circle.radius) {
-                return Math.atan2(closestY - unrotatedCircleY, closestX - unrotatedCircleX);
-            }
-            else {
-                return 999;
-            }
+            return [999]; //no collision
         };
         return RobotinoChassis;
     }(ChassisMobile));

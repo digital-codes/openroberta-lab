@@ -1,4 +1,4 @@
-package de.fhg.iais.roberta.syntax.action.robotino;
+package de.fhg.iais.roberta.syntax.actor.robotino;
 
 import de.fhg.iais.roberta.blockly.generated.Hide;
 import de.fhg.iais.roberta.syntax.action.Action;
@@ -13,28 +13,29 @@ import de.fhg.iais.roberta.util.dbc.Assert;
 import de.fhg.iais.roberta.util.syntax.BlocklyConstants;
 import de.fhg.iais.roberta.util.syntax.WithUserDefinedPort;
 
-
-@NepoPhrase(category = "ACTOR", blocklyNames = {"robActions_motorOmni_curve_for"}, name = "MOTOR_OMNIDRIVE_DISTANCE_ACTION")
-public class OmnidriveDistanceAction<V> extends Action implements WithUserDefinedPort<V> {
+@NepoPhrase(category = "ACTOR", blocklyNames = {"robActions_motorOmni_position"}, name = "MOTOR_OMNIDRIVE_POSITION_ACTION")
+public final class OmnidrivePositionAction extends Action implements WithUserDefinedPort {
     @NepoValue(name = BlocklyConstants.X, type = BlocklyType.NUMBER)
-    public final Expr xVel;
+    public final Expr x;
     @NepoValue(name = BlocklyConstants.Y, type = BlocklyType.NUMBER)
-    public final Expr yVel;
-    @NepoValue(name = BlocklyConstants.DISTANCE, type = BlocklyType.NUMBER)
-    public final Expr distance;
+    public final Expr y;
+    @NepoValue(name = BlocklyConstants.POWER, type = BlocklyType.NUMBER)
+    public final Expr power;
+
     @NepoField(name = BlocklyConstants.ACTORPORT, value = BlocklyConstants.EMPTY_PORT)
     public final String port;
+
     @NepoHide
     public final Hide hide;
 
-    public OmnidriveDistanceAction(BlocklyProperties properties, Expr xVel, Expr yVel, Expr distance, String port, Hide hide) {
+    public OmnidrivePositionAction(BlocklyProperties properties, Expr x, Expr y, Expr power, String port, Hide hide) {
         super(properties);
         Assert.nonEmptyString(port);
 
         this.hide = hide;
-        this.xVel = xVel;
-        this.yVel = yVel;
-        this.distance = distance;
+        this.x = x;
+        this.y = y;
+        this.power = power;
         this.port = port;
 
         setReadOnly();
@@ -45,4 +46,3 @@ public class OmnidriveDistanceAction<V> extends Action implements WithUserDefine
         return this.port;
     }
 }
-

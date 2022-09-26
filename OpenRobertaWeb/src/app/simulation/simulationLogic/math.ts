@@ -72,7 +72,7 @@ export const getIntersectionPoint = function(line1: Line, line2: Line): Point {
  * @return {x, y}
  *              closest intersection point (coordinate)
  */
-export const getClosestIntersectionPointCircle = function(line, circle) {
+export const getClosestIntersectionPointCircle = function(line: Line, circle): Point {
     const intersections = this.getIntersectionPointsCircle(line, circle);
 
     if (intersections.length == 1) {
@@ -89,7 +89,19 @@ export const getClosestIntersectionPointCircle = function(line, circle) {
             return intersections[1];
         }
     }
+    return null; // no intersections at all
+};
 
+export const getMiddleIntersectionPointCircle = function(line: Line, circle): Point {
+    const intersections = this.getIntersectionPointsCircle(line, circle);
+
+    if (intersections.length == 1) {
+        return intersections[0]; // one intersection
+    }
+
+    if (intersections.length == 2) {
+        return ({ x: 0.5 * (intersections[0].x + intersections[1].x), y: 0.5 * (intersections[0].y + intersections[1].y) });
+    }
     return null; // no intersections at all
 };
 
@@ -102,7 +114,7 @@ export const getClosestIntersectionPointCircle = function(line, circle) {
  * @return {{x, y}[]}
  *              array with point(s) of the intersection
  */
-export const getIntersectionPointsCircle = function(line, circle) {
+export const getIntersectionPointsCircle = function(line, circle): Point[] {
     var dx, dy, A, B, C, det, t;
 
     dx = line.x2 - line.x1;

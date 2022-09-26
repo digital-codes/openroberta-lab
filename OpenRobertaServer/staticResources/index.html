@@ -317,6 +317,7 @@ limitations under the License.
                     <canvas id='backgroundLayer' class='canvasSim' style='z-index: 2' width='1' height='1'></canvas>
                     <canvas id='drawLayer' class='canvasSim' style='z-index: 3' width='1' height='1'></canvas>
                     <canvas id='rulerLayer' class='canvasSim' style='z-index: 4' width='1' height='1'></canvas>
+                    <canvas id='arucoMarkerLayer' class='canvasSim' style='z-index: 5' width='1' height='1'></canvas>
                     <canvas id='objectLayer' class='canvasSim' style='z-index: 5' width='1' height='1'></canvas>
                     <canvas id='robotLayer' class='canvasSim' style='z-index: 6' width='1' height='1'></canvas>
                 </div>
@@ -331,6 +332,18 @@ limitations under the License.
                         data-original-title='' title=''></button>
                     <button id='simUploadConfig' class='blbtn typcn typcn-upload-outline' lkey='Blockly.Msg.MENU_SIM_CONFIG_IMPORT' rel='tooltip'
                         data-original-title='' title=''></button>
+                    <div class='btn-group'>
+                        <button id='simMarkerObject' type='button' class='blbtn typcn typcn-0 dropdown-toggle' data-toggle='dropdown'
+                            aria-expanded='true' lkey='Blockly.Msg.MENU_SIM_ADD_MARKER_OBJECT_TOOLTIP' rel='tooltip' data-original-title=''></button>
+                        <ul class='dropdown-menu' style='width:60px'>
+                            <li><a id='simMarker0' data-marker='0' class='simAddMarker typcn typcn-0'><span>0</span></a></li>
+                            <li><a id='simMarker1' data-marker='1' class='simAddMarker typcn typcn-1'><span>1</span></a></li>
+                            <li><a id='simMarker2' data-marker='2' class='simAddMarker typcn typcn-2'><span>2</span></a></li>
+                            <li><a id='simMarker15' data-marker='15' class='simAddMarker typcn typcn-15'><span>15</span></a></li>
+                            <hr style='margin:0; border-top: 1px solid #333;'>
+                            <li><a id='simMarkerDeleteAll' class='typcn typcn-delete'></a></li>
+                        </ul>
+                    </div>
                     <div class='btn-group'>
                         <button id='simCustomObstacle' type='button' class='blbtn typcn typcn-box dropdown-toggle' data-toggle='dropdown' aria-expanded='true'
                             lkey='Blockly.Msg.MENU_SIM_ADD_OBSTACLE_TOOLTIP' rel='tooltip' data-original-title=''></button>

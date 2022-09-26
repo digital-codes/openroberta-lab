@@ -35,4 +35,9 @@
             <field name="NAME">_I</field>
         </block>
     </instance>
+    <instance x="100" y="300">
+        <block type="robConf_camera" intask="true" id="13" deletable="false">
+            <field name="NAME">_I</field>
+        </block>
+    </instance>
 </block_set>
