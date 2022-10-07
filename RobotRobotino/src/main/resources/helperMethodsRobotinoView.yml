@@ -4,17 +4,17 @@ include: "classpath:/common.methods.yml"
 
 OMNIDRIVESPEED:
   PYTHON: |
-    def _setSpeedOmnidrive(x, y, z):
-        global _speed
-        _speed[0] = (1 / 100 * x) * _maxSpeed
-        _speed[1] = (1 / 100 * y) * _maxSpeed
-        _speed[2] = 1 / 100 * z * _maxSpeed
+    def setSpeedOmnidrivePercent(x, y, z):
+        global currentSpeed
+        currentSpeed[0] = (1 / 100 * x) * MAXSPEED
+        currentSpeed[1] = (1 / 100 * y) * MAXSPEED
+        currentSpeed[2] = 1 / 100 * z * MAXSPEED
 
 POSTVEL:
   PYTHON: |
     def _postVel():
         OMNIDRIVE_URL = "http://" + ROBOTINOIP + "/data/omnidrive"
-        r = requests.post(url = OMNIDRIVE_URL, params = PARAMS, json = _speed )
+        r = requests.post(url = OMNIDRIVE_URL, params = PARAMS, json = currentSpeed )
         if r.status_code != requests.codes.ok:
             raise RuntimeError("Error: post to %s with params %s failed", OMNIDRIVE_URL, PARAMS)
 
@@ -89,3 +89,44 @@ GETODOMETRY:
                 return data
         else:
             raise RuntimeError("Error: get from %s with params %s failed", DISTANCES_URL, PARAMS)
+
+DRIVETOPOSITION:
+  PYTHON: |
+    def _driveToPosition(RV, x, y, speed):
+        global currentSpeed
+        RV.writeFloatVector(2, [x, y, RV.readFloatVector(1)[2], 1])
+        time.sleep(0.5)
+        while RV.readFloatVector(2)[3] != 1:
+            speedX = RV.readFloatVector(2)[0] * speed/100
+            speedY = RV.readFloatVector(2)[1] * speed/100
+            currentSpeed = [speedX , speedY, 0]
+            time.sleep(0.05)
+        currentSpeed = [0, 0, 0]
+
+DRIVEFORDISTANCE:
+  PYTHON: |
+    def _driveForDistance(RV, x, y, distance):
+        distance = distance * 10
+        angle = math.atan2((-1) * x, y)
+        targetX = RV.readFloatVector(1)[0] + distance * math.cos(angle)
+        targetY = RV.readFloatVector(1)[1] + distance * math.sin(angle)
+        resultingSpeed = math.sqrt(math.pow(targetX,2) + math.pow(targetY,2))
+        _driveToPosition(RV, targetX, targetY, resultingSpeed)
+
+TURNFORDEGREES:
+  PYTHON: |
+    def _turnForDegrees(RV, speed, degrees):
+        if degrees < 0:
+            speed = speed * -1
+        distance = abs(degrees)
+        lastOrientation = RV.readFloatVector(1)[2]
+        _setSpeedOmnidrive(0, 0, speed)
+        while distance > 0:
+            orientation = RV.readFloatVector(1)[2]
+            traveledDegrees = abs(orientation - lastOrientation)
+            if ((speed > 0 and lastOrientation > orientation) or (speed < 0 and lastOrientation < orientation)) and traveledDegrees > 300:
+                traveledDegrees = 360 - traveledDegrees
+            distance -= traveledDegrees
+            lastOrientation = orientation
+            time.sleep(0.05)
+        _setSpeedOmnidrive(0, 0, 0)

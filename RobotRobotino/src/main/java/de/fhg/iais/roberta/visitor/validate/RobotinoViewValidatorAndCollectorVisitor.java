@@ -55,18 +55,22 @@ public class RobotinoViewValidatorAndCollectorVisitor extends RobotinoValidatorA
     @Override
     public Void visitOmnidriveDistanceAction(OmnidriveDistanceAction omnidriveDistanceAction) {
         addMotorMethods();
+        usedMethodBuilder.addUsedMethod(RobotinoMethods.DRIVEFORDISTANCE);
+        usedMethodBuilder.addUsedMethod(RobotinoMethods.DRIVETOPOSITION);
         return super.visitOmnidriveDistanceAction(omnidriveDistanceAction);
     }
 
     @Override
     public Void visitTurnAction(TurnAction turnAction) {
         addMotorMethods();
+        usedMethodBuilder.addUsedMethod(RobotinoMethods.TURNFORDEGREES);
         return super.visitTurnAction(turnAction);
     }
 
     @Override
     public Void visitOmnidrivePositionAction(OmnidrivePositionAction omnidrivePositionAction) {
         addMotorMethods();
+        usedMethodBuilder.addUsedMethod(RobotinoMethods.DRIVETOPOSITION);
         return super.visitOmnidrivePositionAction(omnidrivePositionAction);
     }
 

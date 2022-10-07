@@ -11,6 +11,7 @@ import de.fhg.iais.roberta.bean.UsedHardwareBean;
 import de.fhg.iais.roberta.components.ConfigurationAst;
 import de.fhg.iais.roberta.components.UsedSensor;
 import de.fhg.iais.roberta.constants.RobotinoConstants;
+import de.fhg.iais.roberta.mode.action.TurnDirection;
 import de.fhg.iais.roberta.syntax.Phrase;
 import de.fhg.iais.roberta.syntax.action.generic.PinWriteValueAction;
 import de.fhg.iais.roberta.syntax.action.motor.differential.MotorDriveStopAction;
@@ -83,7 +84,7 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
         nlIndent();
         this.sb.append("PARAMS = {'sid':'robertaProgram'}");
         nlIndent();
-        this.sb.append("_maxSpeed = 1");
+        this.sb.append("MAXSPEED = 1");
         nlIndent();
         generateOptionalVariables();
     }
@@ -94,7 +95,7 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
             nlIndent();
         }
         if ( this.getBean(UsedHardwareBean.class).isActorUsed(RobotinoConstants.OMNIDRIVE) ) {
-            this.sb.append("_speed = [0, 0, 0]");
+            this.sb.append("currentSpeed = [0, 0, 0]");
             nlIndent();
         }
     }
@@ -117,6 +118,11 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
         this.sb.append("def run(RV):");
         incrIndentation();
         generateGlobalVariables();
+        if ( this.getBean(UsedHardwareBean.class).isSensorUsed(RobotinoConstants.ODOMETRY) ) {
+            //odometrieReset
+            this.sb.append("RV.writeFloatVector(1, [0, 0, 0, 1])");
+            nlIndent();
+        }
         this.sb.append("time.sleep(1)");
         nlIndent();
 
@@ -279,19 +285,39 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
 
     @Override
     public Void visitOmnidriveDistanceAction(OmnidriveDistanceAction omnidriveDistanceAction) {
-        //TODO with View but similar to ROS solution
+        this.sb.append(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(RobotinoMethods.DRIVETOPOSITION));
+        this.sb.append("(RV, ");
+        omnidriveDistanceAction.xVel.accept(this);
+        this.sb.append(", ");
+        omnidriveDistanceAction.yVel.accept(this);
+        this.sb.append(", ");
+        omnidriveDistanceAction.distance.accept(this);
+        this.sb.append(")");
         return null;
     }
 
     @Override
     public Void visitOmnidrivePositionAction(OmnidrivePositionAction omnidrivePositionAction) {
-        //TODO with View
+        this.sb.append(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(RobotinoMethods.DRIVETOPOSITION));
+        this.sb.append("(RV, ");
+        omnidrivePositionAction.x.accept(this);
+        this.sb.append(", ");
+        omnidrivePositionAction.y.accept(this);
+        this.sb.append(")");
         return null;
     }
 
     @Override
     public Void visitTurnAction(TurnAction turnAction) {
-        //TODO with View
+        this.sb.append(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(RobotinoMethods.TURNFORDEGREES))
+            .append("(RV, ");
+        if ( turnAction.direction == TurnDirection.RIGHT ) {
+            this.sb.append("-");
+        }
+        turnAction.param.getSpeed().accept(this);
+        this.sb.append(", ");
+        turnAction.param.getDuration().getValue().accept(this);
+        this.sb.append(")");
         return null;
     }
 
@@ -326,7 +352,22 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
 
     @Override
     public Void visitOdometrySensorReset(OdometrySensorReset odometrySensorReset) {
-        //TODO with View
+        switch ( odometrySensorReset.slot ) {
+            case "ALL":
+                this.sb.append("RV.writeFloatVector(1, [0, 0, 0, 1])");
+                break;
+            case "X":
+                this.sb.append("RV.writeFloatVector(1, [0, RV.readFloatVector(1)[1], RV.readFloatVector(1)[2], 1])");
+                break;
+            case "Y":
+                this.sb.append("RV.writeFloatVector(1, [RV.readFloatVector(1)[0], 0, RV.readFloatVector(1)[2], 1])");
+                break;
+            case "THETA":
+                this.sb.append("RV.writeFloatVector(1, [RV.readFloatVector(1)[0], RV.readFloatVector(1)[1], 0, 1])");
+                break;
+            default:
+                throw new DbcException("Invalid Odometry Mode!");
+        }
         return null;
     }
 
