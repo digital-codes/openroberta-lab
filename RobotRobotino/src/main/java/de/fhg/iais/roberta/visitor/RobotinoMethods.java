@@ -16,5 +16,6 @@ public enum RobotinoMethods {
     GETDIGITALPIN,
     GETANALOGPIN,
     GETODOMETRY,
-    POSTVEL
+    POSTVEL,
+    GETMARKERINFO
 }

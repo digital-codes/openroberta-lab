@@ -11,6 +11,7 @@ import de.fhg.iais.roberta.syntax.actor.robotino.OmnidriveDistanceAction;
 import de.fhg.iais.roberta.syntax.actor.robotino.OmnidrivePositionAction;
 import de.fhg.iais.roberta.syntax.sensor.generic.PinGetValueSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.TouchSensor;
+import de.fhg.iais.roberta.syntax.sensor.robotino.MarkerInformation;
 import de.fhg.iais.roberta.syntax.sensor.robotino.OdometrySensor;
 import de.fhg.iais.roberta.util.syntax.SC;
 import de.fhg.iais.roberta.visitor.RobotinoMethods;
@@ -80,8 +81,16 @@ public class RobotinoViewValidatorAndCollectorVisitor extends RobotinoValidatorA
         return super.visitMotorDriveStopAction(stopAction);
     }
 
+    @Override
+    public Void visitMarkerInformation(MarkerInformation markerInformation) {
+        usedMethodBuilder.addUsedMethod(RobotinoMethods.GETMARKERINFO);
+        return super.visitMarkerInformation(markerInformation);
+    }
+
     private void addMotorMethods() {
         usedMethodBuilder.addUsedMethod(RobotinoMethods.OMNIDRIVESPEED);
         usedMethodBuilder.addUsedMethod(RobotinoMethods.POSTVEL);
     }
+
+
 }

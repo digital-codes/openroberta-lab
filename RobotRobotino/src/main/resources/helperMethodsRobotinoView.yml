@@ -130,3 +130,9 @@ TURNFORDEGREES:
             lastOrientation = orientation
             time.sleep(0.05)
         _setSpeedOmnidrive(0, 0, 0)
+
+GETMARKERINFO:
+  PYTHON: |
+    def _getMarkerInformation(id):
+        RV.writeFloat(3,id)
+        return RV.readFloatVector(4)

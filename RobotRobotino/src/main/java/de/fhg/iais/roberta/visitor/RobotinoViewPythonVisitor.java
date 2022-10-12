@@ -323,16 +323,24 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
 
     @Override
     public Void visitMarkerInformation(MarkerInformation markerInformation) {
+        this.sb.append(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(RobotinoMethods.GETMARKERINFO));
+        this.sb.append("(");
+        markerInformation.markerId.accept(this);
+        this.sb.append(")");
         return null;
     }
 
     @Override
     public Void visitDetectMarkSensor(DetectMarkSensor detectMarkSensor) {
+        this.sb.append("RV.readFloatVector(3)");
         return null;
     }
 
     @Override
     public Void visitCameraSensor(CameraSensor cameraSensor) {
+        if ( cameraSensor.getMode().equals("LINE") ) {
+            this.sb.append("RV.readFloatVector(5)[0]");
+        }
         return null;
     }
 
