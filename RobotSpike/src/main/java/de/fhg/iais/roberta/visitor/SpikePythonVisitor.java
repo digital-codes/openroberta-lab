@@ -11,6 +11,7 @@ import de.fhg.iais.roberta.bean.UsedHardwareBean;
 import de.fhg.iais.roberta.components.ConfigurationAst;
 import de.fhg.iais.roberta.components.UsedSensor;
 import de.fhg.iais.roberta.syntax.Phrase;
+import de.fhg.iais.roberta.syntax.action.spike.MotorOnAction;
 import de.fhg.iais.roberta.syntax.configuration.ConfigurationComponent;
 import de.fhg.iais.roberta.syntax.lang.blocksequence.MainTask;
 import de.fhg.iais.roberta.syntax.lang.expr.ColorConst;
@@ -28,7 +29,7 @@ import de.fhg.iais.roberta.visitor.lang.codegen.prog.AbstractPythonVisitor;
  * This class is implementing {@link IVisitor}. All methods are implemented and they append a human-readable Python code representation of a phrase to a
  * StringBuilder. <b>This representation is correct Python code.</b> <br>
  */
-public final class SpikePythonVisitor extends AbstractPythonVisitor implements ISpikeVisitor<Void> {
+public final class SpikePythonVisitor extends AbstractPythonVisitor {
 
     private final ConfigurationAst configurationAst;
     private String rightMotorPort;
@@ -218,6 +219,11 @@ public final class SpikePythonVisitor extends AbstractPythonVisitor implements I
 
     @Override
     public Void visitTimerReset(TimerReset timerReset) {
+        return null;
+    }
+
+    public Void visitMotorOnAction(MotorOnAction motorOnAction) {
+        this.sb.append("beate");
         return null;
     }
 }

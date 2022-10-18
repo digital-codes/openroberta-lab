@@ -9,6 +9,7 @@ import de.fhg.iais.roberta.components.ConfigurationAst;
 import de.fhg.iais.roberta.components.UsedSensor;
 import de.fhg.iais.roberta.syntax.action.motor.MotorGetPowerAction;
 import de.fhg.iais.roberta.syntax.action.motor.MotorSetPowerAction;
+import de.fhg.iais.roberta.syntax.action.spike.MotorOnAction;
 import de.fhg.iais.roberta.syntax.configuration.ConfigurationComponent;
 import de.fhg.iais.roberta.syntax.lang.blocksequence.MainTask;
 import de.fhg.iais.roberta.syntax.sensor.generic.TimerReset;
@@ -17,7 +18,7 @@ import de.fhg.iais.roberta.util.syntax.SC;
 import de.fhg.iais.roberta.visitor.validate.DifferentialMotorValidatorAndCollectorVisitor;
 
 
-public class SpikeValidatorAndCollectorVisitor extends DifferentialMotorValidatorAndCollectorVisitor implements ISpikeVisitor<Void> {
+public class SpikeValidatorAndCollectorVisitor extends DifferentialMotorValidatorAndCollectorVisitor {
 
 
     public SpikeValidatorAndCollectorVisitor(ConfigurationAst robotConfiguration, ClassToInstanceMap<IProjectBean.IBuilder> beanBuilders) {
@@ -68,6 +69,11 @@ public class SpikeValidatorAndCollectorVisitor extends DifferentialMotorValidato
                 continue;
             }
         }
+        return null;
+    }
+
+    public Void visitMotorOnAction(MotorOnAction motorOnAction) {
+        System.out.println("BEATE");
         return null;
     }
 }
