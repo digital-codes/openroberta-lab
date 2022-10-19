@@ -84,7 +84,7 @@ GETODOMETRY:
             elif val == 'y':
                 return data[1]
             elif val == 'rot':
-                return data[2]:
+                return data[2]
             else:
                 return data
         else:
@@ -94,7 +94,7 @@ DRIVETOPOSITION:
   PYTHON: |
     def _driveToPosition(RV, x, y, speed):
         global currentSpeed
-        RV.writeFloatVector(2, [x, y, RV.readFloatVector(1)[2], 1])
+        RV.writeFloatVector(2, [x * 10, y * 10, RV.readFloatVector(1)[2], 1])
         time.sleep(0.5)
         while RV.readFloatVector(2)[3] != 1:
             speedX = RV.readFloatVector(2)[0] * speed/100
@@ -106,11 +106,11 @@ DRIVETOPOSITION:
 DRIVEFORDISTANCE:
   PYTHON: |
     def _driveForDistance(RV, x, y, distance):
-        distance = distance * 10
-        angle = math.atan2((-1) * x, y)
+        distance = distance
+        angle = math.atan2(y,  x)
         targetX = RV.readFloatVector(1)[0] + distance * math.cos(angle)
         targetY = RV.readFloatVector(1)[1] + distance * math.sin(angle)
-        resultingSpeed = math.sqrt(math.pow(targetX,2) + math.pow(targetY,2))
+        resultingSpeed = math.sqrt(math.pow(x,2) + math.pow(y,2))
         _driveToPosition(RV, targetX, targetY, resultingSpeed)
 
 TURNFORDEGREES:
@@ -120,7 +120,7 @@ TURNFORDEGREES:
             speed = speed * -1
         distance = abs(degrees)
         lastOrientation = RV.readFloatVector(1)[2]
-        _setSpeedOmnidrive(0, 0, speed)
+        setSpeedOmnidrivePercent(0, 0, speed)
         while distance > 0:
             orientation = RV.readFloatVector(1)[2]
             traveledDegrees = abs(orientation - lastOrientation)
@@ -129,7 +129,7 @@ TURNFORDEGREES:
             distance -= traveledDegrees
             lastOrientation = orientation
             time.sleep(0.05)
-        _setSpeedOmnidrive(0, 0, 0)
+        setSpeedOmnidrivePercent(0, 0, 0)
 
 GETMARKERINFO:
   PYTHON: |

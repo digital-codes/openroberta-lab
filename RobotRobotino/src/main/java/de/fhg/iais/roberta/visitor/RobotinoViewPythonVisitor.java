@@ -122,8 +122,11 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
             //odometrieReset
             this.sb.append("RV.writeFloatVector(1, [0, 0, 0, 1])");
             nlIndent();
+            this.sb.append("time.sleep(1)");
+            nlIndent();
+            this.sb.append("RV.writeFloatVector(1, [])");
+            nlIndent();
         }
-        this.sb.append("time.sleep(1)");
         nlIndent();
 
         return null;
@@ -285,7 +288,7 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
 
     @Override
     public Void visitOmnidriveDistanceAction(OmnidriveDistanceAction omnidriveDistanceAction) {
-        this.sb.append(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(RobotinoMethods.DRIVETOPOSITION));
+        this.sb.append(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(RobotinoMethods.DRIVEFORDISTANCE));
         this.sb.append("(RV, ");
         omnidriveDistanceAction.xVel.accept(this);
         this.sb.append(", ");
@@ -303,6 +306,8 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
         omnidrivePositionAction.x.accept(this);
         this.sb.append(", ");
         omnidrivePositionAction.y.accept(this);
+        this.sb.append(", ");
+        omnidrivePositionAction.power.accept(this);
         this.sb.append(")");
         return null;
     }
@@ -376,6 +381,10 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
             default:
                 throw new DbcException("Invalid Odometry Mode!");
         }
+        nlIndent();
+        this.sb.append("time.sleep(0.1)");
+        nlIndent();
+        this.sb.append("RV.writeFloatVector(1, [])");
         return null;
     }
 
