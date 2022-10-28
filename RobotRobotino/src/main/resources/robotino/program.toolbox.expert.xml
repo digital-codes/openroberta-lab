@@ -94,14 +94,53 @@
         <block type="robSensors_timer_reset"></block>
         <block type="robSensors_out_getSample"></block>
         <block type="robSensors_detectmark_getSample"></block>
-        <block type="robSensors_get_markerinf"></block>
-        <block type="robSensors_camera_getSample">
+        <block type="robSensors_get_markerinf">
             <value name="VALUE">
                 <block type="math_number">
                     <field name="NUM">0</field>
                 </block>
             </value>
         </block>
+        <block type="robSensors_set_marker_threshold">
+            <value name="VALUE">
+                <block type="math_number">
+                    <field name="NUM">100</field>
+                </block>
+            </value>
+        </block>
+        <block type="robSensors_get_colourBlob">
+            <value name="MIN_HUE">
+                <block type="math_number">
+                    <field name="NUM">40</field>
+                </block>
+            </value>
+            <value name="MAX_HUE">
+                <block type="math_number">
+                    <field name="NUM">56</field>
+                </block>
+            </value>
+            <value name="MIN_SAT">
+                <block type="math_number">
+                    <field name="NUM">42</field>
+                </block>
+            </value>
+            <value name="MAX_SAT">
+                <block type="math_number">
+                    <field name="NUM">100</field>
+                </block>
+            </value>
+            <value name="MIN_VAL">
+                <block type="math_number">
+                    <field name="NUM">53</field>
+                </block>
+            </value>
+            <value name="MAX_VAL">
+                <block type="math_number">
+                    <field name="NUM">100</field>
+                </block>
+            </value>
+        </block>
+        <block type="robSensors_camera_getSample"></block>
     </category>
     <category name="TOOLBOX_CONTROL" svg="true">
         <category name="TOOLBOX_DECISION" svg="true">
