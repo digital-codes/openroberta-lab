@@ -12,7 +12,7 @@ OMNIDRIVESPEED:
 
 POSTVEL:
   PYTHON: |
-    def _postVel():
+    def postVel():
         OMNIDRIVE_URL = "http://" + ROBOTINOIP + "/data/omnidrive"
         r = requests.post(url = OMNIDRIVE_URL, params = PARAMS, json = currentSpeed )
         if r.status_code != requests.codes.ok:
@@ -20,7 +20,7 @@ POSTVEL:
 
 GETDISTANCE:
   PYTHON: |
-    def _getDistance(port):
+    def getDistance(port):
         DISTANCES_URL = "http://" + ROBOTINOIP + "/data/distancesensorarray"
         r = requests.get(url = DISTANCES_URL, params = PARAMS)
         if r.status_code == requests.codes.ok:
@@ -31,7 +31,7 @@ GETDISTANCE:
 
 ISBUMPED:
   PYTHON: |
-    def _isBumped():
+    def isBumped():
         BUMPER_URL = "http://" + ROBOTINOIP + "/data/bumper"
         r = requests.get(url = BUMPER_URL, params = PARAMS)
         if r.status_code == requests.codes.ok:
@@ -42,7 +42,7 @@ ISBUMPED:
 
 SETDIGITALPIN:
   PYTHON: |
-    def _setDigitalPin(pos, value):
+    def setDigitalPin(pos, value):
         _digitalPinValues[pos-1] = int(value)
         DIGITALPIN_URL = "http://" + ROBOTINOIP + "/data/digitaloutputstatus"
             r = requests.post(url = DIGITALPIN_URL, params = PARAMS, json = _digitalPinValues )
@@ -51,7 +51,7 @@ SETDIGITALPIN:
 
 GETDIGITALPIN:
   PYTHON: |
-    def _getDigitalPin(pos):
+    def getDigitalPin(pos):
         DIGITALPIN_URL = "http://" + ROBOTINOIP + "/data/digitalinputarray"
         r = requests.get(url = DIGITALPIN_URL, params = PARAMS)
         if r.status_code == requests.codes.ok:
@@ -62,7 +62,7 @@ GETDIGITALPIN:
 
 GETANALOGPIN:
   PYTHON: |
-    def _getAnalogPin(pos):
+    def getAnalogPin(pos):
         ANALOGPIN_URL = "http://" + ROBOTINOIP + "/data/analoginputarray"
         r = requests.get(url = ANALOGPIN_URL, params = PARAMS)
         if r.status_code == requests.codes.ok:
@@ -73,7 +73,7 @@ GETANALOGPIN:
 
 GETODOMETRY:
   PYTHON: |
-    def _getOdometry(val):
+    def getOdometry(val):
         ODOMETRY_URL = "http://" + ROBOTINOIP + "/data/odometry"
         r = requests.get(url = ODOMETRY_URL, params = PARAMS)
         if r.status_code == requests.codes.ok:
@@ -92,7 +92,7 @@ GETODOMETRY:
 
 DRIVETOPOSITION:
   PYTHON: |
-    def _driveToPosition(RV, x, y, speed):
+    def driveToPosition(RV, x, y, speed):
         global currentSpeed
         RV.writeFloatVector(2, [x * 10, y * 10, RV.readFloatVector(1)[2], 1])
         time.sleep(0.5)
@@ -105,7 +105,7 @@ DRIVETOPOSITION:
 
 DRIVEFORDISTANCE:
   PYTHON: |
-    def _driveForDistance(RV, x, y, distance):
+    def driveForDistance(RV, x, y, distance):
         distance = distance
         angle = math.atan2(y,  x)
         targetX = RV.readFloatVector(1)[0] + distance * math.cos(angle)
@@ -115,7 +115,7 @@ DRIVEFORDISTANCE:
 
 TURNFORDEGREES:
   PYTHON: |
-    def _turnForDegrees(RV, speed, degrees):
+    def turnForDegrees(RV, speed, degrees):
         if degrees < 0:
             speed = speed * -1
         distance = abs(degrees)
@@ -133,6 +133,6 @@ TURNFORDEGREES:
 
 GETMARKERINFO:
   PYTHON: |
-    def _getMarkerInformation(id):
+    def getMarkerInformation(RV, id):
         RV.writeFloat(3,id)
         return RV.readFloatVector(4)

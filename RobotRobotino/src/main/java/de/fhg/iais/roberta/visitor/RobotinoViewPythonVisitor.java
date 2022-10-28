@@ -1,5 +1,6 @@
 package de.fhg.iais.roberta.visitor;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -8,6 +9,7 @@ import com.google.common.collect.ClassToInstanceMap;
 import de.fhg.iais.roberta.bean.CodeGeneratorSetupBean;
 import de.fhg.iais.roberta.bean.IProjectBean;
 import de.fhg.iais.roberta.bean.UsedHardwareBean;
+import de.fhg.iais.roberta.components.Category;
 import de.fhg.iais.roberta.components.ConfigurationAst;
 import de.fhg.iais.roberta.components.UsedSensor;
 import de.fhg.iais.roberta.constants.RobotinoConstants;
@@ -22,6 +24,7 @@ import de.fhg.iais.roberta.syntax.actor.robotino.OmnidrivePositionAction;
 import de.fhg.iais.roberta.syntax.configuration.ConfigurationComponent;
 import de.fhg.iais.roberta.syntax.lang.blocksequence.MainTask;
 import de.fhg.iais.roberta.syntax.lang.expr.ConnectConst;
+import de.fhg.iais.roberta.syntax.lang.expr.VarDeclaration;
 import de.fhg.iais.roberta.syntax.lang.stmt.StmtList;
 import de.fhg.iais.roberta.syntax.lang.stmt.WaitStmt;
 import de.fhg.iais.roberta.syntax.lang.stmt.WaitTimeStmt;
@@ -46,7 +49,7 @@ import de.fhg.iais.roberta.visitor.lang.codegen.prog.AbstractPythonVisitor;
 public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor implements IRobotinoVisitor<Void> {
 
     private final ConfigurationAst configurationAst;
-
+    private List<VarDeclaration> varDeclarations;
     /**
      * initialize the Python code generator visitor.
      *
@@ -56,6 +59,7 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
         List<List<Phrase>> programPhrases, ClassToInstanceMap<IProjectBean> beans, ConfigurationAst configurationAst) {
         super(programPhrases, beans);
         this.configurationAst = configurationAst;
+        varDeclarations = new ArrayList<>();
     }
 
     @Override
@@ -67,7 +71,6 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
         generateVariables();
         nlIndent();
         generateTimerVariables();
-        nlIndent();
         if ( !this.getBean(CodeGeneratorSetupBean.class).getUsedMethods().isEmpty() ) {
             String helperMethodImpls =
                 this.getBean(CodeGeneratorSetupBean.class)
@@ -86,18 +89,17 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
         this.sb.append("PARAMS = {'sid':'robertaProgram'}");
         nlIndent();
         this.sb.append("MAXSPEED = 1");
-        nlIndent();
         generateOptionalVariables();
     }
 
     private void generateOptionalVariables() {
         if ( this.getBean(UsedHardwareBean.class).isActorUsed(SC.DIGITAL_PIN) ) {
-            this.sb.append("_digitalPinValues = [0 for i in range(8)]");
             nlIndent();
+            this.sb.append("_digitalPinValues = [0 for i in range(8)]");
         }
         if ( this.getBean(UsedHardwareBean.class).isActorUsed(RobotinoConstants.OMNIDRIVE) ) {
-            this.sb.append("currentSpeed = [0, 0, 0]");
             nlIndent();
+            this.sb.append("currentSpeed = [0, 0, 0]");
         }
     }
 
@@ -111,15 +113,42 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
     }
 
     @Override
+    public Void visitVarDeclaration(VarDeclaration var) {
+        this.usedGlobalVarInFunctions.add(var.getCodeSafeName());
+        this.sb.append(var.getCodeSafeName());
+        if ( var.getVarType().getBlocklyName().contains("Array") ) {
+            this.sb.append(" = []");
+        } else {
+            this.sb.append(" = None");
+        }
+        this.varDeclarations.add(var);
+        return null;
+    }
+
+    @Override
     public Void visitMainTask(MainTask mainTask) {
         StmtList variables = mainTask.variables;
         variables.accept(this);
         generateUserDefinedMethods();
+        if ( hasUserdefinedMethods() ) {
+            nlIndent();
+        } else if ( varDeclarations.size() > 0 ) {
+            nlIndent();
+            nlIndent();
+        }
+        generateStart();
         nlIndent();
         this.sb.append("def run(RV):");
         incrIndentation();
         generateGlobalVariables();
+        this.sb.append("time.sleep(2)");
+        nlIndent();
+        for ( VarDeclaration var : varDeclarations ) {
+            declareGlobalVariable(var);
+            nlIndent();
+        }
         if ( this.getBean(UsedHardwareBean.class).isSensorUsed(RobotinoConstants.ODOMETRY) ) {
+            nlIndent();
             //odometrieReset
             this.sb.append("RV.writeFloatVector(1, [0, 0, 0, 1])");
             nlIndent();
@@ -128,9 +157,27 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
             this.sb.append("RV.writeFloatVector(1, [])");
             nlIndent();
         }
-        nlIndent();
-
         return null;
+    }
+
+    private boolean hasUserdefinedMethods() {
+        return this.programPhrases
+            .stream().anyMatch(phrase -> phrase.getKind().getCategory() == Category.METHOD && !phrase.getKind().hasName("METHOD_CALL"));
+    }
+
+    private void generateStart() {
+        this.sb.append("def start(RV):");
+        incrIndentation();
+        nlIndent();
+        this.sb.append("motorDaemon2 = threading.Thread(target=run, daemon=True, args=(RV,), name='mainProgram')\n" +
+            "    motorDaemon2.start()\n" +
+            "    print('start')");
+        decrIndentation();
+        nlIndent();
+    }
+
+    private void declareGlobalVariable(VarDeclaration var) {
+        super.visitVarDeclaration(var);
     }
 
     private void generateGlobalVariables() {
@@ -157,15 +204,6 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
     }
 
     private void appendViewMethods() {
-        this.sb.append("def start(RV):");
-        incrIndentation();
-        nlIndent();
-        this.sb.append("motorDaemon2 = threading.Thread(target=run, daemon=True, args=(RV,), name='mainProgram')\n" +
-            "    motorDaemon2.start()\n" +
-            "    print('start')");
-        decrIndentation();
-        nlIndent();
-        nlIndent();
         this.sb.append("def step(RV):");
         incrIndentation();
         nlIndent();
@@ -175,7 +213,6 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
             this.sb.append(this.getBean(CodeGeneratorSetupBean.class).
                     getHelperMethodGenerator().getHelperMethodName(RobotinoMethods.POSTVEL))
                 .append("()");
-            nlIndent();
         }
         decrIndentation();
         nlIndent();
@@ -192,7 +229,6 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
         nlIndent();
         this.sb.append("print('cleanup')");
         decrIndentation();
-        nlIndent();
         nlIndent();
     }
 
@@ -335,7 +371,7 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
     @Override
     public Void visitMarkerInformation(MarkerInformation markerInformation) {
         this.sb.append(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(RobotinoMethods.GETMARKERINFO));
-        this.sb.append("(");
+        this.sb.append("(RV, ");
         markerInformation.markerId.accept(this);
         this.sb.append(")");
         return null;
@@ -350,7 +386,7 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
     @Override
     public Void visitCameraSensor(CameraSensor cameraSensor) {
         if ( cameraSensor.getMode().equals("LINE") ) {
-            this.sb.append("RV.readFloatVector(5)[0]");
+            this.sb.append("RV.readFloatVector(5)[1]");
         }
         return null;
     }
