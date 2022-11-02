@@ -35,6 +35,7 @@ import de.fhg.iais.roberta.syntax.sensor.generic.TimerReset;
 import de.fhg.iais.roberta.syntax.sensor.generic.TimerSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.TouchSensor;
 import de.fhg.iais.roberta.syntax.sensor.robotino.CameraSensor;
+import de.fhg.iais.roberta.syntax.sensor.robotino.CameraThreshold;
 import de.fhg.iais.roberta.syntax.sensor.robotino.ColourBlob;
 import de.fhg.iais.roberta.syntax.sensor.robotino.MarkerInformation;
 import de.fhg.iais.roberta.syntax.sensor.robotino.OdometrySensor;
@@ -388,7 +389,8 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
     @Override
     public Void visitCameraSensor(CameraSensor cameraSensor) {
         if ( cameraSensor.getMode().equals("LINE") ) {
-            this.sb.append("RV.readFloatVector(5)[1]");
+            this.sb.append(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(RobotinoMethods.GETCAMERALINE))
+                .append("(RV)");
         }
         return null;
     }
@@ -489,4 +491,13 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
         this.sb.append("])");
         return null;
     }
+
+    @Override
+    public Void visitCameraThreshold(CameraThreshold cameraThreshold) {
+        this.sb.append("RV.writeFloat(4, ");
+        cameraThreshold.threshold.accept(this);
+        this.sb.append(")");
+        return null;
+    }
+
 }
