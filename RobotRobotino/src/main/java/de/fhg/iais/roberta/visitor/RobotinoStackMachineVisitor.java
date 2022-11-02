@@ -20,6 +20,7 @@ import de.fhg.iais.roberta.syntax.sensor.generic.TimerReset;
 import de.fhg.iais.roberta.syntax.sensor.generic.TimerSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.TouchSensor;
 import de.fhg.iais.roberta.syntax.sensor.robotino.CameraSensor;
+import de.fhg.iais.roberta.syntax.sensor.robotino.ColourBlob;
 import de.fhg.iais.roberta.syntax.sensor.robotino.MarkerInformation;
 import de.fhg.iais.roberta.syntax.sensor.robotino.OdometrySensor;
 import de.fhg.iais.roberta.syntax.sensor.robotino.OdometrySensorReset;
@@ -118,6 +119,11 @@ public final class RobotinoStackMachineVisitor extends AbstractStackMachineVisit
     public Void visitCameraSensor(CameraSensor cameraSensor) {
         JSONObject o = makeNode(C.GET_SAMPLE).put(C.GET_SAMPLE, C.CAMERA).put(C.MODE, cameraSensor.getMode().toLowerCase());
         return add(o);
+    }
+
+    @Override
+    public Void visitColourBlob(ColourBlob colourBlob) {
+        return null;
     }
 
     @Override

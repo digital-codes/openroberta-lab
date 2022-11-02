@@ -135,4 +135,18 @@ GETMARKERINFO:
   PYTHON: |
     def getMarkerInformation(RV, id):
         RV.writeFloat(3,id)
-        return RV.readFloatVector(4)
+        time.sleep(0.001)
+        value = RV.readFloatVector(4)
+        if not value[0]:
+            value = [False, -1,-1,-1,-1,-1,-1]
+        return value
+
+GETCOLOURBLOB:
+  PYTHON: |
+    def getColourBlob(RV, inputs):
+        RV.writeFloatVector(6, inputs)
+        time.sleep(0.001)
+        value = RV.readFloatVector(6)
+        if value[3] <= 0:
+            value = [-1,-1,0,0]
+        return value
