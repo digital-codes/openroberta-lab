@@ -35,6 +35,7 @@ import de.fhg.iais.roberta.syntax.sensor.generic.TimerReset;
 import de.fhg.iais.roberta.syntax.sensor.generic.TimerSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.TouchSensor;
 import de.fhg.iais.roberta.syntax.sensor.robotino.CameraSensor;
+import de.fhg.iais.roberta.syntax.sensor.robotino.ColourBlob;
 import de.fhg.iais.roberta.syntax.sensor.robotino.MarkerInformation;
 import de.fhg.iais.roberta.syntax.sensor.robotino.OdometrySensor;
 import de.fhg.iais.roberta.syntax.sensor.robotino.OdometrySensorReset;
@@ -50,6 +51,7 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
 
     private final ConfigurationAst configurationAst;
     private List<VarDeclaration> varDeclarations;
+
     /**
      * initialize the Python code generator visitor.
      *
@@ -466,6 +468,25 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
             .append(", ");
         pinWriteValueAction.value.accept(this);
         this.sb.append(")");
+        return null;
+    }
+
+    @Override
+    public Void visitColourBlob(ColourBlob colourBlob) {
+        this.sb.append(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(RobotinoMethods.GETCOLOURBLOB))
+            .append("(RV, [");
+        colourBlob.minHue.accept(this);
+        this.sb.append(", ");
+        colourBlob.maxHue.accept(this);
+        this.sb.append(", ");
+        colourBlob.minSat.accept(this);
+        this.sb.append(", ");
+        colourBlob.maxSat.accept(this);
+        this.sb.append(", ");
+        colourBlob.minVal.accept(this);
+        this.sb.append(", ");
+        colourBlob.maxVal.accept(this);
+        this.sb.append("])");
         return null;
     }
 }
