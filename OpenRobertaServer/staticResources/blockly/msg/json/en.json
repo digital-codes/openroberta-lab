@@ -1,7 +1,7 @@
 {
 	"@metadata": {
 		"author": "Ellen Spertus <ellen.spertus@gmail.com>",
-		"lastupdated": "2022-09-29 13:55:04.548175",
+		"lastupdated": "2022-11-02 15:32:17.274953",
 		"locale": "en",
 		"messagedocumentation" : "qqq"
 	},
@@ -394,7 +394,7 @@
 	"DISPLAY_TEXT_TOOLTIP": "Displays a text on the screen.",
 	"DISPLAY_PRINTLN_TOOLTIP": "Displays a text on the screen in a new line.",
 	"DISPLAY_CLEAR_TOOLTIP": "Clears the display.",
-	"PLAY_TONE_TOOLTIP": "Plays a tone. Use frequency and duration to determin the tone pitch and duration.",
+	"PLAY_TONE_TOOLTIP": "Plays a tone. Use frequency and duration to determine the tone pitch and duration.",
 	"PLAY_FILE_TOOLTIP": "Plays a sound file.",
 	"PLAY_SETVOLUME_TOOLTIP": "Sets volume.",
 	"PLAY_GETVOLUME_TOOLTIP": "Gets current volume.",
@@ -1900,5 +1900,7 @@
 	"CIRCLE": "circle",
 	"SENSOR_IRHORIZONTAL_GETSAMPLE_TOOLTIP": "Gets the current reading from the infrared sensor.",
 	"FORWARD": "forward",
-	"BACKWARD": "backward"
+	"BACKWARD": "backward",
+	"MATH_THYMIO_TRIG_TOOLTIP": "All trigonometric functions map the angles [-pi, pi] radians to [-32768, 32767]. The resultant sin and cos values are similarly mapped, namely [-1.0, 1.0] to [-32768, 32767].",
+	"MOTOR_TOOLTIP_SPIKE": "Represents a middle or large angular motor."
 }
