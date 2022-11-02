@@ -150,3 +150,12 @@ GETCOLOURBLOB:
         if value[3] <= 0:
             value = [-1,-1,0,0]
         return value
+
+GETCAMERALINE:
+  PYTHON: |
+    def getCameraLine(RV):
+        value = RV.readFloatVector(5)
+        if value[0]:
+            return value[1]
+        else:
+            return -1
