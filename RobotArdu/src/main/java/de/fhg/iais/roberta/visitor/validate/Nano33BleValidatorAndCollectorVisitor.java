@@ -5,16 +5,16 @@ import com.google.common.collect.ClassToInstanceMap;
 import de.fhg.iais.roberta.bean.IProjectBean;
 import de.fhg.iais.roberta.components.ConfigurationAst;
 import de.fhg.iais.roberta.components.UsedActor;
+import de.fhg.iais.roberta.syntax.sensor.arduino.nano33blesense.Apds9960ColorSensor;
+import de.fhg.iais.roberta.syntax.sensor.arduino.nano33blesense.Apds9960DistanceSensor;
+import de.fhg.iais.roberta.syntax.sensor.arduino.nano33blesense.Apds9960GestureSensor;
+import de.fhg.iais.roberta.syntax.sensor.arduino.nano33blesense.Hts221HumiditySensor;
+import de.fhg.iais.roberta.syntax.sensor.arduino.nano33blesense.Hts221TemperatureSensor;
+import de.fhg.iais.roberta.syntax.sensor.arduino.nano33blesense.Lps22hbPressureSensor;
+import de.fhg.iais.roberta.syntax.sensor.arduino.nano33blesense.Lsm9ds1AccSensor;
+import de.fhg.iais.roberta.syntax.sensor.arduino.nano33blesense.Lsm9ds1GyroSensor;
+import de.fhg.iais.roberta.syntax.sensor.arduino.nano33blesense.Lsm9ds1MagneticFieldSensor;
 import de.fhg.iais.roberta.util.syntax.SC;
-import de.fhg.iais.roberta.syntax.sensors.arduino.nano33blesense.Apds9960ColorSensor;
-import de.fhg.iais.roberta.syntax.sensors.arduino.nano33blesense.Apds9960DistanceSensor;
-import de.fhg.iais.roberta.syntax.sensors.arduino.nano33blesense.Apds9960GestureSensor;
-import de.fhg.iais.roberta.syntax.sensors.arduino.nano33blesense.Hts221HumiditySensor;
-import de.fhg.iais.roberta.syntax.sensors.arduino.nano33blesense.Hts221TemperatureSensor;
-import de.fhg.iais.roberta.syntax.sensors.arduino.nano33blesense.Lps22hbPressureSensor;
-import de.fhg.iais.roberta.syntax.sensors.arduino.nano33blesense.Lsm9ds1AccSensor;
-import de.fhg.iais.roberta.syntax.sensors.arduino.nano33blesense.Lsm9ds1GyroSensor;
-import de.fhg.iais.roberta.syntax.sensors.arduino.nano33blesense.Lsm9ds1MagneticFieldSensor;
 import de.fhg.iais.roberta.visitor.hardware.INano33BleSensorVisitor;
 
 public class Nano33BleValidatorAndCollectorVisitor extends ArduinoValidatorAndCollectorVisitor implements INano33BleSensorVisitor<Void> {
