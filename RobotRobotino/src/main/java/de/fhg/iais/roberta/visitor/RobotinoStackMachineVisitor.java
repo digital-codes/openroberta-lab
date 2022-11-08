@@ -25,6 +25,7 @@ import de.fhg.iais.roberta.syntax.sensor.robotino.ColourBlob;
 import de.fhg.iais.roberta.syntax.sensor.robotino.MarkerInformation;
 import de.fhg.iais.roberta.syntax.sensor.robotino.OdometrySensor;
 import de.fhg.iais.roberta.syntax.sensor.robotino.OdometrySensorReset;
+import de.fhg.iais.roberta.syntax.sensor.robotino.OpticalSensor;
 import de.fhg.iais.roberta.util.basic.C;
 import de.fhg.iais.roberta.util.dbc.Assert;
 import de.fhg.iais.roberta.util.syntax.SC;
@@ -130,6 +131,12 @@ public final class RobotinoStackMachineVisitor extends AbstractStackMachineVisit
     @Override
     public Void visitCameraThreshold(CameraThreshold cameraThreshold) {
         return null;
+    }
+
+    @Override
+    public Void visitOpticalSensor(OpticalSensor opticalSensor) {
+        JSONObject o = makeNode(C.GET_SAMPLE).put(C.GET_SAMPLE, C.OPTICAL).put(C.PORT, opticalSensor.getUserDefinedPort()).put(C.MODE, opticalSensor.getMode().toLowerCase());
+        return add(o);
     }
 
     @Override

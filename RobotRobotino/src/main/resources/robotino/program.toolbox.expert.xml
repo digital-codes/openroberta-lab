@@ -93,6 +93,7 @@
         <block type="robSensors_timer_getSample"></block>
         <block type="robSensors_timer_reset"></block>
         <block type="robSensors_out_getSample"></block>
+        <block type="robSensors_optical_getSample"></block>
         <block type="robSensors_detectmark_getSample"></block>
         <block type="robSensors_get_markerinf">
             <value name="VALUE">

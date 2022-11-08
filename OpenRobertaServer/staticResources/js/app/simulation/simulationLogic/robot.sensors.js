@@ -15,7 +15,7 @@ var __extends = (this && this.__extends) || (function () {
 })();
 define(["require", "exports", "robot.base.mobile", "interpreter.constants", "simulation.math", "util", "robot.actuators", "simulation.objects", "blockly", "volume-meter", "jquery", "simulation.roberta"], function (require, exports, robot_base_mobile_1, C, SIMATH, UTIL, robot_actuators_1, simulation_objects_1, Blockly, VolumeMeter, $, simulation_roberta_1) {
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.CameraSensor = exports.OdometrySensor = exports.SoundSensor = exports.VolumeMeterSensor = exports.TemperatureSensor = exports.Rob3rtaInfraredSensor = exports.CalliopeLightSensor = exports.CompassSensor = exports.GestureSensor = exports.MbotButton = exports.MicrobitPins = exports.Pins = exports.TouchKeys = exports.EV3Keys = exports.Keys = exports.GyroSensorExt = exports.GyroSensor = exports.LightSensor = exports.NXTColorSensor = exports.ColorSensor = exports.RobotinoTouchSensor = exports.TapSensor = exports.TouchSensor = exports.RobotinoInfraredSensor = exports.MbotInfraredSensor = exports.ThymioInfraredSensors = exports.ThymioLineSensor = exports.ThymioInfraredSensor = exports.InfraredSensor = exports.UltrasonicSensor = exports.DistanceSensor = exports.Timer = void 0;
+    exports.CameraSensor = exports.OdometrySensor = exports.SoundSensor = exports.VolumeMeterSensor = exports.TemperatureSensor = exports.Rob3rtaInfraredSensor = exports.CalliopeLightSensor = exports.CompassSensor = exports.GestureSensor = exports.MbotButton = exports.MicrobitPins = exports.Pins = exports.TouchKeys = exports.EV3Keys = exports.Keys = exports.GyroSensorExt = exports.GyroSensor = exports.OpticalSensor = exports.LightSensor = exports.NXTColorSensor = exports.ColorSensor = exports.RobotinoTouchSensor = exports.TapSensor = exports.TouchSensor = exports.RobotinoInfraredSensor = exports.MbotInfraredSensor = exports.ThymioInfraredSensors = exports.ThymioLineSensor = exports.ThymioInfraredSensor = exports.InfraredSensor = exports.UltrasonicSensor = exports.DistanceSensor = exports.Timer = void 0;
     var WAVE_LENGTH = 60;
     var Timer = /** @class */ (function () {
         function Timer(num) {
@@ -105,9 +105,13 @@ define(["require", "exports", "robot.base.mobile", "interpreter.constants", "sim
             }
             rCtx.translate(this.rx, this.ry);
             rCtx.rotate(myRobot.pose.theta);
+            rCtx.rotate(this.theta);
+            rCtx.translate(10, 0);
+            rCtx.rotate(-this.theta);
+            rCtx.translate(-5, 0);
             rCtx.beginPath();
             rCtx.fillStyle = '#555555';
-            rCtx.fillText(String(this.port.replace('ORT_', '')), this.x !== myRobot.chassis.geom.x ? 10 : -10, 4);
+            rCtx.fillText(String(this.port.replace('ORT_', '')), 0, 4);
             rCtx.restore();
             rCtx.save();
             rCtx.translate(myRobot.pose.x, myRobot.pose.y);
@@ -129,31 +133,31 @@ define(["require", "exports", "robot.base.mobile", "interpreter.constants", "sim
                     x1: this.rx,
                     y1: this.ry,
                     x2: this.rx + this.maxLength * Math.cos(robot.pose.theta + this.theta),
-                    y2: this.ry + this.maxLength * Math.sin(robot.pose.theta + this.theta)
+                    y2: this.ry + this.maxLength * Math.sin(robot.pose.theta + this.theta),
                 };
                 var u1 = {
                     x1: this.rx,
                     y1: this.ry,
                     x2: this.rx + this.maxLength * Math.cos(robot.pose.theta - Math.PI / 8 + this.theta),
-                    y2: this.ry + this.maxLength * Math.sin(robot.pose.theta - Math.PI / 8 + this.theta)
+                    y2: this.ry + this.maxLength * Math.sin(robot.pose.theta - Math.PI / 8 + this.theta),
                 };
                 var u2 = {
                     x1: this.rx,
                     y1: this.ry,
                     x2: this.rx + this.maxLength * Math.cos(robot.pose.theta - Math.PI / 16 + this.theta),
-                    y2: this.ry + this.maxLength * Math.sin(robot.pose.theta - Math.PI / 16 + this.theta)
+                    y2: this.ry + this.maxLength * Math.sin(robot.pose.theta - Math.PI / 16 + this.theta),
                 };
                 var u5 = {
                     x1: this.rx,
                     y1: this.ry,
                     x2: this.rx + this.maxLength * Math.cos(robot.pose.theta + Math.PI / 8 + this.theta),
-                    y2: this.ry + this.maxLength * Math.sin(robot.pose.theta + Math.PI / 8 + this.theta)
+                    y2: this.ry + this.maxLength * Math.sin(robot.pose.theta + Math.PI / 8 + this.theta),
                 };
                 var u4 = {
                     x1: this.rx,
                     y1: this.ry,
                     x2: this.rx + this.maxLength * Math.cos(robot.pose.theta + Math.PI / 16 + this.theta),
-                    y2: this.ry + this.maxLength * Math.sin(robot.pose.theta + Math.PI / 16 + this.theta)
+                    y2: this.ry + this.maxLength * Math.sin(robot.pose.theta + Math.PI / 16 + this.theta),
                 };
                 var uA = [u1, u2, u3, u4, u5];
                 this.distance = this.maxLength;
@@ -355,7 +359,7 @@ define(["require", "exports", "robot.base.mobile", "interpreter.constants", "sim
             rCtx.beginPath();
             rCtx.lineWidth = 0.1;
             rCtx.arc(this.x, this.y - this.dy / 2, this.r, 0, Math.PI * 2);
-            var leftLight = this.left.light / 100 * 255;
+            var leftLight = (this.left.light / 100) * 255;
             rCtx.fillStyle = 'rgb(' + leftLight + ', ' + leftLight + ', ' + leftLight + ')';
             rCtx.fill();
             rCtx.strokeStyle = 'black';
@@ -364,7 +368,7 @@ define(["require", "exports", "robot.base.mobile", "interpreter.constants", "sim
             rCtx.beginPath();
             rCtx.lineWidth = 0.1;
             rCtx.arc(this.x, this.y + this.dy / 2, this.r, 0, Math.PI * 2);
-            var leftRight = this.right.light / 100 * 255;
+            var leftRight = (this.right.light / 100) * 255;
             rCtx.fillStyle = 'rgb(' + leftRight + ', ' + leftRight + ', ' + leftRight + ')';
             rCtx.fill();
             rCtx.strokeStyle = 'black';
@@ -677,8 +681,7 @@ define(["require", "exports", "robot.base.mobile", "interpreter.constants", "sim
         };
         RobotinoTouchSensor.prototype.updateSensor = function (running, dt, myRobot, values, uCtx, udCtx, personalObstacleList) {
             values['touch'] = values['touch'] || {};
-            values['touch'] = this.bumped =
-                myRobot.chassis.bumpedAngle.length > 0;
+            values['touch'] = this.bumped = myRobot.chassis.bumpedAngle.length > 0;
         };
         return RobotinoTouchSensor;
     }());
@@ -867,6 +870,56 @@ define(["require", "exports", "robot.base.mobile", "interpreter.constants", "sim
         return LightSensor;
     }(ColorSensor));
     exports.LightSensor = LightSensor;
+    var OpticalSensor = /** @class */ (function (_super) {
+        __extends(OpticalSensor, _super);
+        function OpticalSensor(name, port, x, y, theta, r, color) {
+            var _this = _super.call(this, port.replace('DI', '').toString(), x, y, theta, r) || this;
+            _this.name = name;
+            return _this;
+        }
+        OpticalSensor.prototype.getLabel = function () {
+            return ('<div><label>' +
+                this.name +
+                ' ' +
+                Blockly.Msg['SENSOR_OPTICAL'] +
+                '</label></div><div><label>&nbsp;-&nbsp;' +
+                Blockly.Msg['MODE_OPENING'] +
+                '</label><span>' +
+                this.light +
+                '</span></div>' +
+                '<div><label>&nbsp;-&nbsp;' +
+                Blockly.Msg['MODE_CLOSING'] +
+                '</label><span>' +
+                !this.light +
+                '</span></div>');
+        };
+        OpticalSensor.prototype.draw = function (rCtx, myRobot) {
+            rCtx.save();
+            rCtx.beginPath();
+            rCtx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+            rCtx.fillStyle = this.color;
+            rCtx.fill();
+            rCtx.strokeStyle = 'black';
+            rCtx.stroke();
+            rCtx.translate(this.x, this.y);
+            rCtx.beginPath();
+            rCtx.fillStyle = '#555555';
+            rCtx.fillText(this.name, 8, 4);
+            rCtx.restore();
+        };
+        OpticalSensor.prototype.updateSensor = function (running, dt, myRobot, values, uCtx, udCtx) {
+            _super.prototype.updateSensor.call(this, running, dt, myRobot, values, uCtx, udCtx);
+            this.lightValue = this.lightValue > 50 ? 100 : 0;
+            this.light = this.lightValue == 0 ? false : true;
+            this.color = this.lightValue == 0 ? 'black' : 'white';
+            values['optical'] = {};
+            values['optical'][this.name] = {};
+            values['optical'][this.name][C.OPENING] = this.light;
+            values['optical'][this.name][C.CLOSING] = !this.light;
+        };
+        return OpticalSensor;
+    }(LightSensor));
+    exports.OpticalSensor = OpticalSensor;
     var GyroSensor = /** @class */ (function () {
         function GyroSensor() {
             this.angleValue = 0;
@@ -985,7 +1038,7 @@ define(["require", "exports", "robot.base.mobile", "interpreter.constants", "sim
             var myEvent = e;
             this.lastMousePosition = {
                 x: myEvent.startX,
-                y: myEvent.startY
+                y: myEvent.startY,
             };
             if (this.uCtx !== undefined) {
                 var myMouseColorData = this.uCtx.getImageData(this.lastMousePosition.x, this.lastMousePosition.y, 1, 1).data;
@@ -1009,7 +1062,7 @@ define(["require", "exports", "robot.base.mobile", "interpreter.constants", "sim
             var myEvent = e;
             this.lastMousePosition = {
                 x: myEvent.startX,
-                y: myEvent.startY
+                y: myEvent.startY,
             };
             if (this.uCtx !== undefined) {
                 var myMouseColorData = this.uCtx.getImageData(this.lastMousePosition.x, this.lastMousePosition.y, 1, 1).data;
@@ -1221,7 +1274,7 @@ define(["require", "exports", "robot.base.mobile", "interpreter.constants", "sim
             var myEvent = e;
             this.lastMousePosition = {
                 x: myEvent.startX,
-                y: myEvent.startY
+                y: myEvent.startY,
             };
             var myCtx = this.$touchLayer.get(0).getContext('2d');
             var myMouseColorData = myCtx.getImageData(this.lastMousePosition.x, this.lastMousePosition.y, 1, 1).data;
@@ -1244,7 +1297,7 @@ define(["require", "exports", "robot.base.mobile", "interpreter.constants", "sim
             var myEvent = e;
             this.lastMousePosition = {
                 x: myEvent.startX,
-                y: myEvent.startY
+                y: myEvent.startY,
             };
             var myKeys = this.color2Keys[this.lastMouseColor];
             var myCtx = this.$touchLayer.get(0).getContext('2d');
@@ -1437,10 +1490,10 @@ define(["require", "exports", "robot.base.mobile", "interpreter.constants", "sim
                             googEchoCancellation: 'false',
                             googAutoGainControl: 'false',
                             googNoiseSuppression: 'false',
-                            googHighpassFilter: 'false'
+                            googHighpassFilter: 'false',
                         },
-                        optional: []
-                    }
+                        optional: [],
+                    },
                 })
                     .then(function (stream) {
                     var mediaStreamSource = sensor.webAudio.context.createMediaStreamSource(stream);
@@ -1530,8 +1583,8 @@ define(["require", "exports", "robot.base.mobile", "interpreter.constants", "sim
         $range.rules('add', {
             messages: {
                 required: false,
-                number: false
-            }
+                number: false,
+            },
         });
     }
     var OdometrySensor = /** @class */ (function () {
@@ -1591,44 +1644,64 @@ define(["require", "exports", "robot.base.mobile", "interpreter.constants", "sim
     var CameraSensor = /** @class */ (function () {
         function CameraSensor(pose, aov) {
             this.MAX_MARKER_DIST_SQR = 150 * 3 * 150 * 3;
-            this.MAX_CAM_Y = 200 * 3 * 200 * 3;
-            this.LINE_RADIUS = 50;
-            this.AOV = 2 * Math.PI / 5;
+            this.MAX_CAM_Y = Math.sqrt(this.MAX_MARKER_DIST_SQR);
+            this.MAX_BLOB_DIST_SQR = this.MAX_MARKER_DIST_SQR;
+            this.LINE_RADIUS = 60;
+            this.AOV = (2 * Math.PI) / 5;
             this.listOfMarkersFound = [];
+            this.bB = { x: 0, y: 0, w: 0, h: 0 };
             this.labelPriority = 8;
-            this.THRESHOLD = 75;
+            this.THRESHOLD = 100;
             this.drawPriority = 1;
             this.x = pose.x;
             this.y = pose.y;
             this.theta = pose.theta;
             this.AOV = aov;
         }
+        CameraSensor.prototype.updateAction = function (myRobot, dt, interpreterRunning) {
+            if (interpreterRunning) {
+                var myBehaviour = myRobot.interpreter.getRobotBehaviour();
+                var colourBlob = myBehaviour.getActionState('colourBlob', true);
+                if (colourBlob) {
+                    this.colourBlob = colourBlob;
+                }
+            }
+            this.colourBlob = {
+                minHue: 0,
+                maxHue: 240,
+                minSat: 90,
+                maxSat: 110,
+                minVal: 90,
+                maxVal: 110,
+            };
+        };
         CameraSensor.prototype.draw = function (rCtx, myRobot) {
             rCtx.beginPath();
             rCtx.strokeStyle = '#0000ff';
             rCtx.beginPath();
             rCtx.arc(this.x, this.y, 1000, Math.PI / 5, -Math.PI / 5, true);
-            rCtx.arc(this.x, this.y, 30, -Math.PI / 5, +Math.PI / 5, false);
+            rCtx.arc(this.x, this.y, this.LINE_RADIUS, -Math.PI / 5, +Math.PI / 5, false);
             rCtx.closePath();
             rCtx.stroke();
         };
         CameraSensor.prototype.getLabel = function () {
-            var myLabel = '<div><label>' + 'Line Sensor' + '</label><span>' + this.line + '</span></div>';
+            var myLabel = '<div><label>' + 'Line Sensor' + '</label><span>' + UTIL.round(this.line, 2) + '</span></div>';
             myLabel += '<div><label>' + 'Marker Sensor' + '</label></div>';
             for (var i = 0; i < this.listOfMarkersFound.length; i++) {
                 var marker = this.listOfMarkersFound[i];
                 myLabel += '<div><label>&nbsp;-&nbsp;id ';
                 myLabel += marker.markerId;
-                myLabel += '</label><span>(';
-                myLabel += UTIL.round(marker.xRel, 3);
+                myLabel += '</label><span>[';
+                myLabel += UTIL.round(marker.xDist, 0);
                 myLabel += ', ';
-                myLabel += UTIL.round(marker.yRel, 3);
-                myLabel += ', 0)</span></div>';
+                myLabel += UTIL.round(marker.yDist, 0);
+                myLabel += ', ';
+                myLabel += UTIL.round(marker.zDist, 0);
+                myLabel += '] cm</span></div>';
             }
             return myLabel;
         };
-        CameraSensor.prototype.reset = function () {
-        };
+        CameraSensor.prototype.reset = function () { };
         CameraSensor.prototype.updateSensor = function (running, dt, myRobot, values, uCtx, udCtx, personalObstacleList, markerList) {
             var _this = this;
             this.listOfMarkersFound = [];
@@ -1637,18 +1710,21 @@ define(["require", "exports", "robot.base.mobile", "interpreter.constants", "sim
             var myPose = new robot_base_mobile_1.Pose(this.rx, this.ry, this.theta);
             var left = (myRobot.pose.theta - this.AOV / 2 + 2 * Math.PI) % (2 * Math.PI);
             var right = (myRobot.pose.theta + this.AOV / 2 + 2 * Math.PI) % (2 * Math.PI);
-            markerList.filter(function (marker) {
+            markerList
+                .filter(function (marker) {
                 var visible = false;
-                marker.sqrDistance = SIMATH.getDistance(myPose, marker);
-                if (marker.sqrDistance <= _this.MAX_MARKER_DIST_SQR) {
-                    var myMarkerPoints = [{ x: marker.x - myPose.x, y: marker.y - myPose.y },
+                marker.sqrDist = SIMATH.getDistance(myPose, marker);
+                if (marker.sqrDist <= _this.MAX_MARKER_DIST_SQR) {
+                    var myMarkerPoints = [
+                        { x: marker.x - myPose.x, y: marker.y - myPose.y },
                         { x: marker.x + marker.w - myPose.x, y: marker.y - myPose.y },
                         { x: marker.x + marker.w - myPose.x, y: marker.y + marker.h - myPose.y },
-                        { x: marker.x - myPose.x, y: marker.y + marker.h - myPose.y }];
+                        { x: marker.x - myPose.x, y: marker.y + marker.h - myPose.y },
+                    ];
                     var visible_1 = true;
                     for (var i = 0; i < myMarkerPoints.length; i++) {
                         var myAngle = (Math.atan2(myMarkerPoints[i].y, myMarkerPoints[i].x) + 2 * Math.PI) % (2 * Math.PI);
-                        if ((left < right && (myAngle > left && myAngle < right)) || (left > right && (myAngle > left || myAngle < right))) {
+                        if ((left < right && myAngle > left && myAngle < right) || (left > right && (myAngle > left || myAngle < right))) {
                             var p = _this.checkVisibility(robot.id, marker, personalObstacleList);
                             if (p) {
                                 visible_1 = false;
@@ -1660,7 +1736,8 @@ define(["require", "exports", "robot.base.mobile", "interpreter.constants", "sim
                     }
                     return visible_1;
                 }
-            }).forEach(function (marker) {
+            })
+                .forEach(function (marker) {
                 var myAngle = (Math.atan2(marker.y + marker.h / 2 - myPose.y, marker.x + marker.w / 2 - myPose.x) + 2 * Math.PI) % (2 * Math.PI);
                 if (left > right) {
                     right += 2 * Math.PI;
@@ -1668,36 +1745,57 @@ define(["require", "exports", "robot.base.mobile", "interpreter.constants", "sim
                         myAngle = myAngle + 2 * Math.PI;
                     }
                 }
-                marker.xRel = (myAngle - left) / (right - left) - 0.5;
-                marker.yRel = Math.sqrt(marker.sqrDistance) / Math.sqrt(_this.MAX_CAM_Y) - 0.5;
+                var dist = Math.sqrt(marker.sqrDist);
+                marker.xDist = (((myAngle - left) / (right - left) - 0.5) * _this.AOV * dist) / 3;
+                marker.yDist = ((dist / _this.MAX_CAM_Y - 0.5) * _this.MAX_CAM_Y) / 3;
+                marker.zDist = dist / 3;
                 _this.listOfMarkersFound.push(marker);
             });
             this.line = -1;
             var leftPoint = { x: this.LINE_RADIUS * Math.cos(left), y: this.LINE_RADIUS * Math.sin(left) };
             var rightPoint = { x: this.LINE_RADIUS * Math.cos(right), y: this.LINE_RADIUS * Math.sin(right) };
+            var dist = SIMATH.getDistance(leftPoint, rightPoint);
             var pixYWidth = Math.abs(rightPoint.y - leftPoint.y);
             var pixXWidth = Math.abs(rightPoint.x - leftPoint.x);
-            var redPixOld = this.calculatePix(uCtx.getImageData(leftPoint.x + myPose.x, leftPoint.y + myPose.y, 1, 1).data);
+            var redPixOld;
             if (pixYWidth > pixXWidth) {
                 if (leftPoint.x > 0) {
-                    for (var i = leftPoint.y + this.ry; i <= rightPoint.y + this.ry; i += 0.5) {
-                        var a = (this.LINE_RADIUS) * (this.LINE_RADIUS) - (i - this.ry) * (i - this.ry);
-                        var xi = Math.sqrt(a) + this.rx;
-                        var redPix = this.calculatePix(uCtx.getImageData(xi, i, 1, 1).data);
+                    this.bB.x = Math.min(leftPoint.x, rightPoint.x) + this.rx;
+                    this.bB.y = Math.min(leftPoint.y, rightPoint.y) + this.ry;
+                    this.bB.w = Math.max(Math.max(leftPoint.x, rightPoint.x), this.LINE_RADIUS) + this.rx - this.bB.x;
+                    this.bB.h = -this.bB.y + Math.max(Math.max(leftPoint.y, rightPoint.y)) + this.ry;
+                    var data = uCtx.getImageData(this.bB.x, this.bB.y, this.bB.w, this.bB.h);
+                    for (var i = 0; i < data.height; i++) {
+                        var a = this.LINE_RADIUS * this.LINE_RADIUS - (i + this.bB.y - this.ry) * (i + this.bB.y - this.ry);
+                        var xi = Math.round(Math.sqrt(a) - (this.bB.x - this.rx));
+                        var myIndex = (xi + i * data.width) * 4;
+                        var redPix = this.calculatePix(data.data.slice(myIndex, myIndex + 3));
+                        if (redPixOld == undefined) {
+                            redPixOld = redPix;
+                        }
                         if (Math.abs(redPix - redPixOld) > this.THRESHOLD) {
-                            this.line = Math.abs(i - leftPoint.y - this.ry) / pixYWidth - 0.5;
+                            this.line = i / pixYWidth - 0.5;
                             break;
                         }
                         redPixOld = redPix;
                     }
                 }
                 else {
-                    for (var i = leftPoint.y + this.ry; i >= rightPoint.y + this.ry; i -= 0.5) {
-                        var a = (this.LINE_RADIUS) * (this.LINE_RADIUS) - (i - this.ry) * (i - this.ry);
-                        var xi = -Math.sqrt(a) + this.rx;
-                        var redPix = this.calculatePix(uCtx.getImageData(xi, i, 1, 1).data);
+                    this.bB.y = Math.min(leftPoint.y, rightPoint.y) + this.ry;
+                    this.bB.x = Math.min(Math.min(leftPoint.x, rightPoint.x), -this.LINE_RADIUS) + this.rx;
+                    this.bB.w = Math.max(leftPoint.x, rightPoint.x) + this.rx - this.bB.x;
+                    this.bB.h = -this.bB.y + Math.max(Math.max(leftPoint.y, rightPoint.y)) + this.ry;
+                    var data = uCtx.getImageData(this.bB.x, this.bB.y, this.bB.w, this.bB.h);
+                    for (var i = data.height - 1; i >= 0; i--) {
+                        var a = this.LINE_RADIUS * this.LINE_RADIUS - (i + this.bB.y - this.ry) * (i + this.bB.y - this.ry);
+                        var xi = Math.round(-Math.sqrt(a) - (this.bB.x - this.rx));
+                        var myIndex = (xi + i * data.width) * 4;
+                        var redPix = this.calculatePix(data.data.slice(myIndex, myIndex + 3));
+                        if (redPixOld == undefined) {
+                            redPixOld = redPix;
+                        }
                         if (Math.abs(redPix - redPixOld) > this.THRESHOLD) {
-                            this.line = Math.abs(i - leftPoint.y - this.ry) / pixYWidth - 0.5;
+                            this.line = 1 - i / pixYWidth - 0.5;
                             break;
                         }
                         redPixOld = redPix;
@@ -1705,27 +1803,46 @@ define(["require", "exports", "robot.base.mobile", "interpreter.constants", "sim
                 }
             }
             else {
-                uCtx.fillStyle = '#00ff00';
                 if (leftPoint.y < 0) {
-                    for (var i = leftPoint.x + this.rx; i <= rightPoint.x + this.rx; i += 0.5) {
-                        var a = (this.LINE_RADIUS) * (this.LINE_RADIUS) - (i - this.rx) * (i - this.rx);
-                        var yi = -Math.sqrt(a);
-                        var redPix = this.calculatePix(uCtx.getImageData(i, yi + this.ry, 1, 1).data);
+                    this.bB.x = Math.min(Math.min(leftPoint.x, rightPoint.x), this.LINE_RADIUS) + this.rx;
+                    this.bB.w = Math.max(leftPoint.x, rightPoint.x) + this.rx - this.bB.x;
+                    this.bB.y = Math.min(Math.min(leftPoint.y, rightPoint.y), -this.LINE_RADIUS) + this.ry;
+                    this.bB.h = Math.max(leftPoint.y, rightPoint.y) + this.ry - this.bB.y;
+                    var data = uCtx.getImageData(this.bB.x, this.bB.y, this.bB.w, this.bB.h);
+                    for (var i = 0; i < data.width; i++) {
+                        var a = this.LINE_RADIUS * this.LINE_RADIUS - (i + this.bB.x - this.rx) * (i + this.bB.x - this.rx);
+                        var xi = Math.round(-Math.sqrt(a) - this.bB.y + this.ry);
+                        var myIndex = (i + xi * data.width) * 4;
+                        var redPix = this.calculatePix(data.data.slice(myIndex, myIndex + 3));
+                        if (redPixOld == undefined) {
+                            redPixOld = redPix;
+                        }
                         if (Math.abs(redPix - redPixOld) > this.THRESHOLD) {
-                            this.line = Math.abs(i - leftPoint.x - this.rx) / pixXWidth - 0.5;
+                            this.line = i / pixXWidth - 0.5;
                             break;
                         }
+                        redPixOld = redPix;
                     }
                 }
                 else {
-                    for (var i = leftPoint.x + this.rx; i >= rightPoint.x + this.rx; i -= 0.5) {
-                        var a = (this.LINE_RADIUS) * (this.LINE_RADIUS) - (i - this.rx) * (i - this.rx);
-                        var yi = Math.sqrt(a);
-                        var redPix = this.calculatePix(uCtx.getImageData(i, yi + this.ry, 1, 1).data);
+                    this.bB.x = Math.min(Math.min(leftPoint.x, rightPoint.x), this.LINE_RADIUS) + this.rx;
+                    this.bB.w = Math.max(leftPoint.x, rightPoint.x) + this.rx - this.bB.x;
+                    this.bB.y = Math.min(leftPoint.y, rightPoint.y) + this.ry;
+                    this.bB.h = Math.max(Math.max(leftPoint.y, rightPoint.y), this.LINE_RADIUS) + this.ry - this.bB.y;
+                    var data = uCtx.getImageData(this.bB.x, this.bB.y, this.bB.w, this.bB.h);
+                    for (var i = data.width - 1; i >= 0; i--) {
+                        var a = this.LINE_RADIUS * this.LINE_RADIUS - (i + this.bB.x - this.rx) * (i + this.bB.x - this.rx);
+                        var xi = Math.round(Math.sqrt(a) - this.bB.y + this.ry) - 1;
+                        var myIndex = (i + xi * data.width) * 4;
+                        var redPix = this.calculatePix(data.data.slice(myIndex, myIndex + 3));
+                        if (redPixOld == undefined) {
+                            redPixOld = redPix;
+                        }
                         if (Math.abs(redPix - redPixOld) > this.THRESHOLD) {
-                            this.line = Math.abs(i - leftPoint.x - this.rx) / pixXWidth - 0.5;
+                            this.line = 0.5 - i / pixXWidth;
                             break;
                         }
+                        redPixOld = redPix;
                     }
                 }
             }
@@ -1740,11 +1857,41 @@ define(["require", "exports", "robot.base.mobile", "interpreter.constants", "sim
             else {
                 values['marker'][C.ID] = this.listOfMarkersFound.map(function (marker) { return marker.markerId; });
                 this.listOfMarkersFound.forEach(function (marker) {
-                    values['marker'][C.INFO][marker.markerId] = [marker.xRel, marker.yRel, 0];
+                    values['marker'][C.INFO][marker.markerId] = [marker.xDist, marker.yDist, 0];
                 });
             }
             values['camera'] = {};
             values['camera'][C.LINE] = this.line;
+            //if (this.colourBlob !== null) {
+            personalObstacleList.filter(function (obstacle) {
+                var visible = false;
+                var inHSVRange = _this.checkHSVRange(obstacle.hsv);
+                if (inHSVRange) {
+                    obstacle.sqrDist = SIMATH.getDistance(myPose, obstacle);
+                    if (obstacle.sqrDist <= _this.MAX_BLOB_DIST_SQR) {
+                        var myObstaclePoints = [{ x: obstacle.x - myPose.x, y: obstacle.y - myPose.y }]; /*,
+                            { x: obstacle.x + obstacle.w - myPose.x, y: obstacle.y - myPose.y },
+                            { x: obstacle.x + obstacle.w - myPose.x, y: obstacle.y + obstacle.h - myPose.y },
+                            { x: obstacle.x - myPose.x, y: obstacle.y + obstacle.h - myPose.y },
+                        ];*/
+                        var visible_2 = true;
+                        for (var i = 0; i < myObstaclePoints.length; i++) {
+                            var myAngle = (Math.atan2(myObstaclePoints[i].y, myObstaclePoints[i].x) + 2 * Math.PI) % (2 * Math.PI);
+                            if ((left < right && myAngle > left && myAngle < right) || (left > right && (myAngle > left || myAngle < right))) {
+                                var p = _this.checkVisibility(robot.id, obstacle, personalObstacleList);
+                                if (p) {
+                                    visible_2 = false;
+                                }
+                            }
+                            else {
+                                visible_2 = false;
+                            }
+                        }
+                        return visible_2;
+                    }
+                }
+            });
+            //}
         };
         CameraSensor.prototype.calculatePix = function (rawPix) {
             var i = 3;
@@ -1760,6 +1907,9 @@ define(["require", "exports", "robot.base.mobile", "interpreter.constants", "sim
             for (var i = 0; i < personalObstacleList.length - 1; i++) {
                 var obstacle = personalObstacleList[i];
                 if (obstacle instanceof robot_actuators_1.ChassisMobile && obstacle.id == id) {
+                    continue;
+                }
+                if (obstacle === mP) {
                     continue;
                 }
                 if (!(obstacle instanceof simulation_objects_1.CircleSimulationObject)) {
@@ -1780,6 +1930,19 @@ define(["require", "exports", "robot.base.mobile", "interpreter.constants", "sim
                 }
             }
             return null;
+        };
+        CameraSensor.prototype.checkHSVRange = function (hsv) {
+            if (this.colourBlob && hsv) {
+                if (hsv[0] >= this.colourBlob.minHue &&
+                    hsv[0] <= this.colourBlob.maxHue &&
+                    hsv[1] >= this.colourBlob.minSat &&
+                    hsv[1] <= this.colourBlob.maxSat &&
+                    hsv[2] >= this.colourBlob.minVal &&
+                    hsv[2] <= this.colourBlob.maxVal) {
+                    return true;
+                }
+            }
+            return false;
         };
         return CameraSensor;
     }());

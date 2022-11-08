@@ -16,6 +16,7 @@ import de.fhg.iais.roberta.syntax.sensor.robotino.ColourBlob;
 import de.fhg.iais.roberta.syntax.sensor.robotino.MarkerInformation;
 import de.fhg.iais.roberta.syntax.sensor.robotino.OdometrySensor;
 import de.fhg.iais.roberta.syntax.sensor.robotino.OdometrySensorReset;
+import de.fhg.iais.roberta.syntax.sensor.robotino.OpticalSensor;
 import de.fhg.iais.roberta.visitor.hardware.sensor.ISensorVisitor;
 
 /**
@@ -55,5 +56,7 @@ public interface IRobotinoVisitor<V> extends ISensorVisitor<V> {
     V visitColourBlob(ColourBlob colourBlob);
 
     V visitCameraThreshold(CameraThreshold cameraThreshold);
-    
+
+    V visitOpticalSensor(OpticalSensor opticalSensor);
+
 }

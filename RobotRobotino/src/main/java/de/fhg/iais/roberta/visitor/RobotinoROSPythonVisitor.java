@@ -37,6 +37,7 @@ import de.fhg.iais.roberta.syntax.sensor.robotino.ColourBlob;
 import de.fhg.iais.roberta.syntax.sensor.robotino.MarkerInformation;
 import de.fhg.iais.roberta.syntax.sensor.robotino.OdometrySensor;
 import de.fhg.iais.roberta.syntax.sensor.robotino.OdometrySensorReset;
+import de.fhg.iais.roberta.syntax.sensor.robotino.OpticalSensor;
 import de.fhg.iais.roberta.util.dbc.DbcException;
 import de.fhg.iais.roberta.util.syntax.SC;
 import de.fhg.iais.roberta.visitor.lang.codegen.prog.AbstractPythonVisitor;
@@ -467,6 +468,11 @@ public final class RobotinoROSPythonVisitor extends AbstractPythonVisitor implem
 
     @Override
     public Void visitCameraThreshold(CameraThreshold cameraThreshold) {
+        return null;
+    }
+
+    @Override
+    public Void visitOpticalSensor(OpticalSensor opticalSensor) {
         return null;
     }
 

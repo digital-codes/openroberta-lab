@@ -15,6 +15,4 @@ public class RobotinoSimValidatorAndCollectorVisitor extends RobotinoValidatorAn
         addWarningToPhrase(pinWriteValueAction, "SIM_BLOCK_NOT_SUPPORTED");
         return super.visitPinWriteValueAction(pinWriteValueAction);
     }
-
-
 }
