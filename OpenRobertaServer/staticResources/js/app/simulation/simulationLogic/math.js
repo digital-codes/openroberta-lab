@@ -5,7 +5,7 @@
  */
 define(["require", "exports", "simulation.constants", "simulation.objects"], function (require, exports, simulation_constants_1, simulation_objects_1) {
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.epsilonEqual = exports.transform = exports.getColor = exports.rgbToHsv = exports.checkInObstacle = exports.isPointInsideRectangle = exports.getDistanceToLine = exports.getDistance = exports.sqr = exports.getDistanceToCircle = exports.getLinesFromObj = exports.isLineAlignedToPoint = exports.getIntersectionPointsCircle = exports.getMiddleIntersectionPointCircle = exports.getClosestIntersectionPointCircle = exports.getIntersectionPoint = exports.toDegree = exports.toRadians = void 0;
+    exports.hexToHsv = exports.hexToRGB = exports.epsilonEqual = exports.transform = exports.getColor = exports.rgbToHsv = exports.checkInObstacle = exports.isPointInsideRectangle = exports.getDistanceToLine = exports.getDistance = exports.sqr = exports.getDistanceToCircle = exports.getLinesFromObj = exports.isLineAlignedToPoint = exports.getIntersectionPointsCircle = exports.getMiddleIntersectionPointCircle = exports.getClosestIntersectionPointCircle = exports.getIntersectionPoint = exports.toDegree = exports.toRadians = void 0;
     /**
      * exports helper for calculations in ORsimulation
      *
@@ -57,7 +57,7 @@ define(["require", "exports", "simulation.constants", "simulation.objects"], fun
         }
         return {
             x: xi,
-            y: yi
+            y: yi,
         };
     };
     exports.getIntersectionPoint = getIntersectionPoint;
@@ -93,7 +93,7 @@ define(["require", "exports", "simulation.constants", "simulation.objects"], fun
             return intersections[0]; // one intersection
         }
         if (intersections.length == 2) {
-            return ({ x: 0.5 * (intersections[0].x + intersections[1].x), y: 0.5 * (intersections[0].y + intersections[1].y) });
+            return { x: 0.5 * (intersections[0].x + intersections[1].x), y: 0.5 * (intersections[0].y + intersections[1].y) };
         }
         return null; // no intersections at all
     };
@@ -168,26 +168,26 @@ define(["require", "exports", "simulation.constants", "simulation.objects"], fun
                         x1: obj.x,
                         x2: obj.x,
                         y1: obj.y,
-                        y2: obj.y + obj.h
+                        y2: obj.y + obj.h,
                     },
                     {
                         x1: obj.x,
                         x2: obj.x + obj.w,
                         y1: obj.y,
-                        y2: obj.y
+                        y2: obj.y,
                     },
                     {
                         x1: obj.x + obj.w,
                         x2: obj.x,
                         y1: obj.y + obj.h,
-                        y2: obj.y + obj.h
+                        y2: obj.y + obj.h,
                     },
                     {
                         x1: obj.x + obj.w,
                         x2: obj.x + obj.w,
                         y1: obj.y + obj.h,
-                        y2: obj.y
-                    }
+                        y2: obj.y,
+                    },
                 ];
             case 'robot':
                 return [
@@ -195,26 +195,26 @@ define(["require", "exports", "simulation.constants", "simulation.objects"], fun
                         x1: obj.backLeft.rx,
                         x2: obj.frontLeft.rx,
                         y1: obj.backLeft.ry,
-                        y2: obj.frontLeft.ry
+                        y2: obj.frontLeft.ry,
                     },
                     {
                         x1: obj.frontLeft.rx,
                         x2: obj.frontRight.rx,
                         y1: obj.frontLeft.ry,
-                        y2: obj.frontRight.ry
+                        y2: obj.frontRight.ry,
                     },
                     {
                         x1: obj.frontRight.rx,
                         x2: obj.backRight.rx,
                         y1: obj.frontRight.ry,
-                        y2: obj.backRight.ry
+                        y2: obj.backRight.ry,
                     },
                     {
                         x1: obj.backRight.rx,
                         x2: obj.backLeft.rx,
                         y1: obj.backRight.ry,
-                        y2: obj.backLeft.ry
-                    }
+                        y2: obj.backLeft.ry,
+                    },
                 ];
             case 'triangle':
                 return [
@@ -222,20 +222,20 @@ define(["require", "exports", "simulation.constants", "simulation.objects"], fun
                         x1: obj.ax,
                         x2: obj.bx,
                         y1: obj.ay,
-                        y2: obj.by
+                        y2: obj.by,
                     },
                     {
                         x1: obj.bx,
                         x2: obj.cx,
                         y1: obj.by,
-                        y2: obj.cy
+                        y2: obj.cy,
                     },
                     {
                         x1: obj.ax,
                         x2: obj.cx,
                         y1: obj.ay,
-                        y2: obj.cy
-                    }
+                        y2: obj.cy,
+                    },
                 ];
             default:
                 return false;
@@ -261,7 +261,7 @@ define(["require", "exports", "simulation.constants", "simulation.objects"], fun
         var aY = circle.y + (vY / magV) * circle.r;
         return {
             x: aX,
-            y: aY
+            y: aY,
         };
     };
     exports.getDistanceToCircle = getDistanceToCircle;
@@ -317,7 +317,7 @@ define(["require", "exports", "simulation.constants", "simulation.objects"], fun
         }
         return {
             x: p1.x + t * (p2.x - p1.x),
-            y: p1.y + t * (p2.y - p1.y)
+            y: p1.y + t * (p2.y - p1.y),
         };
     }
     exports.getDistanceToLine = getDistanceToLine;
@@ -364,45 +364,45 @@ define(["require", "exports", "simulation.constants", "simulation.objects"], fun
         else {
             return ((0, exports.isPointInsideRectangle)({
                 x: myCheckPoint.rx,
-                y: myCheckPoint.ry
+                y: myCheckPoint.ry,
             }, {
                 p1: {
                     x: obstacle.backLeft.rx,
-                    y: obstacle.backLeft.ry
+                    y: obstacle.backLeft.ry,
                 },
                 p2: {
                     x: obstacle.frontLeft.rx,
-                    y: obstacle.frontLeft.ry
+                    y: obstacle.frontLeft.ry,
                 },
                 p3: {
                     x: obstacle.frontRight.rx,
-                    y: obstacle.frontRight.ry
+                    y: obstacle.frontRight.ry,
                 },
                 p4: {
                     x: obstacle.backRight.rx,
-                    y: obstacle.backRight.ry
-                }
+                    y: obstacle.backRight.ry,
+                },
             }) ||
                 (0, exports.isPointInsideRectangle)({
                     x: myCheckPoint.rx,
-                    y: myCheckPoint.ry
+                    y: myCheckPoint.ry,
                 }, {
                     p1: {
                         x: obstacle.wheelFrontRight.rx,
-                        y: obstacle.wheelFrontRight.ry
+                        y: obstacle.wheelFrontRight.ry,
                     },
                     p2: {
                         x: obstacle.wheelBackRight.rx,
-                        y: obstacle.wheelBackRight.ry
+                        y: obstacle.wheelBackRight.ry,
                     },
                     p3: {
                         x: obstacle.wheelBackLeft.rx,
-                        y: obstacle.wheelBackLeft.ry
+                        y: obstacle.wheelBackLeft.ry,
                     },
                     p4: {
                         x: obstacle.wheelFrontLeft.rx,
-                        y: obstacle.wheelFrontLeft.ry
-                    }
+                        y: obstacle.wheelFrontLeft.ry,
+                    },
                 }));
         }
     };
@@ -491,4 +491,18 @@ define(["require", "exports", "simulation.constants", "simulation.objects"], fun
         return Math.abs(num1 - num2) <= epsilon;
     }
     exports.epsilonEqual = epsilonEqual;
+    function hexToRGB(hex) {
+        var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+        hex = hex.replace(shorthandRegex, function (m, r, g, b) {
+            return r + r + g + g + b + b;
+        });
+        var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)] : null;
+    }
+    exports.hexToRGB = hexToRGB;
+    function hexToHsv(hex) {
+        var rgb = hexToRGB(hex);
+        return (0, exports.rgbToHsv)(rgb[0], rgb[1], rgb[2]);
+    }
+    exports.hexToHsv = hexToHsv;
 });

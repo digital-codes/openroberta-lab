@@ -22,7 +22,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     }
     return to.concat(ar || Array.prototype.slice.call(from));
 };
-define(["require", "exports", "jquery", "util", "simulation.roberta"], function (require, exports, $, UTIL, simulation_roberta_1) {
+define(["require", "exports", "jquery", "util", "simulation.roberta", "simulation.math"], function (require, exports, $, UTIL, simulation_roberta_1, SIMATH) {
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.Ruler = exports.Ground = exports.TriangleSimulationObject = exports.CircleSimulationObject = exports.MarkerSimulationObject = exports.RectangleSimulationObject = exports.SimObjectShape = exports.SimObjectType = exports.SimObjectFactory = exports.BaseSimulationObject = void 0;
     var BaseSimulationObject = /** @class */ (function () {
@@ -63,6 +63,24 @@ define(["require", "exports", "jquery", "util", "simulation.roberta"], function 
                         this.myScene.sim.enableChangeObjectButtons();
                     }
                 }
+            },
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(BaseSimulationObject.prototype, "color", {
+            get: function () {
+                return this._color;
+            },
+            set: function (value) {
+                this._color = value;
+                this._hsv = SIMATH.hexToHsv(value);
+            },
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(BaseSimulationObject.prototype, "hsv", {
+            get: function () {
+                return this._hsv;
             },
             enumerable: false,
             configurable: true
@@ -154,7 +172,7 @@ define(["require", "exports", "jquery", "util", "simulation.roberta"], function 
                     object.type,
                     {
                         x: -1000,
-                        y: -1000
+                        y: -1000,
                     },
                     object.color], [object.w, object.h], false));
             }
@@ -166,7 +184,7 @@ define(["require", "exports", "jquery", "util", "simulation.roberta"], function 
                     object.type,
                     {
                         x: -1000,
-                        y: -1000
+                        y: -1000,
                     },
                     object.color], [object.ax, object.ay, object.bx, object.by, object.cx, object.cy], false));
             }
@@ -178,7 +196,7 @@ define(["require", "exports", "jquery", "util", "simulation.roberta"], function 
                     object.type,
                     {
                         x: -1000,
-                        y: -1000
+                        y: -1000,
                     },
                     object.color], [object.r], false));
             }
@@ -510,7 +528,10 @@ define(["require", "exports", "jquery", "util", "simulation.roberta"], function 
             ctx.fillText(String(this.markerId), this.x + this.MARKER_LABEL_OFFSET, this.y + this.h / 2);
             ctx.font = '' + this.w + 'px typicons';
             ctx.textAlign = 'left';
-            ctx.fillText(window.getComputedStyle($('.typcn.typcn-' + this.markerId)[0], ':before').content.replace(/"/, '').replace(/"/, ''), this.x, this.y + this.MARKER_OFFSET);
+            ctx.fillText(window
+                .getComputedStyle($('.typcn.typcn-' + this.markerId)[0], ':before')
+                .content.replace(/"/, '')
+                .replace(/"/, ''), this.x, this.y + this.MARKER_OFFSET);
             if (this.selected) {
                 ctx.restore();
                 ctx.save();
@@ -1023,20 +1044,20 @@ define(["require", "exports", "jquery", "util", "simulation.roberta"], function 
                     x1: this.ax,
                     x2: this.bx,
                     y1: this.ay,
-                    y2: this.by
+                    y2: this.by,
                 },
                 {
                     x1: this.bx,
                     x2: this.cx,
                     y1: this.by,
-                    y2: this.cy
+                    y2: this.cy,
                 },
                 {
                     x1: this.ax,
                     x2: this.cx,
                     y1: this.ay,
-                    y2: this.cy
-                }
+                    y2: this.cy,
+                },
             ];
         };
         TriangleSimulationObject.prototype.moveTo = function (p) {
@@ -1087,26 +1108,26 @@ define(["require", "exports", "jquery", "util", "simulation.roberta"], function 
                     x1: this.x,
                     x2: this.x,
                     y1: this.y,
-                    y2: this.y + this.h
+                    y2: this.y + this.h,
                 },
                 {
                     x1: this.x,
                     x2: this.x + this.w,
                     y1: this.y,
-                    y2: this.y
+                    y2: this.y,
                 },
                 {
                     x1: this.x + this.w,
                     x2: this.x,
                     y1: this.y + this.h,
-                    y2: this.y + this.h
+                    y2: this.y + this.h,
                 },
                 {
                     x1: this.x + this.w,
                     x2: this.x + this.w,
                     y1: this.y + this.h,
-                    y2: this.y
-                }
+                    y2: this.y,
+                },
             ];
         };
         Ground.prototype.getTolerance = function () {

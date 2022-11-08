@@ -3,6 +3,7 @@ import * as $ from 'jquery';
 import * as UTIL from 'util';
 import { SimulationRoberta } from 'simulation.roberta';
 import { SimulationScene } from 'simulation.scene';
+import * as SIMATH from 'simulation.math';
 
 export interface ISimulationObstacle {
     getLines(): Line[];
@@ -17,7 +18,8 @@ export abstract class BaseSimulationObject implements ISelectable, ISimulationOb
     myScene: SimulationScene;
     mySelectionListener: SelectionListener;
     type: SimObjectType;
-    color: string;
+    private _color: string;
+    private _hsv: number[];
     abstract corners: Corner[];
     protected isDown = false;
     protected mouseOldX: number = 0;
@@ -62,6 +64,19 @@ export abstract class BaseSimulationObject implements ISelectable, ISimulationOb
                 this.myScene.sim.enableChangeObjectButtons();
             }
         }
+    }
+
+    get color(): string {
+        return this._color;
+    }
+
+    set color(value: string) {
+        this._color = value;
+        this._hsv = SIMATH.hexToHsv(value);
+    }
+
+    get hsv(): number[] {
+        return this._hsv;
     }
 
     abstract draw(rCtx: CanvasRenderingContext2D, uCtx: CanvasRenderingContext2D, mCtx: CanvasRenderingContext2D): void;
@@ -176,7 +191,7 @@ export class SimObjectFactory {
                 object.type,
                 {
                     x: -1000,
-                    y: -1000
+                    y: -1000,
                 },
                 object.color,
                 ...[object.w, object.h]
@@ -190,7 +205,7 @@ export class SimObjectFactory {
                 object.type,
                 {
                     x: -1000,
-                    y: -1000
+                    y: -1000,
                 },
                 object.color,
                 ...[object.ax, object.ay, object.bx, object.by, object.cx, object.cy]
@@ -204,7 +219,7 @@ export class SimObjectFactory {
                 object.type,
                 {
                     x: -1000,
-                    y: -1000
+                    y: -1000,
                 },
                 object.color,
                 ...[object.r]
@@ -217,14 +232,14 @@ export enum SimObjectType {
     Obstacle = 'OBSTACLE',
     ColorArea = 'COLORAREA',
     Passiv = 'PASSIV',
-    Marker = 'MARKER'
+    Marker = 'MARKER',
 }
 
 export enum SimObjectShape {
     Rectangle = 'RECTANGLE',
     Triangle = 'TRIANGLE',
     Circle = 'CIRCLE',
-    Marker = 'MARKER'
+    Marker = 'MARKER',
 }
 
 export class RectangleSimulationObject extends BaseSimulationObject {
@@ -516,9 +531,10 @@ export class MarkerSimulationObject extends RectangleSimulationObject {
     MARKER_OFFSET: number = 33;
     MARKER_LABEL_OFFSET: number = 40;
     markerId: number;
-    xRel: number;
-    yRel: number;
-    sqrDistance: number;
+    xDist: number;
+    yDist: number;
+    zDist: number;
+    sqrDist: number;
 
     constructor(myId: number, myScene: any, mySelectionListener: SelectionListener, type: SimObjectType, p: Point) {
         super(myId, myScene, mySelectionListener, type, p);
@@ -536,7 +552,14 @@ export class MarkerSimulationObject extends RectangleSimulationObject {
         ctx.fillText(String(this.markerId), this.x + this.MARKER_LABEL_OFFSET, this.y + this.h / 2);
         ctx.font = '' + this.w + 'px typicons';
         ctx.textAlign = 'left';
-        ctx.fillText(window.getComputedStyle($('.typcn.typcn-' + this.markerId)[0], ':before').content.replace(/"/, '').replace(/"/, ''), this.x, this.y + this.MARKER_OFFSET);
+        ctx.fillText(
+            window
+                .getComputedStyle($('.typcn.typcn-' + this.markerId)[0], ':before')
+                .content.replace(/"/, '')
+                .replace(/"/, ''),
+            this.x,
+            this.y + this.MARKER_OFFSET
+        );
 
         if (this.selected) {
             ctx.restore();
@@ -1050,20 +1073,20 @@ export class TriangleSimulationObject extends BaseSimulationObject {
                 x1: this.ax,
                 x2: this.bx,
                 y1: this.ay,
-                y2: this.by
+                y2: this.by,
             },
             {
                 x1: this.bx,
                 x2: this.cx,
                 y1: this.by,
-                y2: this.cy
+                y2: this.cy,
             },
             {
                 x1: this.ax,
                 x2: this.cx,
                 y1: this.ay,
-                y2: this.cy
-            }
+                y2: this.cy,
+            },
         ];
     }
 
@@ -1121,26 +1144,26 @@ export class Ground implements ISimulationObstacle {
                 x1: this.x,
                 x2: this.x,
                 y1: this.y,
-                y2: this.y + this.h
+                y2: this.y + this.h,
             },
             {
                 x1: this.x,
                 x2: this.x + this.w,
                 y1: this.y,
-                y2: this.y
+                y2: this.y,
             },
             {
                 x1: this.x + this.w,
                 x2: this.x,
                 y1: this.y + this.h,
-                y2: this.y + this.h
+                y2: this.y + this.h,
             },
             {
                 x1: this.x + this.w,
                 x2: this.x + this.w,
                 y1: this.y + this.h,
-                y2: this.y
-            }
+                y2: this.y,
+            },
         ];
     }
 

@@ -23,13 +23,13 @@ define(["require", "exports", "robot.base.mobile", "robot.sensors", "./robot.act
             _this.tts = new robot_actuators_1.TTS();
             _this.webAudio = new robot_actuators_1.WebAudio();
             _this.timer = new robot_sensors_1.Timer(5);
-            _this.imgList = ['squareBig', 'blank'];
+            _this.imgList = ['square', 'blank'];
             _this.mouse = {
                 x: 0,
                 y: 0,
                 rx: 0,
                 ry: 0,
-                r: 70
+                r: 70,
             };
             _this.configure(configuration);
             return _this;
@@ -47,11 +47,64 @@ define(["require", "exports", "robot.base.mobile", "robot.sensors", "./robot.act
         };
         // this method might go up to BaseMobileRobots as soon as the configuration has detailed information about the sensors geometry and location on the robot
         RobotRobotino.prototype.configure = function (configuration) {
+            /*        ACTUATORS
+    :
+    M1
+    :
+    {PORT1: 'M1', TYPE: 'ENCODER'}
+    M2
+    :
+    {PORT1: 'M2', TYPE: 'ENCODER'}
+    M3
+    :
+    {PORT1: 'M3', TYPE: 'ENCODER'}
+    left
+    :
+    BK
+    :
+    "DI3"
+    TYPE
+    :
+    "OPTICAL"
+    WH
+    :
+    "DI4"
+    [[Prototype]]
+    :
+    Object
+    right
+    :
+    TYPE
+    :
+    "OPTICAL"
+    [[Prototype]]
+    :
+    Object
+    _I
+    :
+    {TYPE: 'CAMERA'}
+    _O
+    :
+    {TYPE: 'OMNIDRIVE'}
+    _OD
+    :
+    {TYPE: 'ODOMETRY'}
+    _T
+    :
+    {TYPE: 'TOUCH'}*/
             this.chassis = new robot_actuators_1.RobotinoChassis(this.id, this.pose);
             this.robotinoTouchSensor = new robot_sensors_1.RobotinoTouchSensor();
             this.infraredSensor = new robot_sensors_1.RobotinoInfraredSensor();
             this.odometrySensor = new robot_sensors_1.OdometrySensor();
-            this.cameraSensor = new robot_sensors_1.CameraSensor(new robot_base_mobile_1.Pose(40, 0, 0), 2 * Math.PI / 5);
+            this.cameraSensor = new robot_sensors_1.CameraSensor(new robot_base_mobile_1.Pose(25, 0, 0), (2 * Math.PI) / 5);
+            var numOptical = Object.keys(configuration['ACTUATORS']).filter(function (sensor) { return configuration['ACTUATORS'][sensor].TYPE == 'OPTICAL'; }).length;
+            var robotino = this;
+            Object.keys(configuration['ACTUATORS'])
+                .filter(function (sensor) { return configuration['ACTUATORS'][sensor].TYPE == 'OPTICAL'; })
+                .forEach(function (optical, index) {
+                var myoptical = configuration['ACTUATORS'][optical];
+                robotino[myoptical['BK']] = new robot_sensors_1.OpticalSensor(optical, myoptical['BK'], 50, index % 2 == 0 ? -6 : 6, 0, 5);
+            });
         };
         return RobotRobotino;
     }(robot_base_mobile_1.RobotBaseMobile));
