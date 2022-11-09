@@ -145,21 +145,23 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
         incrIndentation();
         generateGlobalVariables();
         this.sb.append("time.sleep(2)");
-        nlIndent();
-        for ( VarDeclaration var : varDeclarations ) {
-            declareGlobalVariable(var);
-            nlIndent();
-        }
         if ( this.getBean(UsedHardwareBean.class).isSensorUsed(RobotinoConstants.ODOMETRY) ) {
             nlIndent();
             //odometrieReset
-            this.sb.append("RV.writeFloatVector(1, [0, 0, 0, 1])");
-            nlIndent();
-            this.sb.append("time.sleep(1)");
-            nlIndent();
-            this.sb.append("RV.writeFloatVector(1, [])");
-            nlIndent();
+            this.sb.append(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(RobotinoMethods.RESETODOMETRY))
+                .append("(RV, 0, 0, 0)");
         }
+        if ( this.getBean(UsedHardwareBean.class).isSensorUsed(RobotinoConstants.CAMERA) ) {
+            //default threshold
+            nlIndent();
+            this.sb.append("RV.writeFloat(4, 100) ");
+        }
+        for ( VarDeclaration var : varDeclarations ) {
+            nlIndent();
+            declareGlobalVariable(var);
+        }
+
+        nlIndent();
         return null;
     }
 
@@ -173,8 +175,7 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
         incrIndentation();
         nlIndent();
         this.sb.append("motorDaemon2 = threading.Thread(target=run, daemon=True, args=(RV,), name='mainProgram')\n" +
-            "    motorDaemon2.start()\n" +
-            "    print('start')");
+            "    motorDaemon2.start()");
         decrIndentation();
         nlIndent();
     }
@@ -209,13 +210,14 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
     private void appendViewMethods() {
         this.sb.append("def step(RV):");
         incrIndentation();
-        nlIndent();
-        this.sb.append("print('step')");
         if ( this.getBean(UsedHardwareBean.class).isActorUsed(RobotinoConstants.OMNIDRIVE) ) {
             nlIndent();
             this.sb.append(this.getBean(CodeGeneratorSetupBean.class).
                     getHelperMethodGenerator().getHelperMethodName(RobotinoMethods.POSTVEL))
                 .append("()");
+        } else {
+            nlIndent();
+            this.sb.append("pass");
         }
         decrIndentation();
         nlIndent();
@@ -223,14 +225,14 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
         this.sb.append("def stop(RV):");
         incrIndentation();
         nlIndent();
-        this.sb.append("print('stop')");
+        this.sb.append("pass");
         decrIndentation();
         nlIndent();
         nlIndent();
         this.sb.append("def cleanup(RV):");
         incrIndentation();
         nlIndent();
-        this.sb.append("print('cleanup')");
+        this.sb.append("pass");
         decrIndentation();
         nlIndent();
     }
@@ -411,26 +413,23 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
 
     @Override
     public Void visitOdometrySensorReset(OdometrySensorReset odometrySensorReset) {
+        this.sb.append(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(RobotinoMethods.RESETODOMETRY));
         switch ( odometrySensorReset.slot ) {
             case "ALL":
-                this.sb.append("RV.writeFloatVector(1, [0, 0, 0, 1])");
+                this.sb.append("(RV, 0, 0, 0)");
                 break;
             case "X":
-                this.sb.append("RV.writeFloatVector(1, [0, RV.readFloatVector(1)[1], RV.readFloatVector(1)[2], 1])");
+                this.sb.append("(0, RV.readFloatVector(1)[1], RV.readFloatVector(1)[2])");
                 break;
             case "Y":
-                this.sb.append("RV.writeFloatVector(1, [RV.readFloatVector(1)[0], 0, RV.readFloatVector(1)[2], 1])");
+                this.sb.append("(RV.readFloatVector(1)[0], 0, RV.readFloatVector(1)[2])");
                 break;
             case "THETA":
-                this.sb.append("RV.writeFloatVector(1, [RV.readFloatVector(1)[0], RV.readFloatVector(1)[1], 0, 1])");
+                this.sb.append("(RV.readFloatVector(1)[0], RV.readFloatVector(1)[1], 0)");
                 break;
             default:
                 throw new DbcException("Invalid Odometry Mode!");
         }
-        nlIndent();
-        this.sb.append("time.sleep(0.1)");
-        nlIndent();
-        this.sb.append("RV.writeFloatVector(1, [])");
         return null;
     }
 

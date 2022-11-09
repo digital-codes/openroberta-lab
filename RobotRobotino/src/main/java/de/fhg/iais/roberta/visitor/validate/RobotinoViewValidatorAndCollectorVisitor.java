@@ -15,6 +15,7 @@ import de.fhg.iais.roberta.syntax.sensor.robotino.CameraSensor;
 import de.fhg.iais.roberta.syntax.sensor.robotino.ColourBlob;
 import de.fhg.iais.roberta.syntax.sensor.robotino.MarkerInformation;
 import de.fhg.iais.roberta.syntax.sensor.robotino.OdometrySensor;
+import de.fhg.iais.roberta.syntax.sensor.robotino.OdometrySensorReset;
 import de.fhg.iais.roberta.util.syntax.SC;
 import de.fhg.iais.roberta.visitor.RobotinoMethods;
 
@@ -30,7 +31,6 @@ public class RobotinoViewValidatorAndCollectorVisitor extends RobotinoValidatorA
     public Void visitTouchSensor(TouchSensor touchSensor) {
         usedMethodBuilder.addUsedMethod(RobotinoMethods.ISBUMPED);
         return super.visitTouchSensor(touchSensor);
-
     }
 
     @Override
@@ -47,6 +47,12 @@ public class RobotinoViewValidatorAndCollectorVisitor extends RobotinoValidatorA
     public Void visitOdometrySensor(OdometrySensor odometrySensor) {
         usedMethodBuilder.addUsedMethod(RobotinoMethods.GETODOMETRY);
         return super.visitOdometrySensor(odometrySensor);
+    }
+
+    @Override
+    public Void visitOdometrySensorReset(OdometrySensorReset odometrySensorReset) {
+        usedMethodBuilder.addUsedMethod(RobotinoMethods.RESETODOMETRY);
+        return super.visitOdometrySensorReset(odometrySensorReset);
     }
 
     @Override
