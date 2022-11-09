@@ -74,7 +74,7 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
         nlIndent();
         generateVariables();
         nlIndent();
-        generateTimerVariables();
+        generateTimerVariables(false);
         if ( !this.getBean(CodeGeneratorSetupBean.class).getUsedMethods().isEmpty() ) {
             String helperMethodImpls =
                 this.getBean(CodeGeneratorSetupBean.class)
@@ -157,6 +157,7 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
             nlIndent();
             this.sb.append("RV.writeFloat(4, 100) ");
         }
+        generateTimerVariables(true);
         for ( VarDeclaration var : varDeclarations ) {
             nlIndent();
             declareGlobalVariable(var);
@@ -277,10 +278,11 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
 
     @Override
     public Void visitTimerReset(TimerReset timerReset) {
+        this.sb.append("_timer").append(timerReset.getUserDefinedPort()).append(" = time.time()");
         return null;
     }
 
-    private void generateTimerVariables() {
+    private void generateTimerVariables(boolean decleration) {
         this.getBean(UsedHardwareBean.class)
             .getUsedSensors()
             .stream()
@@ -289,8 +291,12 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
             .keySet()
             .forEach(port -> {
                 this.usedGlobalVarInFunctions.add("_timer" + port);
-                this.sb.append("_timer").append(port).append(" = time.time()");
                 nlIndent();
+                if ( decleration ) {
+                    this.sb.append("_timer").append(port).append(" = time.time()");
+                } else {
+                    this.sb.append("_timer").append(port).append(" = None");
+                }
             });
     }
 
