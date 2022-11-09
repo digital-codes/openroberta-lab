@@ -5,5 +5,6 @@
     <category name="TOOLBOX_SENSOR" svg="true">
         <block type="robConf_analogout"></block>
         <block type="robConf_digitalout"></block>
+        <block type='robConf_optical'></block>
     </category>
 </toolbox_set>

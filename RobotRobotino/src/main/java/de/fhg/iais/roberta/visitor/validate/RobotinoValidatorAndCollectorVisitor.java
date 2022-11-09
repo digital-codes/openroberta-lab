@@ -29,6 +29,7 @@ import de.fhg.iais.roberta.syntax.sensor.robotino.ColourBlob;
 import de.fhg.iais.roberta.syntax.sensor.robotino.MarkerInformation;
 import de.fhg.iais.roberta.syntax.sensor.robotino.OdometrySensor;
 import de.fhg.iais.roberta.syntax.sensor.robotino.OdometrySensorReset;
+import de.fhg.iais.roberta.syntax.sensor.robotino.OpticalSensor;
 import de.fhg.iais.roberta.util.syntax.SC;
 import de.fhg.iais.roberta.visitor.IRobotinoVisitor;
 import de.fhg.iais.roberta.visitor.RobotinoMethods;
@@ -200,6 +201,11 @@ public abstract class RobotinoValidatorAndCollectorVisitor extends MotorValidato
     public Void visitCameraThreshold(CameraThreshold cameraThreshold) {
         usedHardwareBuilder.addUsedSensor(new UsedSensor(cameraThreshold.getUserDefinedPort(), RobotinoConstants.CAMERA, cameraThreshold.mode));
         requiredComponentVisited(cameraThreshold, cameraThreshold.threshold);
+        return null;
+    }
+
+    @Override
+    public Void visitOpticalSensor(OpticalSensor opticalSensor) {
         return null;
     }
 }

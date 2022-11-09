@@ -164,9 +164,13 @@ export abstract class DistanceSensor implements IExternalSensor, IDrawable {
         }
         rCtx.translate(this.rx, this.ry);
         rCtx.rotate(myRobot.pose.theta);
+        rCtx.rotate(this.theta);
+        rCtx.translate(10, 0);
+        rCtx.rotate(-this.theta);
+        rCtx.translate(-5, 0);
         rCtx.beginPath();
         rCtx.fillStyle = '#555555';
-        rCtx.fillText(String(this.port.replace('ORT_', '')), this.x !== myRobot.chassis.geom.x ? 10 : -10, 4);
+        rCtx.fillText(String(this.port.replace('ORT_', '')), 0, 4);
         rCtx.restore();
         rCtx.save();
         rCtx.translate(myRobot.pose.x, myRobot.pose.y);
@@ -201,31 +205,31 @@ export abstract class DistanceSensor implements IExternalSensor, IDrawable {
                 x1: this.rx,
                 y1: this.ry,
                 x2: this.rx + this.maxLength * Math.cos(robot.pose.theta + this.theta),
-                y2: this.ry + this.maxLength * Math.sin(robot.pose.theta + this.theta)
+                y2: this.ry + this.maxLength * Math.sin(robot.pose.theta + this.theta),
             };
             let u1 = {
                 x1: this.rx,
                 y1: this.ry,
                 x2: this.rx + this.maxLength * Math.cos(robot.pose.theta - Math.PI / 8 + this.theta),
-                y2: this.ry + this.maxLength * Math.sin(robot.pose.theta - Math.PI / 8 + this.theta)
+                y2: this.ry + this.maxLength * Math.sin(robot.pose.theta - Math.PI / 8 + this.theta),
             };
             let u2 = {
                 x1: this.rx,
                 y1: this.ry,
                 x2: this.rx + this.maxLength * Math.cos(robot.pose.theta - Math.PI / 16 + this.theta),
-                y2: this.ry + this.maxLength * Math.sin(robot.pose.theta - Math.PI / 16 + this.theta)
+                y2: this.ry + this.maxLength * Math.sin(robot.pose.theta - Math.PI / 16 + this.theta),
             };
             let u5 = {
                 x1: this.rx,
                 y1: this.ry,
                 x2: this.rx + this.maxLength * Math.cos(robot.pose.theta + Math.PI / 8 + this.theta),
-                y2: this.ry + this.maxLength * Math.sin(robot.pose.theta + Math.PI / 8 + this.theta)
+                y2: this.ry + this.maxLength * Math.sin(robot.pose.theta + Math.PI / 8 + this.theta),
             };
             let u4 = {
                 x1: this.rx,
                 y1: this.ry,
                 x2: this.rx + this.maxLength * Math.cos(robot.pose.theta + Math.PI / 16 + this.theta),
-                y2: this.ry + this.maxLength * Math.sin(robot.pose.theta + Math.PI / 16 + this.theta)
+                y2: this.ry + this.maxLength * Math.sin(robot.pose.theta + Math.PI / 16 + this.theta),
             };
 
             let uA = [u1, u2, u3, u4, u5];
@@ -453,7 +457,7 @@ export class ThymioLineSensor implements ISensor, IDrawable, ILabel {
         rCtx.beginPath();
         rCtx.lineWidth = 0.1;
         rCtx.arc(this.x, this.y - this.dy / 2, this.r, 0, Math.PI * 2);
-        let leftLight = this.left.light / 100 * 255;
+        let leftLight = (this.left.light / 100) * 255;
         rCtx.fillStyle = 'rgb(' + leftLight + ', ' + leftLight + ', ' + leftLight + ')';
         rCtx.fill();
         rCtx.strokeStyle = 'black';
@@ -462,7 +466,7 @@ export class ThymioLineSensor implements ISensor, IDrawable, ILabel {
         rCtx.beginPath();
         rCtx.lineWidth = 0.1;
         rCtx.arc(this.x, this.y + this.dy / 2, this.r, 0, Math.PI * 2);
-        let leftRight = this.right.light / 100 * 255;
+        let leftRight = (this.right.light / 100) * 255;
         rCtx.fillStyle = 'rgb(' + leftRight + ', ' + leftRight + ', ' + leftRight + ')';
         rCtx.fill();
         rCtx.strokeStyle = 'black';
@@ -923,8 +927,7 @@ export class RobotinoTouchSensor implements ISensor, ILabel {
         personalObstacleList: any[]
     ): void {
         values['touch'] = values['touch'] || {};
-        values['touch'] = this.bumped =
-            ((myRobot as RobotRobotino).chassis as RobotinoChassis).bumpedAngle.length > 0;
+        values['touch'] = this.bumped = ((myRobot as RobotRobotino).chassis as RobotinoChassis).bumpedAngle.length > 0;
     }
 }
 
@@ -1118,6 +1121,70 @@ export class LightSensor extends ColorSensor {
     }
 }
 
+export class OpticalSensor extends LightSensor {
+    name: string;
+    light: boolean;
+
+    constructor(name: string, port: string, x: number, y: number, theta: number, r: number, color?: string) {
+        super(port.replace('DI', '').toString(), x, y, theta, r);
+        this.name = name;
+    }
+
+    override getLabel(): string {
+        return (
+            '<div><label>' +
+            this.name +
+            ' ' +
+            Blockly.Msg['SENSOR_OPTICAL'] +
+            '</label></div><div><label>&nbsp;-&nbsp;' +
+            Blockly.Msg['MODE_OPENING'] +
+            '</label><span>' +
+            this.light +
+            '</span></div>' +
+            '<div><label>&nbsp;-&nbsp;' +
+            Blockly.Msg['MODE_CLOSING'] +
+            '</label><span>' +
+            !this.light +
+            '</span></div>'
+        );
+    }
+
+    override draw(rCtx: CanvasRenderingContext2D, myRobot: RobotBaseMobile): void {
+        rCtx.save();
+        rCtx.beginPath();
+        rCtx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+        rCtx.fillStyle = this.color;
+        rCtx.fill();
+        rCtx.strokeStyle = 'black';
+        rCtx.stroke();
+        rCtx.translate(this.x, this.y);
+        rCtx.beginPath();
+        rCtx.fillStyle = '#555555';
+        rCtx.fillText(this.name, 8, 4);
+        rCtx.restore();
+    }
+
+    override updateSensor(
+        running: boolean,
+        dt: number,
+        myRobot: RobotBaseMobile,
+        values: object,
+        uCtx: CanvasRenderingContext2D,
+        udCtx: CanvasRenderingContext2D
+    ) {
+        super.updateSensor(running, dt, myRobot, values, uCtx, udCtx);
+
+        this.lightValue = this.lightValue > 50 ? 100 : 0;
+        this.light = this.lightValue == 0 ? false : true;
+        this.color = this.lightValue == 0 ? 'black' : 'white';
+
+        values['optical'] = {};
+        values['optical'][this.name] = {};
+        values['optical'][this.name][C.OPENING] = this.light;
+        values['optical'][this.name][C.CLOSING] = !this.light;
+    }
+}
+
 export class GyroSensor implements ISensor, IReset, IUpdateAction {
     angleValue: number = 0;
     rateValue: number = 0;
@@ -1277,7 +1344,7 @@ export class TouchKeys extends Keys implements IMouse {
         let myEvent = e as unknown as SimMouseEvent;
         this.lastMousePosition = {
             x: myEvent.startX,
-            y: myEvent.startY
+            y: myEvent.startY,
         };
         if (this.uCtx !== undefined) {
             let myMouseColorData = this.uCtx.getImageData(this.lastMousePosition.x, this.lastMousePosition.y, 1, 1).data;
@@ -1302,7 +1369,7 @@ export class TouchKeys extends Keys implements IMouse {
         let myEvent = e as unknown as SimMouseEvent;
         this.lastMousePosition = {
             x: myEvent.startX,
-            y: myEvent.startY
+            y: myEvent.startY,
         };
         if (this.uCtx !== undefined) {
             let myMouseColorData = this.uCtx.getImageData(this.lastMousePosition.x, this.lastMousePosition.y, 1, 1).data;
@@ -1368,10 +1435,10 @@ export class Pins extends TouchKeys implements IDrawable {
                 }
                 $mySensorGenerator.append(
                     '<input type="text" value="0" style="margin-bottom: 8px;margin-top: 12px; min-width: 45px; width: 45px; display: inline-block; border: 1px solid #333; border-radius: 2px; text-align: right; float: right; padding: 0" id="rangePin' +
-                    pin.port +
-                    '" name="rangePin' +
-                    pin.port +
-                    '" class="range" />'
+                        pin.port +
+                        '" name="rangePin' +
+                        pin.port +
+                        '" class="range" />'
                 );
                 $mySensorGenerator.append(
                     '<div style="margin:8px 0;"><input id="sliderPin' + pin.port + '" type="range" min="0" max="' + range + '" value="0" step="1" /></div>'
@@ -1536,7 +1603,7 @@ export class MbotButton extends TouchKeys {
         let myEvent = e as unknown as SimMouseEvent;
         this.lastMousePosition = {
             x: myEvent.startX,
-            y: myEvent.startY
+            y: myEvent.startY,
         };
         let myCtx = (this.$touchLayer as any).get(0).getContext('2d');
         let myMouseColorData = myCtx.getImageData(this.lastMousePosition.x, this.lastMousePosition.y, 1, 1).data;
@@ -1560,7 +1627,7 @@ export class MbotButton extends TouchKeys {
         let myEvent = e as unknown as SimMouseEvent;
         this.lastMousePosition = {
             x: myEvent.startX,
-            y: myEvent.startY
+            y: myEvent.startY,
         };
         let myKeys: string[] = this.color2Keys[this.lastMouseColor];
         let myCtx = (this.$touchLayer as any).get(0).getContext('2d');
@@ -1601,29 +1668,29 @@ export class GestureSensor implements ISensor, ILabel {
     constructor() {
         $('#mbedButtons').append(
             '<label style="margin: 12px 8px 8px 0">' +
-            Blockly.Msg.SENSOR_GESTURE +
-            '</label>' + //
-            '<label class="btn simbtn active"><input type="radio" id="up" name="options" autocomplete="off">' +
-            Blockly.Msg.SENSOR_GESTURE_UP +
-            '</label>' + //
-            '<label class="btn simbtn"><input type="radio" id="down" name="options" autocomplete="off" >' +
-            Blockly.Msg.SENSOR_GESTURE_DOWN +
-            '</label>' + //
-            '<label class="btn simbtn"><input type="radio" id="face_down" name="options" autocomplete="off" >' +
-            Blockly.Msg.SENSOR_GESTURE_FACE_DOWN +
-            '</label>' + //
-            '<label class="btn simbtn"><input type="radio" id="face_up" name="options" autocomplete="off" >' +
-            Blockly.Msg.SENSOR_GESTURE_FACE_UP +
-            '</label>' + //
-            '<label class="btn simbtn"><input type="radio" id="shake" name="options" autocomplete="off" >' +
-            Blockly.Msg.SENSOR_GESTURE_SHAKE +
-            '</label>' + //
-            '<label class="btn simbtn"><input type="radio" id="freefall" name="options" autocomplete="off" >' +
-            Blockly.Msg.SENSOR_GESTURE_FREEFALL +
-            '</label>'
+                Blockly.Msg.SENSOR_GESTURE +
+                '</label>' + //
+                '<label class="btn simbtn active"><input type="radio" id="up" name="options" autocomplete="off">' +
+                Blockly.Msg.SENSOR_GESTURE_UP +
+                '</label>' + //
+                '<label class="btn simbtn"><input type="radio" id="down" name="options" autocomplete="off" >' +
+                Blockly.Msg.SENSOR_GESTURE_DOWN +
+                '</label>' + //
+                '<label class="btn simbtn"><input type="radio" id="face_down" name="options" autocomplete="off" >' +
+                Blockly.Msg.SENSOR_GESTURE_FACE_DOWN +
+                '</label>' + //
+                '<label class="btn simbtn"><input type="radio" id="face_up" name="options" autocomplete="off" >' +
+                Blockly.Msg.SENSOR_GESTURE_FACE_UP +
+                '</label>' + //
+                '<label class="btn simbtn"><input type="radio" id="shake" name="options" autocomplete="off" >' +
+                Blockly.Msg.SENSOR_GESTURE_SHAKE +
+                '</label>' + //
+                '<label class="btn simbtn"><input type="radio" id="freefall" name="options" autocomplete="off" >' +
+                Blockly.Msg.SENSOR_GESTURE_FREEFALL +
+                '</label>'
         );
         let gestureSensor = this;
-        $('input[name="options"]').on('change', function(e) {
+        $('input[name="options"]').on('change', function (e) {
             gestureSensor.gesture = {};
             gestureSensor.gesture[e.currentTarget.id] = true;
         });
@@ -1662,9 +1729,9 @@ export class CompassSensor implements ISensor, ILabel {
     constructor() {
         $('#mbedButtons').append(
             '<label for="rangeCompass" style="margin: 12px 8px 8px 0">' +
-            Blockly.Msg.SENSOR_COMPASS +
-            '</label><input type="text" value="0" style="margin-bottom: 8px;margin-top: 12px; min-width: 45px; width: 45px; display: inline-block; border: 1px solid #333; border-radius: 2px; text-align: right; float: right; padding: 0" id="rangeCompass" name="rangeCompass" class="range" />' +
-            '<div style="margin:8px 0; "><input id="sliderCompass" type="range" min="0" max="360" value="0" step="5" /></div>'
+                Blockly.Msg.SENSOR_COMPASS +
+                '</label><input type="text" value="0" style="margin-bottom: 8px;margin-top: 12px; min-width: 45px; width: 45px; display: inline-block; border: 1px solid #333; border-radius: 2px; text-align: right; float: right; padding: 0" id="rangeCompass" name="rangeCompass" class="range" />' +
+                '<div style="margin:8px 0; "><input id="sliderCompass" type="range" min="0" max="360" value="0" step="5" /></div>'
         );
         createSlider($('#sliderCompass'), $('#rangeCompass'), this, 'degree', { min: 0, max: 360 });
     }
@@ -1699,9 +1766,9 @@ export class CalliopeLightSensor implements ISensor, ILabel, IDrawable {
     constructor() {
         $('#mbedButtons').append(
             '<label for="rangeLight" style="margin: 12px 8px 8px 0">' +
-            Blockly.Msg.SENSOR_LIGHT +
-            '</label><input type="text" value="0" style="margin-bottom: 8px;margin-top: 12px; min-width: 45px; width: 45px; display: inline-block; border: 1px solid #333; border-radius: 2px; text-align: right; float: right; padding: 0;" id="rangeLight" name="rangeLight" class="range" />' +
-            '<div style="margin:8px 0; "><input id="sliderLight" type="range" min="0" max="100" value="0" /></div>'
+                Blockly.Msg.SENSOR_LIGHT +
+                '</label><input type="text" value="0" style="margin-bottom: 8px;margin-top: 12px; min-width: 45px; width: 45px; display: inline-block; border: 1px solid #333; border-radius: 2px; text-align: right; float: right; padding: 0;" id="rangeLight" name="rangeLight" class="range" />' +
+                '<div style="margin:8px 0; "><input id="sliderLight" type="range" min="0" max="100" value="0" /></div>'
         );
         createSlider($('#sliderLight'), $('#rangeLight'), this, 'lightLevel', { min: 0, max: 100 });
     }
@@ -1749,9 +1816,9 @@ export class Rob3rtaInfraredSensor implements ISensor, ILabel {
     constructor() {
         $('#mbedButtons').append(
             '<label for="rangeLight" style="margin: 12px 8px 8px 0">' +
-            Blockly.Msg.SENSOR_INFRARED +
-            '</label><input type="text" value="0" style="margin-bottom: 8px;margin-top: 12px; min-width: 45px; width: 45px; display: inline-block; border: 1px solid #333; border-radius: 2px; text-align: right; float: right; padding: 0;" id="rangeLight" name="rangeLight" class="range" />' +
-            '<div style="margin:8px 0; "><input id="sliderLight" type="range" min="0" max="1023" value="0" /></div>'
+                Blockly.Msg.SENSOR_INFRARED +
+                '</label><input type="text" value="0" style="margin-bottom: 8px;margin-top: 12px; min-width: 45px; width: 45px; display: inline-block; border: 1px solid #333; border-radius: 2px; text-align: right; float: right; padding: 0;" id="rangeLight" name="rangeLight" class="range" />' +
+                '<div style="margin:8px 0; "><input id="sliderLight" type="range" min="0" max="1023" value="0" /></div>'
         );
         createSlider($('#sliderLight'), $('#rangeLight'), this, 'lightLevel', { min: 0, max: 1023 });
     }
@@ -1783,9 +1850,9 @@ export class TemperatureSensor implements ISensor, ILabel {
     constructor() {
         $('#mbedButtons').append(
             '<label for="rangeTemperature" style="margin: 12px 8px 8px 0">' +
-            Blockly.Msg.SENSOR_TEMPERATURE +
-            '</label><input type="text" value="0" style="margin-bottom: 8px;margin-top: 12px; min-width: 45px; width: 45px; display: inline-block; border: 1px solid #333; border-radius: 2px; text-align: right; float: right; padding: 0;" id="rangeTemperature" name="rangeTemperature" class="range" />' +
-            '<div style="margin:8px 0; "><input id="sliderTemperature" type="range" min="-25" max="75" value="0" step="1" /></div>'
+                Blockly.Msg.SENSOR_TEMPERATURE +
+                '</label><input type="text" value="0" style="margin-bottom: 8px;margin-top: 12px; min-width: 45px; width: 45px; display: inline-block; border: 1px solid #333; border-radius: 2px; text-align: right; float: right; padding: 0;" id="rangeTemperature" name="rangeTemperature" class="range" />' +
+                '<div style="margin:8px 0; "><input id="sliderTemperature" type="range" min="-25" max="75" value="0" step="1" /></div>'
         );
         createSlider($('#sliderTemperature'), $('#rangeTemperature'), this, 'degree', { min: -15, max: 75 });
     }
@@ -1832,19 +1899,19 @@ export class VolumeMeterSensor implements ISensor, ILabel {
                             googEchoCancellation: 'false',
                             googAutoGainControl: 'false',
                             googNoiseSuppression: 'false',
-                            googHighpassFilter: 'false'
+                            googHighpassFilter: 'false',
                         },
-                        optional: []
-                    }
+                        optional: [],
+                    },
                 })
                 .then(
-                    function(stream) {
+                    function (stream) {
                         var mediaStreamSource = sensor.webAudio.context.createMediaStreamSource(stream);
                         sensor.sound = VolumeMeter.createAudioMeter(sensor.webAudio.context);
                         // @ts-ignore
                         mediaStreamSource.connect(sensor.sound);
                     },
-                    function() {
+                    function () {
                         console.log('Sorry, but there is no microphone available on your system');
                     }
                 );
@@ -1914,16 +1981,16 @@ export class SoundSensor extends VolumeMeterSensor implements IExternalSensor {
 }
 
 function createSlider($slider: JQuery<HTMLElement>, $range: JQuery<HTMLElement>, sensor: ISensor, value: string, range: { min: number; max: number }) {
-    $slider.on('mousedown touchstart', function(e) {
+    $slider.on('mousedown touchstart', function (e) {
         e.stopPropagation();
     });
-    $slider.on('input change', function(e) {
+    $slider.on('input change', function (e) {
         e.preventDefault();
         $range.val($slider.val());
         sensor[value] = Number($slider.val());
         e.stopPropagation();
     });
-    $range.on('change', function(e) {
+    $range.on('change', function (e) {
         e.preventDefault();
         let myValue = Number($range.val());
         if (!$range.valid()) {
@@ -1946,8 +2013,8 @@ function createSlider($slider: JQuery<HTMLElement>, $range: JQuery<HTMLElement>,
     $range.rules('add', {
         messages: {
             required: false,
-            number: false
-        }
+            number: false,
+        },
     });
 }
 
@@ -2015,20 +2082,31 @@ export class OdometrySensor implements ISensor, ILabel, IReset, IUpdateAction {
     }
 }
 
-export class CameraSensor implements ISensor, IDrawable, ILabel, IReset {
+export class CameraSensor implements ISensor, IUpdateAction, IDrawable, ILabel, IReset {
     readonly MAX_MARKER_DIST_SQR = 150 * 3 * 150 * 3;
-    readonly MAX_CAM_Y = 200 * 3 * 200 * 3;
-    readonly LINE_RADIUS: number = 50;
+    readonly MAX_CAM_Y = Math.sqrt(this.MAX_MARKER_DIST_SQR);
+    readonly MAX_BLOB_DIST_SQR = this.MAX_MARKER_DIST_SQR;
+    readonly LINE_RADIUS: number = 60;
     x: number;
     y: number;
+    h: number;
     theta: number;
     rx: number;
     ry: number;
-    readonly AOV: number = 2 * Math.PI / 5;
+    readonly AOV: number = (2 * Math.PI) / 5;
     listOfMarkersFound: MarkerSimulationObject[] = [];
+    colourBlob: {
+        minHue: number;
+        maxHue: number;
+        minSat: number;
+        maxSat: number;
+        minVal: number;
+        maxVal: number;
+    };
+    bB: Rectangle = { x: 0, y: 0, w: 0, h: 0 };
 
     labelPriority: number = 8;
-    private THRESHOLD: number = 75;
+    private THRESHOLD: number = 100;
     private line: number;
 
     constructor(pose: Pose, aov: number) {
@@ -2038,6 +2116,24 @@ export class CameraSensor implements ISensor, IDrawable, ILabel, IReset {
         this.AOV = aov;
     }
 
+    updateAction(myRobot: RobotBase, dt: number, interpreterRunning: boolean): void {
+        if (interpreterRunning) {
+            let myBehaviour = myRobot.interpreter.getRobotBehaviour();
+            let colourBlob = myBehaviour.getActionState('colourBlob', true);
+            if (colourBlob) {
+                this.colourBlob = colourBlob;
+            }
+        }
+        this.colourBlob = {
+            minHue: 0,
+            maxHue: 240,
+            minSat: 90,
+            maxSat: 110,
+            minVal: 90,
+            maxVal: 110,
+        };
+    }
+
     drawPriority: number = 1;
 
     draw(rCtx: CanvasRenderingContext2D, myRobot: RobotBase): void {
@@ -2045,32 +2141,32 @@ export class CameraSensor implements ISensor, IDrawable, ILabel, IReset {
         rCtx.strokeStyle = '#0000ff';
         rCtx.beginPath();
         rCtx.arc(this.x, this.y, 1000, Math.PI / 5, -Math.PI / 5, true);
-        rCtx.arc(this.x, this.y, 30, -Math.PI / 5, +Math.PI / 5, false);
+        rCtx.arc(this.x, this.y, this.LINE_RADIUS, -Math.PI / 5, +Math.PI / 5, false);
         rCtx.closePath();
         rCtx.stroke();
     }
 
     getLabel(): string {
-        let myLabel: string = '<div><label>' + 'Line Sensor' + '</label><span>' + this.line + '</span></div>';
+        let myLabel: string = '<div><label>' + 'Line Sensor' + '</label><span>' + UTIL.round(this.line, 2) + '</span></div>';
 
         myLabel += '<div><label>' + 'Marker Sensor' + '</label></div>';
         for (let i = 0; i < this.listOfMarkersFound.length; i++) {
             let marker = this.listOfMarkersFound[i];
             myLabel += '<div><label>&nbsp;-&nbsp;id ';
             myLabel += marker.markerId;
-            myLabel += '</label><span>(';
-            myLabel += UTIL.round(marker.xRel, 3);
+            myLabel += '</label><span>[';
+            myLabel += UTIL.round(marker.xDist, 0);
             myLabel += ', ';
-            myLabel += UTIL.round(marker.yRel, 3);
-            myLabel += ', 0)</span></div>';
+            myLabel += UTIL.round(marker.yDist, 0);
+            myLabel += ', ';
+            myLabel += UTIL.round(marker.zDist, 0);
+            myLabel += '] cm</span></div>';
         }
 
         return myLabel;
     }
 
-    reset(): void {
-
-    }
+    reset(): void {}
 
     updateSensor(
         running: boolean,
@@ -2086,95 +2182,142 @@ export class CameraSensor implements ISensor, IDrawable, ILabel, IReset {
         let robot: RobotRobotino = myRobot as RobotRobotino;
         SIMATH.transform(robot.pose, this as PointRobotWorld);
         let myPose: Pose = new Pose(this.rx, this.ry, this.theta);
+
         let left = ((myRobot as RobotBaseMobile).pose.theta - this.AOV / 2 + 2 * Math.PI) % (2 * Math.PI);
         let right = ((myRobot as RobotBaseMobile).pose.theta + this.AOV / 2 + 2 * Math.PI) % (2 * Math.PI);
-        markerList.filter(marker => {
-            let visible: boolean = false;
-            marker.sqrDistance = SIMATH.getDistance(myPose, marker);
-            if (marker.sqrDistance <= this.MAX_MARKER_DIST_SQR) {
-                let myMarkerPoints: Point[] = [{ x: marker.x - myPose.x, y: marker.y - myPose.y },
-                    { x: marker.x + marker.w - myPose.x, y: marker.y - myPose.y },
-                    { x: marker.x + marker.w - myPose.x, y: marker.y + marker.h - myPose.y },
-                    { x: marker.x - myPose.x, y: marker.y + marker.h - myPose.y }];
-                let visible: boolean = true;
-                for (let i = 0; i < myMarkerPoints.length; i++) {
-                    let myAngle = (Math.atan2(myMarkerPoints[i].y, myMarkerPoints[i].x) + 2 * Math.PI) % (2 * Math.PI);
-                    if ((left < right && (myAngle > left && myAngle < right)) || (left > right && (myAngle > left || myAngle < right))) {
-                        let p: Point = this.checkVisibility(robot.id, marker, personalObstacleList);
-                        if (p) {
+        markerList
+            .filter((marker) => {
+                let visible: boolean = false;
+                marker.sqrDist = SIMATH.getDistance(myPose, marker);
+                if (marker.sqrDist <= this.MAX_MARKER_DIST_SQR) {
+                    let myMarkerPoints: Point[] = [
+                        { x: marker.x - myPose.x, y: marker.y - myPose.y },
+                        { x: marker.x + marker.w - myPose.x, y: marker.y - myPose.y },
+                        { x: marker.x + marker.w - myPose.x, y: marker.y + marker.h - myPose.y },
+                        { x: marker.x - myPose.x, y: marker.y + marker.h - myPose.y },
+                    ];
+                    let visible: boolean = true;
+                    for (let i = 0; i < myMarkerPoints.length; i++) {
+                        let myAngle = (Math.atan2(myMarkerPoints[i].y, myMarkerPoints[i].x) + 2 * Math.PI) % (2 * Math.PI);
+                        if ((left < right && myAngle > left && myAngle < right) || (left > right && (myAngle > left || myAngle < right))) {
+                            let p: Point = this.checkVisibility(robot.id, marker, personalObstacleList);
+                            if (p) {
+                                visible = false;
+                            }
+                        } else {
                             visible = false;
                         }
-                    } else {
-                        visible = false;
+                    }
+                    return visible;
+                }
+            })
+            .forEach((marker) => {
+                let myAngle = (Math.atan2(marker.y + marker.h / 2 - myPose.y, marker.x + marker.w / 2 - myPose.x) + 2 * Math.PI) % (2 * Math.PI);
+                if (left > right) {
+                    right += 2 * Math.PI;
+                    if (myAngle < left) {
+                        myAngle = myAngle + 2 * Math.PI;
                     }
                 }
-                return visible;
-            }
-        }).forEach(marker => {
-            let myAngle = (Math.atan2(marker.y + marker.h / 2 - myPose.y, marker.x + marker.w / 2 - myPose.x) + 2 * Math.PI) % (2 * Math.PI);
-            if (left > right) {
-                right += 2 * Math.PI;
-                if (myAngle < left) {
-                    myAngle = myAngle + 2 * Math.PI;
-                }
-            }
-            marker.xRel = (myAngle - left) / (right - left) - 0.5;
-            marker.yRel = Math.sqrt(marker.sqrDistance) / Math.sqrt(this.MAX_CAM_Y) - 0.5;
-            this.listOfMarkersFound.push(marker);
-        });
+                let dist: number = Math.sqrt(marker.sqrDist);
+                marker.xDist = (((myAngle - left) / (right - left) - 0.5) * this.AOV * dist) / 3;
+                marker.yDist = ((dist / this.MAX_CAM_Y - 0.5) * this.MAX_CAM_Y) / 3;
+                marker.zDist = dist / 3;
+                this.listOfMarkersFound.push(marker);
+            });
 
         this.line = -1;
         let leftPoint = { x: this.LINE_RADIUS * Math.cos(left), y: this.LINE_RADIUS * Math.sin(left) };
         let rightPoint = { x: this.LINE_RADIUS * Math.cos(right), y: this.LINE_RADIUS * Math.sin(right) };
+        let dist = SIMATH.getDistance(leftPoint, rightPoint);
         let pixYWidth = Math.abs(rightPoint.y - leftPoint.y);
         let pixXWidth = Math.abs(rightPoint.x - leftPoint.x);
-        let redPixOld = this.calculatePix(uCtx.getImageData(leftPoint.x + myPose.x, leftPoint.y + myPose.y, 1, 1).data);
+        let redPixOld;
+
         if (pixYWidth > pixXWidth) {
             if (leftPoint.x > 0) {
-                for (let i = leftPoint.y + this.ry; i <= rightPoint.y + this.ry; i += 0.5) {
-                    let a: number = (this.LINE_RADIUS) * (this.LINE_RADIUS) - (i - this.ry) * (i - this.ry);
-                    let xi = Math.sqrt(a) + this.rx;
-                    let redPix = this.calculatePix(uCtx.getImageData(xi, i, 1, 1).data);
+                this.bB.x = Math.min(leftPoint.x, rightPoint.x) + this.rx;
+                this.bB.y = Math.min(leftPoint.y, rightPoint.y) + this.ry;
+                this.bB.w = Math.max(Math.max(leftPoint.x, rightPoint.x), this.LINE_RADIUS) + this.rx - this.bB.x;
+                this.bB.h = -this.bB.y + Math.max(Math.max(leftPoint.y, rightPoint.y)) + this.ry;
+                let data: ImageData = uCtx.getImageData(this.bB.x, this.bB.y, this.bB.w, this.bB.h);
+                for (let i = 0; i < data.height; i++) {
+                    let a: number = this.LINE_RADIUS * this.LINE_RADIUS - (i + this.bB.y - this.ry) * (i + this.bB.y - this.ry);
+                    let xi = Math.round(Math.sqrt(a) - (this.bB.x - this.rx));
+                    let myIndex = (xi + i * data.width) * 4;
+                    let redPix = this.calculatePix(data.data.slice(myIndex, myIndex + 3));
+                    if (redPixOld == undefined) {
+                        redPixOld = redPix;
+                    }
                     if (Math.abs(redPix - redPixOld) > this.THRESHOLD) {
-                        this.line = Math.abs(i - leftPoint.y - this.ry) / pixYWidth - 0.5;
+                        this.line = i / pixYWidth - 0.5;
                         break;
                     }
                     redPixOld = redPix;
                 }
             } else {
-                for (let i = leftPoint.y + this.ry; i >= rightPoint.y + this.ry; i -= 0.5) {
-                    let a: number = (this.LINE_RADIUS) * (this.LINE_RADIUS) - (i - this.ry) * (i - this.ry);
-                    let xi = -Math.sqrt(a) + this.rx;
-                    let redPix = this.calculatePix(uCtx.getImageData(xi, i, 1, 1).data);
+                this.bB.y = Math.min(leftPoint.y, rightPoint.y) + this.ry;
+                this.bB.x = Math.min(Math.min(leftPoint.x, rightPoint.x), -this.LINE_RADIUS) + this.rx;
+                this.bB.w = Math.max(leftPoint.x, rightPoint.x) + this.rx - this.bB.x;
+                this.bB.h = -this.bB.y + Math.max(Math.max(leftPoint.y, rightPoint.y)) + this.ry;
+                let data: ImageData = uCtx.getImageData(this.bB.x, this.bB.y, this.bB.w, this.bB.h);
+                for (let i = data.height - 1; i >= 0; i--) {
+                    let a: number = this.LINE_RADIUS * this.LINE_RADIUS - (i + this.bB.y - this.ry) * (i + this.bB.y - this.ry);
+                    let xi = Math.round(-Math.sqrt(a) - (this.bB.x - this.rx));
+                    let myIndex = (xi + i * data.width) * 4;
+                    let redPix = this.calculatePix(data.data.slice(myIndex, myIndex + 3));
+                    if (redPixOld == undefined) {
+                        redPixOld = redPix;
+                    }
                     if (Math.abs(redPix - redPixOld) > this.THRESHOLD) {
-                        this.line = Math.abs(i - leftPoint.y - this.ry) / pixYWidth - 0.5;
+                        this.line = 1 - i / pixYWidth - 0.5;
                         break;
                     }
                     redPixOld = redPix;
                 }
             }
         } else {
-            uCtx.fillStyle = '#00ff00';
             if (leftPoint.y < 0) {
-                for (let i = leftPoint.x + this.rx; i <= rightPoint.x + this.rx; i += 0.5) {
-                    let a: number = (this.LINE_RADIUS) * (this.LINE_RADIUS) - (i - this.rx) * (i - this.rx);
-                    let yi = -Math.sqrt(a);
-
-                    let redPix = this.calculatePix(uCtx.getImageData(i, yi + this.ry, 1, 1).data);
+                this.bB.x = Math.min(Math.min(leftPoint.x, rightPoint.x), this.LINE_RADIUS) + this.rx;
+                this.bB.w = Math.max(leftPoint.x, rightPoint.x) + this.rx - this.bB.x;
+                this.bB.y = Math.min(Math.min(leftPoint.y, rightPoint.y), -this.LINE_RADIUS) + this.ry;
+                this.bB.h = Math.max(leftPoint.y, rightPoint.y) + this.ry - this.bB.y;
+                let data: ImageData = uCtx.getImageData(this.bB.x, this.bB.y, this.bB.w, this.bB.h);
+                for (let i = 0; i < data.width; i++) {
+                    let a: number = this.LINE_RADIUS * this.LINE_RADIUS - (i + this.bB.x - this.rx) * (i + this.bB.x - this.rx);
+                    let xi = Math.round(-Math.sqrt(a) - this.bB.y + this.ry);
+                    let myIndex = (i + xi * data.width) * 4;
+                    let redPix = this.calculatePix(data.data.slice(myIndex, myIndex + 3));
+                    if (redPixOld == undefined) {
+                        redPixOld = redPix;
+                    }
                     if (Math.abs(redPix - redPixOld) > this.THRESHOLD) {
-                        this.line = Math.abs(i - leftPoint.x - this.rx) / pixXWidth - 0.5;
+                        this.line = i / pixXWidth - 0.5;
                         break;
                     }
+                    redPixOld = redPix;
                 }
             } else {
-                for (let i = leftPoint.x + this.rx; i >= rightPoint.x + this.rx; i -= 0.5) {
-                    let a: number = (this.LINE_RADIUS) * (this.LINE_RADIUS) - (i - this.rx) * (i - this.rx);
-                    let yi = Math.sqrt(a);
-                    let redPix = this.calculatePix(uCtx.getImageData(i, yi + this.ry, 1, 1).data);
+                this.bB.x = Math.min(Math.min(leftPoint.x, rightPoint.x), this.LINE_RADIUS) + this.rx;
+                this.bB.w = Math.max(leftPoint.x, rightPoint.x) + this.rx - this.bB.x;
+                this.bB.y = Math.min(leftPoint.y, rightPoint.y) + this.ry;
+                this.bB.h = Math.max(Math.max(leftPoint.y, rightPoint.y), this.LINE_RADIUS) + this.ry - this.bB.y;
+                let data: ImageData = uCtx.getImageData(this.bB.x, this.bB.y, this.bB.w, this.bB.h);
+
+                for (let i = data.width - 1; i >= 0; i--) {
+                    let a: number = this.LINE_RADIUS * this.LINE_RADIUS - (i + this.bB.x - this.rx) * (i + this.bB.x - this.rx);
+                    let xi = Math.round(Math.sqrt(a) - this.bB.y + this.ry) - 1;
+                    let myIndex = (i + xi * data.width) * 4;
+                    let redPix = this.calculatePix(data.data.slice(myIndex, myIndex + 3));
+                    if (redPixOld == undefined) {
+                        redPixOld = redPix;
+                    }
+
                     if (Math.abs(redPix - redPixOld) > this.THRESHOLD) {
-                        this.line = Math.abs(i - leftPoint.x - this.rx) / pixXWidth - 0.5;
+                        this.line = 0.5 - i / pixXWidth;
                         break;
                     }
+                    redPixOld = redPix;
                 }
             }
         }
@@ -2188,13 +2331,44 @@ export class CameraSensor implements ISensor, IDrawable, ILabel, IReset {
         if (this.listOfMarkersFound.length == 0) {
             values['marker'][C.ID] = [-1];
         } else {
-            values['marker'][C.ID] = this.listOfMarkersFound.map(marker => marker.markerId);
-            this.listOfMarkersFound.forEach(marker => {
-                values['marker'][C.INFO][marker.markerId] = [marker.xRel, marker.yRel, 0];
+            values['marker'][C.ID] = this.listOfMarkersFound.map((marker) => marker.markerId);
+            this.listOfMarkersFound.forEach((marker) => {
+                values['marker'][C.INFO][marker.markerId] = [marker.xDist, marker.yDist, 0];
             });
         }
         values['camera'] = {};
         values['camera'][C.LINE] = this.line;
+
+        //if (this.colourBlob !== null) {
+        personalObstacleList.filter((obstacle) => {
+            let visible: boolean = false;
+            let inHSVRange = this.checkHSVRange(obstacle.hsv);
+            if (inHSVRange) {
+                obstacle.sqrDist = SIMATH.getDistance(myPose, obstacle);
+                if (obstacle.sqrDist <= this.MAX_BLOB_DIST_SQR) {
+                    let myObstaclePoints: Point[] = [{ x: obstacle.x - myPose.x, y: obstacle.y - myPose.y }]; /*,
+                        { x: obstacle.x + obstacle.w - myPose.x, y: obstacle.y - myPose.y },
+                        { x: obstacle.x + obstacle.w - myPose.x, y: obstacle.y + obstacle.h - myPose.y },
+                        { x: obstacle.x - myPose.x, y: obstacle.y + obstacle.h - myPose.y },
+                    ];*/
+
+                    let visible: boolean = true;
+                    for (let i = 0; i < myObstaclePoints.length; i++) {
+                        let myAngle = (Math.atan2(myObstaclePoints[i].y, myObstaclePoints[i].x) + 2 * Math.PI) % (2 * Math.PI);
+                        if ((left < right && myAngle > left && myAngle < right) || (left > right && (myAngle > left || myAngle < right))) {
+                            let p: Point = this.checkVisibility(robot.id, obstacle, personalObstacleList);
+                            if (p) {
+                                visible = false;
+                            }
+                        } else {
+                            visible = false;
+                        }
+                    }
+                    return visible;
+                }
+            }
+        });
+        //}
     }
 
     private calculatePix(rawPix: Uint8ClampedArray): number {
@@ -2214,6 +2388,9 @@ export class CameraSensor implements ISensor, IDrawable, ILabel, IReset {
             if (obstacle instanceof ChassisMobile && obstacle.id == id) {
                 continue;
             }
+            if (obstacle === mP) {
+                continue;
+            }
             if (!(obstacle instanceof CircleSimulationObject)) {
                 let obstacleLines = obstacle.getLines();
                 for (let j = 0; j < obstacleLines.length; j++) {
@@ -2223,7 +2400,7 @@ export class CameraSensor implements ISensor, IDrawable, ILabel, IReset {
                     }
                 }
             } else {
-                let myCircle = (obstacle as CircleSimulationObject);
+                let myCircle = obstacle as CircleSimulationObject;
                 myIntersectionPoint = SIMATH.getClosestIntersectionPointCircle(myLine, myCircle);
                 if (myIntersectionPoint) {
                     return myIntersectionPoint;
@@ -2231,5 +2408,21 @@ export class CameraSensor implements ISensor, IDrawable, ILabel, IReset {
             }
         }
         return null;
+    }
+
+    private checkHSVRange(hsv: number[]): boolean {
+        if (this.colourBlob && hsv) {
+            if (
+                hsv[0] >= this.colourBlob.minHue &&
+                hsv[0] <= this.colourBlob.maxHue &&
+                hsv[1] >= this.colourBlob.minSat &&
+                hsv[1] <= this.colourBlob.maxSat &&
+                hsv[2] >= this.colourBlob.minVal &&
+                hsv[2] <= this.colourBlob.maxVal
+            ) {
+                return true;
+            }
+        }
+        return false;
     }
 }

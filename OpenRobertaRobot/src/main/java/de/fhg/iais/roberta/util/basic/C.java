@@ -43,6 +43,7 @@ public class C {
     public static final String CHARACTER = "character";
     public static final String CIRCLE_LED_ACTION = "cirleLedAction";
     public static final String CLEAR_DISPLAY_ACTION = "ClearDisplay";
+    public static final String CLOSING = "closing";
     public static final String COLOR = "color";
     public static final String COLOR_CONST = "COLOR_CONST";
     public static final String CONDITIONAL = "conditional";
@@ -216,6 +217,7 @@ public class C {
     public static final String OFF = "off";
     public static final String ON = "on";
     public static final String OP = "op";
+    public static final String OPENING = "opening";
     public static final String POP = "pop";
     public static final String OPS = "ops";
     public static final String PROGRAM_COUNTER = "pc";
@@ -229,6 +231,7 @@ public class C {
     public static final String OMNI_DRIVE_TURN = "omniDriveTurn";
     public static final String OMNI_DRIVE_POSITION = "omniDrivePosition";
     public static final String OPCODE = "opc";
+    public static final String OPTICAL = "optical";
     public static final String OR = "OR";
     public static final String ORANGE = "ORANGE";
     public static final String PARAMETERS = "parameters";

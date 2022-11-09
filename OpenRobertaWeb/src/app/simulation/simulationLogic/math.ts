@@ -44,7 +44,7 @@ export function toDegree(radians: number): number {
  *            another line
  * @returns {Point} point or null, if no intersection found
  */
-export const getIntersectionPoint = function(line1: Line, line2: Line): Point {
+export const getIntersectionPoint = function (line1: Line, line2: Line): Point {
     var d = (line1.x1 - line1.x2) * (line2.y1 - line2.y2) - (line1.y1 - line1.y2) * (line2.x1 - line2.x2);
     if (d === 0) {
         return null;
@@ -60,7 +60,7 @@ export const getIntersectionPoint = function(line1: Line, line2: Line): Point {
     }
     return {
         x: xi,
-        y: yi
+        y: yi,
     };
 };
 
@@ -72,7 +72,7 @@ export const getIntersectionPoint = function(line1: Line, line2: Line): Point {
  * @return {x, y}
  *              closest intersection point (coordinate)
  */
-export const getClosestIntersectionPointCircle = function(line: Line, circle): Point {
+export const getClosestIntersectionPointCircle = function (line: Line, circle): Point {
     const intersections = this.getIntersectionPointsCircle(line, circle);
 
     if (intersections.length == 1) {
@@ -92,7 +92,7 @@ export const getClosestIntersectionPointCircle = function(line: Line, circle): P
     return null; // no intersections at all
 };
 
-export const getMiddleIntersectionPointCircle = function(line: Line, circle): Point {
+export const getMiddleIntersectionPointCircle = function (line: Line, circle): Point {
     const intersections = this.getIntersectionPointsCircle(line, circle);
 
     if (intersections.length == 1) {
@@ -100,7 +100,7 @@ export const getMiddleIntersectionPointCircle = function(line: Line, circle): Po
     }
 
     if (intersections.length == 2) {
-        return ({ x: 0.5 * (intersections[0].x + intersections[1].x), y: 0.5 * (intersections[0].y + intersections[1].y) });
+        return { x: 0.5 * (intersections[0].x + intersections[1].x), y: 0.5 * (intersections[0].y + intersections[1].y) };
     }
     return null; // no intersections at all
 };
@@ -114,7 +114,7 @@ export const getMiddleIntersectionPointCircle = function(line: Line, circle): Po
  * @return {{x, y}[]}
  *              array with point(s) of the intersection
  */
-export const getIntersectionPointsCircle = function(line, circle): Point[] {
+export const getIntersectionPointsCircle = function (line, circle): Point[] {
     var dx, dy, A, B, C, det, t;
 
     dx = line.x2 - line.x1;
@@ -142,8 +142,7 @@ export const getIntersectionPointsCircle = function(line, circle): Point[] {
         t = (-B - Math.sqrt(det)) / (2 * A);
         var intersection2 = { x: line.x1 + t * dx, y: line.y1 + t * dy };
 
-        if (this.isLineAlignedToPoint(intersection1, line) && this.isLineAlignedToPoint(intersection2, line))
-            return [intersection1, intersection2];
+        if (this.isLineAlignedToPoint(intersection1, line) && this.isLineAlignedToPoint(intersection2, line)) return [intersection1, intersection2];
 
         return [];
     }
@@ -171,7 +170,7 @@ export function isLineAlignedToPoint(p: Point, line: Line): boolean {
     return true;
 }
 
-export const getLinesFromObj = function(obj) {
+export const getLinesFromObj = function (obj) {
     switch (obj.shape) {
         case 'rectangle':
             return [
@@ -179,26 +178,26 @@ export const getLinesFromObj = function(obj) {
                     x1: obj.x,
                     x2: obj.x,
                     y1: obj.y,
-                    y2: obj.y + obj.h
+                    y2: obj.y + obj.h,
                 },
                 {
                     x1: obj.x,
                     x2: obj.x + obj.w,
                     y1: obj.y,
-                    y2: obj.y
+                    y2: obj.y,
                 },
                 {
                     x1: obj.x + obj.w,
                     x2: obj.x,
                     y1: obj.y + obj.h,
-                    y2: obj.y + obj.h
+                    y2: obj.y + obj.h,
                 },
                 {
                     x1: obj.x + obj.w,
                     x2: obj.x + obj.w,
                     y1: obj.y + obj.h,
-                    y2: obj.y
-                }
+                    y2: obj.y,
+                },
             ];
         case 'robot':
             return [
@@ -206,26 +205,26 @@ export const getLinesFromObj = function(obj) {
                     x1: obj.backLeft.rx,
                     x2: obj.frontLeft.rx,
                     y1: obj.backLeft.ry,
-                    y2: obj.frontLeft.ry
+                    y2: obj.frontLeft.ry,
                 },
                 {
                     x1: obj.frontLeft.rx,
                     x2: obj.frontRight.rx,
                     y1: obj.frontLeft.ry,
-                    y2: obj.frontRight.ry
+                    y2: obj.frontRight.ry,
                 },
                 {
                     x1: obj.frontRight.rx,
                     x2: obj.backRight.rx,
                     y1: obj.frontRight.ry,
-                    y2: obj.backRight.ry
+                    y2: obj.backRight.ry,
                 },
                 {
                     x1: obj.backRight.rx,
                     x2: obj.backLeft.rx,
                     y1: obj.backRight.ry,
-                    y2: obj.backLeft.ry
-                }
+                    y2: obj.backLeft.ry,
+                },
             ];
         case 'triangle':
             return [
@@ -233,20 +232,20 @@ export const getLinesFromObj = function(obj) {
                     x1: obj.ax,
                     x2: obj.bx,
                     y1: obj.ay,
-                    y2: obj.by
+                    y2: obj.by,
                 },
                 {
                     x1: obj.bx,
                     x2: obj.cx,
                     y1: obj.by,
-                    y2: obj.cy
+                    y2: obj.cy,
                 },
                 {
                     x1: obj.ax,
                     x2: obj.cx,
                     y1: obj.ay,
-                    y2: obj.cy
-                }
+                    y2: obj.cy,
+                },
             ];
         default:
             return false;
@@ -264,7 +263,7 @@ export const getLinesFromObj = function(obj) {
  * @returns {distance}
  *           distance
  */
-export const getDistanceToCircle = function(point, circle) {
+export const getDistanceToCircle = function (point, circle) {
     var vX = point.x - circle.x;
     var vY = point.y - circle.y;
     var magV = Math.sqrt(vX * vX + vY * vY);
@@ -272,7 +271,7 @@ export const getDistanceToCircle = function(point, circle) {
     var aY = circle.y + (vY / magV) * circle.r;
     return {
         x: aX,
-        y: aY
+        y: aY,
     };
 };
 
@@ -284,7 +283,7 @@ export const getDistanceToCircle = function(point, circle) {
  * x value to square
  * @returns { Number } square of x
  */
-export const sqr = function(x) {
+export const sqr = function (x) {
     return x * x;
 };
 
@@ -327,12 +326,12 @@ function getDistanceToLine(p, p1, p2) {
     }
     return {
         x: p1.x + t * (p2.x - p1.x),
-        y: p1.y + t * (p2.y - p1.y)
+        y: p1.y + t * (p2.y - p1.y),
     };
 }
 export { getDistance, getDistanceToLine };
 
-export const isPointInsideRectangle = function(p, rect) {
+export const isPointInsideRectangle = function (p, rect) {
     var p1 = rect.p1;
     var p2 = rect.p2;
     var p3 = rect.p3;
@@ -350,7 +349,7 @@ export const isPointInsideRectangle = function(p, rect) {
     }
 };
 
-export const checkInObstacle = function(obstacle, myCheckPoint) {
+export const checkInObstacle = function (obstacle, myCheckPoint) {
     if (obstacle instanceof RectangleSimulationObject) {
         return (
             myCheckPoint.rx > obstacle.x &&
@@ -385,49 +384,49 @@ export const checkInObstacle = function(obstacle, myCheckPoint) {
             isPointInsideRectangle(
                 {
                     x: myCheckPoint.rx,
-                    y: myCheckPoint.ry
+                    y: myCheckPoint.ry,
                 },
                 {
                     p1: {
                         x: obstacle.backLeft.rx,
-                        y: obstacle.backLeft.ry
+                        y: obstacle.backLeft.ry,
                     },
                     p2: {
                         x: obstacle.frontLeft.rx,
-                        y: obstacle.frontLeft.ry
+                        y: obstacle.frontLeft.ry,
                     },
                     p3: {
                         x: obstacle.frontRight.rx,
-                        y: obstacle.frontRight.ry
+                        y: obstacle.frontRight.ry,
                     },
                     p4: {
                         x: obstacle.backRight.rx,
-                        y: obstacle.backRight.ry
-                    }
+                        y: obstacle.backRight.ry,
+                    },
                 }
             ) ||
             isPointInsideRectangle(
                 {
                     x: myCheckPoint.rx,
-                    y: myCheckPoint.ry
+                    y: myCheckPoint.ry,
                 },
                 {
                     p1: {
                         x: obstacle.wheelFrontRight.rx,
-                        y: obstacle.wheelFrontRight.ry
+                        y: obstacle.wheelFrontRight.ry,
                     },
                     p2: {
                         x: obstacle.wheelBackRight.rx,
-                        y: obstacle.wheelBackRight.ry
+                        y: obstacle.wheelBackRight.ry,
                     },
                     p3: {
                         x: obstacle.wheelBackLeft.rx,
-                        y: obstacle.wheelBackLeft.ry
+                        y: obstacle.wheelBackLeft.ry,
                     },
                     p4: {
                         x: obstacle.wheelFrontLeft.rx,
-                        y: obstacle.wheelFrontLeft.ry
-                    }
+                        y: obstacle.wheelFrontLeft.ry,
+                    },
                 }
             )
         );
@@ -446,35 +445,35 @@ export const checkInObstacle = function(obstacle, myCheckPoint) {
  *            b blue value
  * @returns {Array} hsv value
  */
-    //copy from http://stackoverflow.com/questions/2348597/why-doesnt-this-javascript-rgb-to-hsl-code-work
-export const rgbToHsv = function(r, g, b) {
-        var min = Math.min(r, g, b),
-            max = Math.max(r, g, b),
-            delta = max - min,
-            h,
-            s,
-            v = max;
+//copy from http://stackoverflow.com/questions/2348597/why-doesnt-this-javascript-rgb-to-hsl-code-work
+export const rgbToHsv = function (r, g, b) {
+    var min = Math.min(r, g, b),
+        max = Math.max(r, g, b),
+        delta = max - min,
+        h,
+        s,
+        v = max;
 
-        v = Math.floor((max / 255) * 100);
-        if (max !== 0) {
-            s = Math.floor((delta / max) * 100);
-        } else {
-            // black
-            return [0, 0, 0];
-        }
-        if (r === max) {
-            h = (g - b) / delta; // between yellow & magenta
-        } else if (g === max) {
-            h = 2 + (b - r) / delta; // between cyan & yellow
-        } else {
-            h = 4 + (r - g) / delta; // between magenta & cyan
-        }
-        h = Math.floor(h * 60); // degrees
-        if (h < 0) {
-            h += 360;
-        }
-        return [h, s, v];
-    };
+    v = Math.floor((max / 255) * 100);
+    if (max !== 0) {
+        s = Math.floor((delta / max) * 100);
+    } else {
+        // black
+        return [0, 0, 0];
+    }
+    if (r === max) {
+        h = (g - b) / delta; // between yellow & magenta
+    } else if (g === max) {
+        h = 2 + (b - r) / delta; // between cyan & yellow
+    } else {
+        h = 4 + (r - g) / delta; // between magenta & cyan
+    }
+    h = Math.floor(h * 60); // degrees
+    if (h < 0) {
+        h += 360;
+    }
+    return [h, s, v];
+};
 
 /**
  * Map a hsv value to a color name.
@@ -484,7 +483,7 @@ export const rgbToHsv = function(r, g, b) {
  *            hsv value
  * @returns {Enum} color
  */
-export const getColor = function(hsv) {
+export const getColor = function (hsv) {
     if (hsv[2] <= 10) {
         return CONSTANTS.COLOR_ENUM.BLACK;
     }
@@ -519,4 +518,18 @@ export function transform(pose, point) {
 
 export function epsilonEqual(num1, num2, epsilon) {
     return Math.abs(num1 - num2) <= epsilon;
+}
+
+export function hexToRGB(hex: string): number[] {
+    var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+    hex = hex.replace(shorthandRegex, function (m, r, g, b) {
+        return r + r + g + g + b + b;
+    });
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)] : null;
+}
+
+export function hexToHsv(hex: string): number[] {
+    let rgb = hexToRGB(hex);
+    return rgbToHsv(rgb[0], rgb[1], rgb[2]);
 }
