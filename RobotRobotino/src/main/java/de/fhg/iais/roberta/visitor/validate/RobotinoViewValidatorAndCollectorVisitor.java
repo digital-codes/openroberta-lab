@@ -16,6 +16,7 @@ import de.fhg.iais.roberta.syntax.sensor.robotino.ColourBlob;
 import de.fhg.iais.roberta.syntax.sensor.robotino.MarkerInformation;
 import de.fhg.iais.roberta.syntax.sensor.robotino.OdometrySensor;
 import de.fhg.iais.roberta.syntax.sensor.robotino.OdometrySensorReset;
+import de.fhg.iais.roberta.syntax.sensor.robotino.OpticalSensor;
 import de.fhg.iais.roberta.util.syntax.SC;
 import de.fhg.iais.roberta.visitor.RobotinoMethods;
 
@@ -112,5 +113,11 @@ public class RobotinoViewValidatorAndCollectorVisitor extends RobotinoValidatorA
     private void addMotorMethods() {
         usedMethodBuilder.addUsedMethod(RobotinoMethods.OMNIDRIVESPEED);
         usedMethodBuilder.addUsedMethod(RobotinoMethods.POSTVEL);
+    }
+
+    @Override
+    public Void visitOpticalSensor(OpticalSensor opticalSensor) {
+        usedMethodBuilder.addUsedMethod(RobotinoMethods.GETDIGITALPIN);
+        return super.visitOpticalSensor(opticalSensor);
     }
 }

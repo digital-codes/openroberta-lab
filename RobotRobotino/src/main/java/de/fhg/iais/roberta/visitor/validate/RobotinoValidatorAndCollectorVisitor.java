@@ -206,6 +206,7 @@ public abstract class RobotinoValidatorAndCollectorVisitor extends MotorValidato
 
     @Override
     public Void visitOpticalSensor(OpticalSensor opticalSensor) {
+        usedHardwareBuilder.addUsedSensor(new UsedSensor(opticalSensor.getUserDefinedPort(), RobotinoConstants.OPTICAL_SENSOR, opticalSensor.getMode()));
         return null;
     }
 }

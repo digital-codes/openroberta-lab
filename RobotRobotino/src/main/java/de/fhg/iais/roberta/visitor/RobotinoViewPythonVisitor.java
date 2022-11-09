@@ -442,12 +442,12 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
 
     @Override
     public Void visitPinGetValueSensor(PinGetValueSensor pinGetValueSensor) {
+        String port = configurationAst.getConfigurationComponent(pinGetValueSensor.getUserDefinedPort()).getComponentProperties().get("OUTPUT");
+
         if ( pinGetValueSensor.getMode().equals(SC.DIGITAL) ) {
-            this.sb.append(this.getBean(CodeGeneratorSetupBean.class).
-                getHelperMethodGenerator().getHelperMethodName(RobotinoMethods.GETDIGITALPIN)).append("()");
+            this.sb.append(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(RobotinoMethods.GETDIGITALPIN)).append("(" + port + ")");
         } else if ( pinGetValueSensor.getMode().equals(SC.ANALOG) ) {
-            this.sb.append(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().
-                getHelperMethodName(RobotinoMethods.GETANALOGPIN)).append("()");
+            this.sb.append(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(RobotinoMethods.GETANALOGPIN)).append("(" + port + ")");
         }
         return null;
     }
@@ -508,6 +508,13 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
 
     @Override
     public Void visitOpticalSensor(OpticalSensor opticalSensor) {
+        String port = "";
+        if ( opticalSensor.getMode().equals("OPENING") ) {
+            port = configurationAst.getConfigurationComponent(opticalSensor.getUserDefinedPort()).getComponentProperties().get("WH").substring(2);
+        } else {
+            port = configurationAst.getConfigurationComponent(opticalSensor.getUserDefinedPort()).getComponentProperties().get("BK").substring(2);
+        }
+        this.sb.append(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(RobotinoMethods.GETDIGITALPIN)).append("(" + port + ")");
         return null;
     }
 
