@@ -15,8 +15,6 @@ POSTVEL:
     def postVel():
         OMNIDRIVE_URL = "http://" + ROBOTINOIP + "/data/omnidrive"
         r = requests.post(url = OMNIDRIVE_URL, params = PARAMS, json = currentSpeed )
-        if r.status_code != requests.codes.ok:
-            raise RuntimeError("Error: post to %s with params %s failed", OMNIDRIVE_URL, PARAMS)
 
 GETDISTANCE:
   PYTHON: |
@@ -27,7 +25,7 @@ GETDISTANCE:
             data = r.json()
             return data[port-1] * 100
         else:
-            raise RuntimeError("Error: get from %s with params %s failed", DISTANCES_URL, PARAMS)
+            return -1
 
 ISBUMPED:
   PYTHON: |
@@ -38,8 +36,7 @@ ISBUMPED:
             data = r.json()
             return data["value"]
         else:
-            raise RuntimeError("Error: get from %s with params %s failed", BUMPER_URL, PARAMS)
-
+            return -1
 SETDIGITALPIN:
   PYTHON: |
     def setDigitalPin(pos, value):
@@ -58,7 +55,7 @@ GETDIGITALPIN:
             data = r.json()
             return data[pos-1]
         else:
-            raise RuntimeError("Error: get from %s with params %s failed", DISTANCES_URL, PARAMS)
+            return -1
 
 GETANALOGPIN:
   PYTHON: |
@@ -69,7 +66,7 @@ GETANALOGPIN:
             data = r.json()
             return data[pos-1]
         else:
-            raise RuntimeError("Error: get from %s with params %s failed", DISTANCES_URL, PARAMS)
+            return -1
 
 GETODOMETRY:
   PYTHON: |
@@ -88,7 +85,14 @@ GETODOMETRY:
             else:
                 return data
         else:
-            raise RuntimeError("Error: get from %s with params %s failed", DISTANCES_URL, PARAMS)
+            return -1
+
+RESETODOMETRY:
+  PYTHON: |
+    def resetOdometry(RV, x, y, z):
+        RV.writeFloatVector(1, [x, y, z, 1])
+        time.sleep(0.1)
+        RV.writeFloatVector(1, [])
 
 DRIVETOPOSITION:
   PYTHON: |
@@ -137,6 +141,8 @@ GETMARKERINFO:
         RV.writeFloat(3,id)
         time.sleep(0.001)
         value = RV.readFloatVector(4)
+        for i in range (1,4):
+          value[i] = value[i] * 100   
         if not value[0]:
             value = [False, -1,-1,-1,-1,-1,-1]
         return value

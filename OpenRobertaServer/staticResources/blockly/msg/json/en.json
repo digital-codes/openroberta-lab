@@ -1,7 +1,7 @@
 {
 	"@metadata": {
 		"author": "Ellen Spertus <ellen.spertus@gmail.com>",
-		"lastupdated": "2022-11-02 13:40:58.650528",
+		"lastupdated": "2022-11-09 13:23:12.706831",
 		"locale": "en",
 		"messagedocumentation" : "qqq"
 	},
@@ -1551,7 +1551,7 @@
 	"SENSOR_FSR_GETSAMPLE_TOOLTIP": "Get the current reading from the force sensitive resistor under the feet of the robot.",
 	"SENSOR_DETECTFACE": "face detector",
 	"SENSOR_DETECTFACE_GETSAMPLE_TOOLTIP": "Detect a face previously learned and saved.",
-	"SENSOR_DETECTMARK": "mark sensor",
+	"SENSOR_DETECTMARK": "marker sensor",
 	"SENSOR_DETECTMARK_NAO": "NAO Mark sensor",
 	"SENSOR_DETECTMARK_GETSAMPLE_TOOLTIP_NAO": "Returns one or an array of IDs (number) of the last detected NAO Mark(s). If no marks are detected, -1 or an array consisting of 1 element with value -1 is returned. For a list of NAO marks with corresponding numbers refer to the wiki.",
 	"SENSOR_ELECTRICCURRENT": "current sensor",
@@ -1910,5 +1910,8 @@
 	"SENSOR_IRHORIZONTAL_GETSAMPLE_TOOLTIP": "Gets the current reading from the infrared sensor.",
 	"FORWARD": "forward",
 	"BACKWARD": "backward",
-	"MATH_THYMIO_TRIG_TOOLTIP": "All trigonometric functions map the angles [-pi, pi] radians to [-32768, 32767]. The resultant sin and cos values are similarly mapped, namely [-1.0, 1.0] to [-32768, 32767]."
+	"MATH_THYMIO_TRIG_TOOLTIP": "All trigonometric functions map the angles [-pi, pi] radians to [-32768, 32767]. The resultant sin and cos values are similarly mapped, namely [-1.0, 1.0] to [-32768, 32767].",
+	"SENSOR_OPTICAL": "optical sensor",
+	"MODE_OPENING": "light",
+	"MODE_CLOSING": "dark"
 }

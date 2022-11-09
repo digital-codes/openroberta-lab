@@ -174,26 +174,32 @@ public abstract class RobotinoValidatorAndCollectorVisitor extends MotorValidato
     @Override
     public Void visitMarkerInformation(MarkerInformation markerInformation) {
         requiredComponentVisited(markerInformation, markerInformation.markerId);
+        usedHardwareBuilder.addUsedSensor(new UsedSensor("", RobotinoConstants.CAMERA, "marker"));
         return null;
     }
 
     @Override
     public Void visitDetectMarkSensor(DetectMarkSensor detectMarkSensor) {
+        usedHardwareBuilder.addUsedSensor(new UsedSensor(detectMarkSensor.getUserDefinedPort(), RobotinoConstants.CAMERA, detectMarkSensor.getMode()));
         return null;
     }
 
     @Override
     public Void visitCameraSensor(CameraSensor cameraSensor) {
+        usedHardwareBuilder.addUsedSensor(new UsedSensor(cameraSensor.getUserDefinedPort(), RobotinoConstants.CAMERA, cameraSensor.getMode()));
         return null;
     }
 
     @Override
     public Void visitColourBlob(ColourBlob colourBlob) {
+        usedHardwareBuilder.addUsedSensor(new UsedSensor(colourBlob.getUserDefinedPort(), RobotinoConstants.CAMERA, colourBlob.mode));
         return null;
     }
 
     @Override
     public Void visitCameraThreshold(CameraThreshold cameraThreshold) {
+        usedHardwareBuilder.addUsedSensor(new UsedSensor(cameraThreshold.getUserDefinedPort(), RobotinoConstants.CAMERA, cameraThreshold.mode));
+        requiredComponentVisited(cameraThreshold, cameraThreshold.threshold);
         return null;
     }
 }
