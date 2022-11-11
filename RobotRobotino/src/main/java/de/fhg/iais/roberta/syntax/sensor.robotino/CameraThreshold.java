@@ -21,7 +21,7 @@ public final class CameraThreshold extends Sensor implements WithUserDefinedPort
     @NepoValue(name = "VALUE", type = BlocklyType.NUMBER)
     public final Expr threshold;
 
-    public CameraThreshold(BlocklyProperties properties, String port, String mode, Expr threshold) {
+    public CameraThreshold(BlocklyProperties properties, String mode, String port, Expr threshold) {
         super(properties);
         Assert.nonEmptyString(port);
         this.mode = mode;

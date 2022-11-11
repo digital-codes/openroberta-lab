@@ -15,6 +15,7 @@ public final class MarkerInformation extends Sensor implements WithUserDefinedPo
 
     @NepoField(name = "MODE")
     public final String mode;
+
     @NepoField(name = BlocklyConstants.SENSORPORT, value = BlocklyConstants.EMPTY_PORT)
     public final String port;
 

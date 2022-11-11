@@ -39,7 +39,7 @@
     </instance>
     <instance x="100" y="320">
         <block type="robConf_camera" id="KqMg3pZC0;P,U6g*@7Vl" intask="true" deletable="false">
-            <field name="NAME">_I</field>
+            <field name="NAME">_C</field>
         </block>
     </instance>
     <instance x='100' y='370'>
