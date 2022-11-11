@@ -74,7 +74,6 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
         nlIndent();
         generateVariables();
         nlIndent();
-        generateTimerVariables(false);
         if ( !this.getBean(CodeGeneratorSetupBean.class).getUsedMethods().isEmpty() ) {
             String helperMethodImpls =
                 this.getBean(CodeGeneratorSetupBean.class)
@@ -82,6 +81,7 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
                     .getHelperMethodDefinitions(this.getBean(CodeGeneratorSetupBean.class).getUsedMethods());
             this.sb.append(helperMethodImpls);
         }
+        generateTimerVariables(false);
     }
 
     private void generateVariables() {
@@ -442,7 +442,7 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
 
     @Override
     public Void visitPinGetValueSensor(PinGetValueSensor pinGetValueSensor) {
-        String port = configurationAst.getConfigurationComponent(pinGetValueSensor.getUserDefinedPort()).getComponentProperties().get("OUTPUT");
+        String port = configurationAst.getConfigurationComponent(pinGetValueSensor.getUserDefinedPort()).getComponentProperties().get("OUTPUT").substring(2);
 
         if ( pinGetValueSensor.getMode().equals(SC.DIGITAL) ) {
             this.sb.append(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(RobotinoMethods.GETDIGITALPIN)).append("(" + port + ")");
@@ -472,7 +472,7 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
     public Void visitPinWriteValueAction(PinWriteValueAction pinWriteValueAction) {
         this.sb.append(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(RobotinoMethods.SETDIGITALPIN))
             .append("(")
-            .append(configurationAst.getConfigurationComponent(pinWriteValueAction.port).getComponentProperties().get("INPUT"))
+            .append(configurationAst.getConfigurationComponent(pinWriteValueAction.port).getComponentProperties().get("INPUT").substring(2))
             .append(", ");
         pinWriteValueAction.value.accept(this);
         this.sb.append(")");

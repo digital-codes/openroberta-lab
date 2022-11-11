@@ -37,14 +37,13 @@ ISBUMPED:
             return data["value"]
         else:
             return -1
+
 SETDIGITALPIN:
   PYTHON: |
     def setDigitalPin(pos, value):
         _digitalPinValues[pos-1] = int(value)
         DIGITALPIN_URL = "http://" + ROBOTINOIP + "/data/digitaloutputstatus"
-            r = requests.post(url = DIGITALPIN_URL, params = PARAMS, json = _digitalPinValues )
-            if r.status_code != requests.codes.ok:
-                #print("Error: post to %s with params %s failed", OMNIDRIVE_URL, PARAMS)
+        r = requests.post(url = DIGITALPIN_URL, params = PARAMS, json = _digitalPinValues )
 
 GETDIGITALPIN:
   PYTHON: |

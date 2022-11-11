@@ -13,7 +13,7 @@ import de.fhg.iais.roberta.syntax.sensor.robotino.OdometrySensor;
 import de.fhg.iais.roberta.syntax.sensor.robotino.OdometrySensorReset;
 import de.fhg.iais.roberta.visitor.RobotinoMethods;
 
-public class RobotinoROSValidatorAndCollectorVisitor extends RobotinoValidatorAndCollectorVisitor {
+public class RobotinoROSValidatorAndCollectorVisitor extends AbstractRobotinoValidatorAndCollectorVisitor {
 
     public RobotinoROSValidatorAndCollectorVisitor(
         ConfigurationAst robotConfiguration, ClassToInstanceMap<IProjectBean.IBuilder> beanBuilders) {
