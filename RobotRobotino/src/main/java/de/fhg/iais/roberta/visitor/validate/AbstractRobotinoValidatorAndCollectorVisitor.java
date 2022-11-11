@@ -9,6 +9,7 @@ import de.fhg.iais.roberta.components.ConfigurationAst;
 import de.fhg.iais.roberta.components.UsedActor;
 import de.fhg.iais.roberta.components.UsedSensor;
 import de.fhg.iais.roberta.constants.RobotinoConstants;
+import de.fhg.iais.roberta.syntax.Phrase;
 import de.fhg.iais.roberta.syntax.action.generic.PinWriteValueAction;
 import de.fhg.iais.roberta.syntax.action.motor.differential.MotorDriveStopAction;
 import de.fhg.iais.roberta.syntax.action.motor.differential.TurnAction;
@@ -30,7 +31,9 @@ import de.fhg.iais.roberta.syntax.sensor.robotino.MarkerInformation;
 import de.fhg.iais.roberta.syntax.sensor.robotino.OdometrySensor;
 import de.fhg.iais.roberta.syntax.sensor.robotino.OdometrySensorReset;
 import de.fhg.iais.roberta.syntax.sensor.robotino.OpticalSensor;
+import de.fhg.iais.roberta.util.dbc.Assert;
 import de.fhg.iais.roberta.util.syntax.SC;
+import de.fhg.iais.roberta.util.syntax.WithUserDefinedPort;
 import de.fhg.iais.roberta.visitor.IRobotinoVisitor;
 import de.fhg.iais.roberta.visitor.RobotinoMethods;
 
@@ -49,12 +52,6 @@ public abstract class AbstractRobotinoValidatorAndCollectorVisitor extends Motor
 
     @Override
     public Void visitTimerReset(TimerReset timerReset) {
-        return null;
-    }
-
-    @Override
-    public Void visitTouchSensor(TouchSensor touchSensor) {
-        usedHardwareBuilder.addUsedSensor(new UsedSensor(touchSensor.getUserDefinedPort(), SC.TOUCH, touchSensor.getMode()));
         return null;
     }
 
@@ -109,21 +106,8 @@ public abstract class AbstractRobotinoValidatorAndCollectorVisitor extends Motor
     }
 
     @Override
-    public Void visitInfraredSensor(InfraredSensor infraredSensor) {
-        usedMethodBuilder.addUsedMethod(RobotinoMethods.GETDISTANCE);
-        usedHardwareBuilder.addUsedSensor(new UsedSensor(infraredSensor.getUserDefinedPort(), SC.INFRARED, infraredSensor.getMode()));
-        return null;
-    }
-
-    @Override
-    public Void visitOdometrySensor(OdometrySensor odometrySensor) {
-        usedHardwareBuilder.addUsedSensor(new UsedSensor(odometrySensor.getUserDefinedPort(), RobotinoConstants.ODOMETRY, odometrySensor.getSlot()));
-        return null;
-    }
-
-    @Override
-    public Void visitOdometrySensorReset(OdometrySensorReset odometrySensorReset) {
-        usedHardwareBuilder.addUsedSensor(new UsedSensor(odometrySensorReset.getUserDefinedPort(), RobotinoConstants.ODOMETRY, odometrySensorReset.slot));
+    public Void visitMotorDriveStopAction(MotorDriveStopAction stopAction) {
+        usedHardwareBuilder.addUsedActor(new UsedActor(getConfigPort(RobotinoConstants.OMNIDRIVE), RobotinoConstants.OMNIDRIVE));
         return null;
     }
 
@@ -157,23 +141,36 @@ public abstract class AbstractRobotinoValidatorAndCollectorVisitor extends Motor
     }
 
     @Override
-    public Void visitMotorDriveStopAction(MotorDriveStopAction stopAction) {
-        usedHardwareBuilder.addUsedActor(new UsedActor(getConfigPort(RobotinoConstants.OMNIDRIVE), RobotinoConstants.OMNIDRIVE));
+    public Void visitOdometrySensor(OdometrySensor odometrySensor) {
+        checkSensorPort(odometrySensor);
+        usedHardwareBuilder.addUsedSensor(new UsedSensor(odometrySensor.getUserDefinedPort(), RobotinoConstants.ODOMETRY, odometrySensor.getSlot()));
         return null;
     }
 
-    private String getConfigPort(String name) {
-        Map<String, ConfigurationComponent> configComponents = this.robotConfiguration.getConfigurationComponents();
-        for ( ConfigurationComponent component : configComponents.values() ) {
-            if ( component.componentType.equals(name) ) {
-                return component.userDefinedPortName;
-            }
-        }
-        return "";
+    @Override
+    public Void visitOdometrySensorReset(OdometrySensorReset odometrySensorReset) {
+        checkSensorPort(odometrySensorReset);
+        usedHardwareBuilder.addUsedSensor(new UsedSensor(odometrySensorReset.getUserDefinedPort(), RobotinoConstants.ODOMETRY, odometrySensorReset.slot));
+        return null;
+    }
+
+    @Override
+    public Void visitInfraredSensor(InfraredSensor infraredSensor) {
+        usedMethodBuilder.addUsedMethod(RobotinoMethods.GETDISTANCE);
+        usedHardwareBuilder.addUsedSensor(new UsedSensor(infraredSensor.getUserDefinedPort(), SC.INFRARED, infraredSensor.getMode()));
+        return null;
+    }
+
+    @Override
+    public Void visitTouchSensor(TouchSensor touchSensor) {
+        checkSensorPort(touchSensor);
+        usedHardwareBuilder.addUsedSensor(new UsedSensor(touchSensor.getUserDefinedPort(), SC.TOUCH, touchSensor.getMode()));
+        return null;
     }
 
     @Override
     public Void visitMarkerInformation(MarkerInformation markerInformation) {
+        checkSensorPort(markerInformation);
         requiredComponentVisited(markerInformation, markerInformation.markerId);
         usedHardwareBuilder.addUsedSensor(new UsedSensor("", RobotinoConstants.CAMERA, "marker"));
         return null;
@@ -187,12 +184,14 @@ public abstract class AbstractRobotinoValidatorAndCollectorVisitor extends Motor
 
     @Override
     public Void visitCameraSensor(CameraSensor cameraSensor) {
+        checkSensorPort(cameraSensor);
         usedHardwareBuilder.addUsedSensor(new UsedSensor(cameraSensor.getUserDefinedPort(), RobotinoConstants.CAMERA, cameraSensor.getMode()));
         return null;
     }
 
     @Override
     public Void visitColourBlob(ColourBlob colourBlob) {
+        checkSensorPort(colourBlob);
         usedHardwareBuilder.addUsedSensor(new UsedSensor(colourBlob.getUserDefinedPort(), RobotinoConstants.CAMERA, colourBlob.mode));
         return null;
     }
@@ -206,7 +205,30 @@ public abstract class AbstractRobotinoValidatorAndCollectorVisitor extends Motor
 
     @Override
     public Void visitOpticalSensor(OpticalSensor opticalSensor) {
+        checkSensorPort(opticalSensor);
         usedHardwareBuilder.addUsedSensor(new UsedSensor(opticalSensor.getUserDefinedPort(), RobotinoConstants.OPTICAL_SENSOR, opticalSensor.getMode()));
         return null;
+    }
+
+    private void checkSensorPort(WithUserDefinedPort sensor) {
+        Assert.isTrue(sensor instanceof Phrase, "checking Port of a non Phrase");
+        Phrase sensorAsSensor = (Phrase) sensor;
+
+        String userDefinedPort = sensor.getUserDefinedPort();
+        ConfigurationComponent configurationComponent = this.robotConfiguration.optConfigurationComponent(userDefinedPort);
+        if ( configurationComponent == null ) {
+            addErrorToPhrase(sensorAsSensor, "CONFIGURATION_ERROR_SENSOR_MISSING");
+            return;
+        }
+    }
+
+    private String getConfigPort(String name) {
+        Map<String, ConfigurationComponent> configComponents = this.robotConfiguration.getConfigurationComponents();
+        for ( ConfigurationComponent component : configComponents.values() ) {
+            if ( component.componentType.equals(name) ) {
+                return component.userDefinedPortName;
+            }
+        }
+        return "";
     }
 }
