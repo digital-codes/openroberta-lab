@@ -35,9 +35,9 @@ import de.fhg.iais.roberta.visitor.IRobotinoVisitor;
 import de.fhg.iais.roberta.visitor.RobotinoMethods;
 
 
-public abstract class RobotinoValidatorAndCollectorVisitor extends MotorValidatorAndCollectorVisitor implements IRobotinoVisitor<Void> {
+public abstract class AbstractRobotinoValidatorAndCollectorVisitor extends MotorValidatorAndCollectorVisitor implements IRobotinoVisitor<Void> {
 
-    public RobotinoValidatorAndCollectorVisitor(ConfigurationAst robotConfiguration, ClassToInstanceMap<IProjectBean.IBuilder> beanBuilders) {
+    public AbstractRobotinoValidatorAndCollectorVisitor(ConfigurationAst robotConfiguration, ClassToInstanceMap<IProjectBean.IBuilder> beanBuilders) {
         super(robotConfiguration, beanBuilders);
     }
 

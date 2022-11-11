@@ -20,7 +20,7 @@ import de.fhg.iais.roberta.syntax.sensor.robotino.OpticalSensor;
 import de.fhg.iais.roberta.util.syntax.SC;
 import de.fhg.iais.roberta.visitor.RobotinoMethods;
 
-public class RobotinoViewValidatorAndCollectorVisitor extends RobotinoValidatorAndCollectorVisitor {
+public class RobotinoViewValidatorAndCollectorVisitor extends AbstractRobotinoValidatorAndCollectorVisitor {
 
     public RobotinoViewValidatorAndCollectorVisitor(
         ConfigurationAst robotConfiguration,
