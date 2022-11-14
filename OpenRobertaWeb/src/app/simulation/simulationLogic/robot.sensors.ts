@@ -2106,7 +2106,7 @@ export class CameraSensor implements ISensor, IUpdateAction, IDrawable, ILabel, 
     bB: Rectangle = { x: 0, y: 0, w: 0, h: 0 };
 
     labelPriority: number = 8;
-    private THRESHOLD: number = 100;
+    private THRESHOLD: number = 126;
     private line: number;
 
     constructor(pose: Pose, aov: number) {
@@ -2137,6 +2137,7 @@ export class CameraSensor implements ISensor, IUpdateAction, IDrawable, ILabel, 
     drawPriority: number = 1;
 
     draw(rCtx: CanvasRenderingContext2D, myRobot: RobotBase): void {
+        rCtx.save();
         rCtx.beginPath();
         rCtx.strokeStyle = '#0000ff';
         rCtx.beginPath();
@@ -2144,6 +2145,19 @@ export class CameraSensor implements ISensor, IUpdateAction, IDrawable, ILabel, 
         rCtx.arc(this.x, this.y, this.LINE_RADIUS, -Math.PI / 5, +Math.PI / 5, false);
         rCtx.closePath();
         rCtx.stroke();
+        /* rCtx.beginPath();
+         rCtx.moveTo(0, 0);
+         rCtx.lineTo(300, 0);
+         rCtx.stroke();
+         rCtx.rotate(-(myRobot as RobotBaseMobile).pose.theta);
+         rCtx.translate(-(myRobot as RobotBaseMobile).pose.x, -(myRobot as RobotBaseMobile).pose.y);
+         rCtx.beginPath();
+         rCtx.strokeStyle = '#ff0000';
+         if (this.bB) {
+             rCtx.rect(this.bB.x, this.bB.y, this.bB.w, this.bB.h);
+             rCtx.stroke();
+         }*/
+        rCtx.restore();
     }
 
     getLabel(): string {
@@ -2213,14 +2227,15 @@ export class CameraSensor implements ISensor, IUpdateAction, IDrawable, ILabel, 
             })
             .forEach((marker) => {
                 let myAngle = (Math.atan2(marker.y + marker.h / 2 - myPose.y, marker.x + marker.w / 2 - myPose.x) + 2 * Math.PI) % (2 * Math.PI);
-                if (left > right) {
-                    right += 2 * Math.PI;
+                let myRight = right;
+                if (left > myRight) {
+                    myRight += 2 * Math.PI;
                     if (myAngle < left) {
                         myAngle = myAngle + 2 * Math.PI;
                     }
                 }
                 let dist: number = Math.sqrt(marker.sqrDist);
-                marker.xDist = (((myAngle - left) / (right - left) - 0.5) * this.AOV * dist) / 3;
+                marker.xDist = (((myAngle - left) / (myRight - left) - 0.5) * this.AOV * dist) / 3;
                 marker.yDist = ((dist / this.MAX_CAM_Y - 0.5) * this.MAX_CAM_Y) / 3;
                 marker.zDist = dist / 3;
                 this.listOfMarkersFound.push(marker);
@@ -2229,95 +2244,120 @@ export class CameraSensor implements ISensor, IUpdateAction, IDrawable, ILabel, 
         this.line = -1;
         let leftPoint = { x: this.LINE_RADIUS * Math.cos(left), y: this.LINE_RADIUS * Math.sin(left) };
         let rightPoint = { x: this.LINE_RADIUS * Math.cos(right), y: this.LINE_RADIUS * Math.sin(right) };
-        let dist = SIMATH.getDistance(leftPoint, rightPoint);
+        let l = Math.atan2(leftPoint.y, leftPoint.x);
+        let r = Math.atan2(rightPoint.y, rightPoint.x);
         let pixYWidth = Math.abs(rightPoint.y - leftPoint.y);
         let pixXWidth = Math.abs(rightPoint.x - leftPoint.x);
-        let redPixOld;
+        let redPixOld = undefined;
+        this.bB = { h: 0, w: 0, x: 0, y: 0 };
 
         if (pixYWidth > pixXWidth) {
             if (leftPoint.x > 0) {
                 this.bB.x = Math.min(leftPoint.x, rightPoint.x) + this.rx;
                 this.bB.y = Math.min(leftPoint.y, rightPoint.y) + this.ry;
-                this.bB.w = Math.max(Math.max(leftPoint.x, rightPoint.x), this.LINE_RADIUS) + this.rx - this.bB.x;
-                this.bB.h = -this.bB.y + Math.max(Math.max(leftPoint.y, rightPoint.y)) + this.ry;
-                let data: ImageData = uCtx.getImageData(this.bB.x, this.bB.y, this.bB.w, this.bB.h);
-                for (let i = 0; i < data.height; i++) {
-                    let a: number = this.LINE_RADIUS * this.LINE_RADIUS - (i + this.bB.y - this.ry) * (i + this.bB.y - this.ry);
-                    let xi = Math.round(Math.sqrt(a) - (this.bB.x - this.rx));
-                    let myIndex = (xi + i * data.width) * 4;
-                    let redPix = this.calculatePix(data.data.slice(myIndex, myIndex + 3));
-                    if (redPixOld == undefined) {
+                this.bB.w = Math.max(Math.max(leftPoint.x, rightPoint.x), this.LINE_RADIUS) + this.rx - this.bB.x + 1;
+                this.bB.h = -this.bB.y + Math.max(Math.max(leftPoint.y, rightPoint.y)) + this.ry + 1;
+                this.constrainBB(uCtx);
+                let data: ImageData = this.bB && uCtx.getImageData(this.bB.x, this.bB.y, this.bB.w, this.bB.h);
+                let dataD: ImageData = this.bB && udCtx.getImageData(this.bB.x, this.bB.y, this.bB.w, this.bB.h);
+                if (data) {
+                    for (let i = 0; i < data.height; i++) {
+                        let a: number = this.LINE_RADIUS * this.LINE_RADIUS - (i + this.bB.y - this.ry) * (i + this.bB.y - this.ry);
+                        let xi = Math.round(Math.sqrt(a) - (this.bB.x - this.rx));
+                        let myIndex = (xi + i * data.width) * 4;
+                        const __ret = this.getPixelData(dataD, myIndex, data, redPixOld);
+                        let redPix = __ret.redPix;
+                        redPixOld = __ret.redPixOld;
+                        if (redPix !== redPixOld) {
+                            let me = Math.atan2(i + this.bB.y - this.ry, xi + this.bB.x - this.rx);
+                            this.line = (me - l) / (r - l) + -0.5;
+                            break;
+                        }
                         redPixOld = redPix;
                     }
-                    if (Math.abs(redPix - redPixOld) > this.THRESHOLD) {
-                        this.line = i / pixYWidth - 0.5;
-                        break;
-                    }
-                    redPixOld = redPix;
                 }
             } else {
-                this.bB.y = Math.min(leftPoint.y, rightPoint.y) + this.ry;
-                this.bB.x = Math.min(Math.min(leftPoint.x, rightPoint.x), -this.LINE_RADIUS) + this.rx;
+                this.bB.y = Math.min(leftPoint.y, rightPoint.y) + this.ry - 1;
+                this.bB.x = Math.min(Math.min(leftPoint.x, rightPoint.x), -this.LINE_RADIUS) + this.rx - 1;
                 this.bB.w = Math.max(leftPoint.x, rightPoint.x) + this.rx - this.bB.x;
                 this.bB.h = -this.bB.y + Math.max(Math.max(leftPoint.y, rightPoint.y)) + this.ry;
-                let data: ImageData = uCtx.getImageData(this.bB.x, this.bB.y, this.bB.w, this.bB.h);
-                for (let i = data.height - 1; i >= 0; i--) {
-                    let a: number = this.LINE_RADIUS * this.LINE_RADIUS - (i + this.bB.y - this.ry) * (i + this.bB.y - this.ry);
-                    let xi = Math.round(-Math.sqrt(a) - (this.bB.x - this.rx));
-                    let myIndex = (xi + i * data.width) * 4;
-                    let redPix = this.calculatePix(data.data.slice(myIndex, myIndex + 3));
-                    if (redPixOld == undefined) {
+                this.constrainBB(uCtx);
+                let data: ImageData = this.bB && uCtx.getImageData(this.bB.x, this.bB.y, this.bB.w, this.bB.h);
+                let dataD: ImageData = this.bB && udCtx.getImageData(this.bB.x, this.bB.y, this.bB.w, this.bB.h);
+                if (data) {
+                    for (let i = data.height - 1; i >= 0; i--) {
+                        let a: number = this.LINE_RADIUS * this.LINE_RADIUS - (i + this.bB.y - this.ry) * (i + this.bB.y - this.ry);
+                        let xi = Math.round(-Math.sqrt(a) - (this.bB.x - this.rx));
+                        let myIndex = (xi + i * data.width) * 4 - 4;
+                        const __ret = this.getPixelData(dataD, myIndex, data, redPixOld);
+                        let redPix = __ret.redPix;
+                        redPixOld = __ret.redPixOld;
+                        if (redPix !== redPixOld) {
+                            let me = Math.atan2(i + this.bB.y - this.ry, xi + this.bB.x - this.rx);
+                            if (me <= 0) {
+                                me += 2 * Math.PI;
+                            }
+                            if (l <= 0) {
+                                l += 2 * Math.PI;
+                            }
+                            if (r <= 0) {
+                                r += 2 * Math.PI;
+                            }
+                            this.line = (me - l) / (r - l) - 0.5;
+                            break;
+                        }
                         redPixOld = redPix;
                     }
-                    if (Math.abs(redPix - redPixOld) > this.THRESHOLD) {
-                        this.line = 1 - i / pixYWidth - 0.5;
-                        break;
-                    }
-                    redPixOld = redPix;
                 }
             }
         } else {
             if (leftPoint.y < 0) {
                 this.bB.x = Math.min(Math.min(leftPoint.x, rightPoint.x), this.LINE_RADIUS) + this.rx;
-                this.bB.w = Math.max(leftPoint.x, rightPoint.x) + this.rx - this.bB.x;
+                this.bB.w = Math.max(leftPoint.x, rightPoint.x) + this.rx - this.bB.x + 1;
                 this.bB.y = Math.min(Math.min(leftPoint.y, rightPoint.y), -this.LINE_RADIUS) + this.ry;
-                this.bB.h = Math.max(leftPoint.y, rightPoint.y) + this.ry - this.bB.y;
-                let data: ImageData = uCtx.getImageData(this.bB.x, this.bB.y, this.bB.w, this.bB.h);
-                for (let i = 0; i < data.width; i++) {
-                    let a: number = this.LINE_RADIUS * this.LINE_RADIUS - (i + this.bB.x - this.rx) * (i + this.bB.x - this.rx);
-                    let xi = Math.round(-Math.sqrt(a) - this.bB.y + this.ry);
-                    let myIndex = (i + xi * data.width) * 4;
-                    let redPix = this.calculatePix(data.data.slice(myIndex, myIndex + 3));
-                    if (redPixOld == undefined) {
+                this.bB.h = Math.max(leftPoint.y, rightPoint.y) + this.ry - this.bB.y + 1;
+                this.constrainBB(uCtx);
+                let data: ImageData = this.bB && uCtx.getImageData(this.bB.x, this.bB.y, this.bB.w + 1, this.bB.h + 1);
+                let dataD: ImageData = this.bB && udCtx.getImageData(this.bB.x, this.bB.y, this.bB.w + 1, this.bB.h + 1);
+                if (data) {
+                    for (let i = 0; i < data.width; i++) {
+                        let a: number = this.LINE_RADIUS * this.LINE_RADIUS - (i + this.bB.x - this.rx) * (i + this.bB.x - this.rx);
+                        let yi = Math.round(-Math.sqrt(a) - this.bB.y + this.ry);
+                        let myIndex = (i + yi * data.width) * 4;
+                        const __ret = this.getPixelData(dataD, myIndex, data, redPixOld);
+                        let redPix = __ret.redPix;
+                        redPixOld = __ret.redPixOld;
+                        if (redPix !== redPixOld) {
+                            let me = Math.atan2(yi + this.bB.y - this.ry, i + this.bB.x - this.rx);
+                            this.line = -1 * ((me - r) / (l - r) - 0.5);
+                            break;
+                        }
                         redPixOld = redPix;
                     }
-                    if (Math.abs(redPix - redPixOld) > this.THRESHOLD) {
-                        this.line = i / pixXWidth - 0.5;
-                        break;
-                    }
-                    redPixOld = redPix;
                 }
             } else {
                 this.bB.x = Math.min(Math.min(leftPoint.x, rightPoint.x), this.LINE_RADIUS) + this.rx;
-                this.bB.w = Math.max(leftPoint.x, rightPoint.x) + this.rx - this.bB.x;
+                this.bB.w = Math.max(leftPoint.x, rightPoint.x) + this.rx - this.bB.x + 1;
                 this.bB.y = Math.min(leftPoint.y, rightPoint.y) + this.ry;
-                this.bB.h = Math.max(Math.max(leftPoint.y, rightPoint.y), this.LINE_RADIUS) + this.ry - this.bB.y;
-                let data: ImageData = uCtx.getImageData(this.bB.x, this.bB.y, this.bB.w, this.bB.h);
-
-                for (let i = data.width - 1; i >= 0; i--) {
-                    let a: number = this.LINE_RADIUS * this.LINE_RADIUS - (i + this.bB.x - this.rx) * (i + this.bB.x - this.rx);
-                    let xi = Math.round(Math.sqrt(a) - this.bB.y + this.ry) - 1;
-                    let myIndex = (i + xi * data.width) * 4;
-                    let redPix = this.calculatePix(data.data.slice(myIndex, myIndex + 3));
-                    if (redPixOld == undefined) {
+                this.bB.h = Math.max(Math.max(leftPoint.y, rightPoint.y), this.LINE_RADIUS) + this.ry - this.bB.y + 1;
+                this.constrainBB(uCtx);
+                let data: ImageData = this.bB && uCtx.getImageData(this.bB.x, this.bB.y, this.bB.w, this.bB.h);
+                let dataD: ImageData = this.bB && udCtx.getImageData(this.bB.x, this.bB.y, this.bB.w, this.bB.h);
+                if (data) {
+                    for (let i = data.width - 1; i >= 0; i--) {
+                        let a: number = this.LINE_RADIUS * this.LINE_RADIUS - (i + this.bB.x - this.rx) * (i + this.bB.x - this.rx);
+                        let yi = Math.round(Math.sqrt(a) - this.bB.y + this.ry) - 1;
+                        let myIndex = (i + yi * data.width) * 4 - 4;
+                        const __ret = this.getPixelData(dataD, myIndex, data, redPixOld);
+                        let redPix = __ret.redPix;
+                        redPixOld = __ret.redPixOld;
+                        if (redPix !== redPixOld) {
+                            let me = Math.atan2(yi + this.bB.y - this.ry, i + this.bB.x - this.rx);
+                            this.line = (me - l) / (r - l) - 0.5;
+                            break;
+                        }
                         redPixOld = redPix;
                     }
-
-                    if (Math.abs(redPix - redPixOld) > this.THRESHOLD) {
-                        this.line = 0.5 - i / pixXWidth;
-                        break;
-                    }
-                    redPixOld = redPix;
                 }
             }
         }
@@ -2333,7 +2373,7 @@ export class CameraSensor implements ISensor, IUpdateAction, IDrawable, ILabel, 
         } else {
             values['marker'][C.ID] = this.listOfMarkersFound.map((marker) => marker.markerId);
             this.listOfMarkersFound.forEach((marker) => {
-                values['marker'][C.INFO][marker.markerId] = [marker.xDist, marker.yDist, 0];
+                values['marker'][C.INFO][marker.markerId] = [marker.xDist, marker.yDist, marker.zDist];
             });
         }
         values['camera'] = {};
@@ -2347,10 +2387,10 @@ export class CameraSensor implements ISensor, IUpdateAction, IDrawable, ILabel, 
                 obstacle.sqrDist = SIMATH.getDistance(myPose, obstacle);
                 if (obstacle.sqrDist <= this.MAX_BLOB_DIST_SQR) {
                     let myObstaclePoints: Point[] = [{ x: obstacle.x - myPose.x, y: obstacle.y - myPose.y }]; /*,
-                        { x: obstacle.x + obstacle.w - myPose.x, y: obstacle.y - myPose.y },
-                        { x: obstacle.x + obstacle.w - myPose.x, y: obstacle.y + obstacle.h - myPose.y },
-                        { x: obstacle.x - myPose.x, y: obstacle.y + obstacle.h - myPose.y },
-                    ];*/
+                       { x: obstacle.x + obstacle.w - myPose.x, y: obstacle.y - myPose.y },
+                       { x: obstacle.x + obstacle.w - myPose.x, y: obstacle.y + obstacle.h - myPose.y },
+                       { x: obstacle.x - myPose.x, y: obstacle.y + obstacle.h - myPose.y },
+                   ];*/
 
                     let visible: boolean = true;
                     for (let i = 0; i < myObstaclePoints.length; i++) {
@@ -2368,16 +2408,24 @@ export class CameraSensor implements ISensor, IUpdateAction, IDrawable, ILabel, 
                 }
             }
         });
-        //}
+    }
+
+    private getPixelData(dataD: ImageData, myIndex: number, data: ImageData, redPixOld) {
+        if (dataD.data[myIndex + 3] === 255) {
+            for (let j = myIndex; j < myIndex + 3; j++) {
+                data.data[j] = dataD.data[j];
+            }
+        }
+        let redPix = this.calculatePix(data.data.slice(myIndex, myIndex + 3));
+        if (redPixOld == undefined) {
+            redPixOld = redPix;
+        }
+        return { redPix, redPixOld };
     }
 
     private calculatePix(rawPix: Uint8ClampedArray): number {
-        let i = 3;
-        let pix = 0;
-        while (i--) {
-            pix += rawPix[i];
-        }
-        return pix / 3;
+        let pix = 0.299 * rawPix[0] + 0.587 * rawPix[1] + 0.114 * rawPix[2];
+        return pix > this.THRESHOLD ? 255 : 0;
     }
 
     private checkVisibility(id: number, mP: Point, personalObstacleList: any[]): Point {
@@ -2424,5 +2472,24 @@ export class CameraSensor implements ISensor, IUpdateAction, IDrawable, ILabel, 
             }
         }
         return false;
+    }
+
+    private constrainBB(uCtx: CanvasRenderingContext2D) {
+        this.bB.x = this.bB.x < 0 ? 0 : this.bB.x;
+        this.bB.y = this.bB.y < 0 ? 0 : this.bB.y;
+        if (this.bB.x + this.bB.w > uCtx.canvas.width) {
+            this.bB.w = uCtx.canvas.width - this.bB.x;
+            if (this.bB.w < 1) {
+                this.bB = null;
+                return;
+            }
+        }
+        if (this.bB.y + this.bB.h > uCtx.canvas.height) {
+            this.bB.h = uCtx.canvas.width - this.bB.y;
+            if (this.bB.h < 1) {
+                this.bB = null;
+                return;
+            }
+        }
     }
 }

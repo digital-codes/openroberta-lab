@@ -145,7 +145,7 @@ define(["require", "exports", "message", "util", "guiState.controller", "nn.cont
             $('.simWindow .close').onWrap('click.sim', function () {
                 $($(this).parents('.simWindow:first')).animate({
                     opacity: 'hide',
-                    top: 'hide'
+                    top: 'hide',
                 }, 300);
                 return false;
             }, 'sim window close clicked');
@@ -154,7 +154,8 @@ define(["require", "exports", "message", "util", "guiState.controller", "nn.cont
                 return false;
             }, 'sim reset pose clicked');
             $('.simAddMarker').onWrap('click.sim', function (e) {
-                SIM.addMarker && SIM.addMarker(e.target.getAttribute('data-marker'));
+                var id = e.target.getAttribute('data-marker') || e.currentTarget.text;
+                SIM.addMarker && SIM.addMarker(id);
                 return false;
             }, 'sim add marker clicked');
             $('#simAddObstacleRectangle').onWrap('click.sim', function () {
@@ -419,7 +420,7 @@ define(["require", "exports", "message", "util", "guiState.controller", "nn.cont
                     }
                     parent.find('input[name=quantity]').val(newValue);
                     $('#multipleRobotsTable').bootstrapTable('updateCell', { index: index, field: 'num', value: newValue });
-                }
+                },
             };
             return _this;
         }
@@ -550,7 +551,7 @@ define(["require", "exports", "message", "util", "guiState.controller", "nn.cont
                 creator: '',
                 date: '',
                 num: 0,
-                blockly: true
+                blockly: true,
             });
             if (GUISTATE_C.isUserLoggedIn()) {
                 PROGLIST.loadProgList(function (result) {
@@ -564,7 +565,7 @@ define(["require", "exports", "message", "util", "guiState.controller", "nn.cont
                                 robot: robotType_1,
                                 creator: item[1],
                                 date: item[4],
-                                num: 0
+                                num: 0,
                             });
                         });
                     }
@@ -585,7 +586,7 @@ define(["require", "exports", "message", "util", "guiState.controller", "nn.cont
                 icons: {
                     paginationSwitchDown: 'typcn-document-text',
                     paginationSwitchUp: 'typcn-book',
-                    refresh: 'typcn-refresh'
+                    refresh: 'typcn-refresh',
                 },
                 pagination: 'true',
                 buttonsAlign: 'right',
@@ -594,19 +595,19 @@ define(["require", "exports", "message", "util", "guiState.controller", "nn.cont
                 columns: [
                     {
                         field: 'programName',
-                        title: '<span lkey=\'Blockly.Msg.DATATABLE_PROGRAM_NAME\'>' + (Blockly.Msg.DATATABLE_PROGRAM_NAME || 'Name des Programms') + '</span>',
-                        sortable: true
+                        title: "<span lkey='Blockly.Msg.DATATABLE_PROGRAM_NAME'>" + (Blockly.Msg.DATATABLE_PROGRAM_NAME || 'Name des Programms') + '</span>',
+                        sortable: true,
                     },
                     {
                         field: 'creator',
-                        title: '<span lkey=\'Blockly.Msg.DATATABLE_CREATED_BY\'>' + (Blockly.Msg.DATATABLE_CREATED_BY || 'Erzeugt von') + '</span>',
-                        sortable: true
+                        title: "<span lkey='Blockly.Msg.DATATABLE_CREATED_BY'>" + (Blockly.Msg.DATATABLE_CREATED_BY || 'Erzeugt von') + '</span>',
+                        sortable: true,
                     },
                     {
                         field: 'date',
-                        title: '<span lkey=\'Blockly.Msg.DATATABLE_CREATED_ON\'>' + (Blockly.Msg.DATATABLE_CREATED_ON || 'Erzeugt am') + '</span>',
+                        title: "<span lkey='Blockly.Msg.DATATABLE_CREATED_ON'>" + (Blockly.Msg.DATATABLE_CREATED_ON || 'Erzeugt am') + '</span>',
                         sortable: true,
-                        formatter: UTIL.formatDate
+                        formatter: UTIL.formatDate,
                     },
                     {
                         field: 'num',
@@ -614,10 +615,10 @@ define(["require", "exports", "message", "util", "guiState.controller", "nn.cont
                         align: 'left',
                         valign: 'top',
                         formatter: C.formatTimesProgram,
-                        width: '117px'
-                    }
+                        width: '117px',
+                    },
                 ],
-                data: dataList
+                data: dataList,
             });
             $('#showMultipleSimPrograms').modal('show');
         };

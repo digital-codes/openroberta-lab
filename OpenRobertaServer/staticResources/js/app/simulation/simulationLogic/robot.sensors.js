@@ -1651,7 +1651,7 @@ define(["require", "exports", "robot.base.mobile", "interpreter.constants", "sim
             this.listOfMarkersFound = [];
             this.bB = { x: 0, y: 0, w: 0, h: 0 };
             this.labelPriority = 8;
-            this.THRESHOLD = 100;
+            this.THRESHOLD = 126;
             this.drawPriority = 1;
             this.x = pose.x;
             this.y = pose.y;
@@ -1676,6 +1676,7 @@ define(["require", "exports", "robot.base.mobile", "interpreter.constants", "sim
             };
         };
         CameraSensor.prototype.draw = function (rCtx, myRobot) {
+            rCtx.save();
             rCtx.beginPath();
             rCtx.strokeStyle = '#0000ff';
             rCtx.beginPath();
@@ -1683,6 +1684,19 @@ define(["require", "exports", "robot.base.mobile", "interpreter.constants", "sim
             rCtx.arc(this.x, this.y, this.LINE_RADIUS, -Math.PI / 5, +Math.PI / 5, false);
             rCtx.closePath();
             rCtx.stroke();
+            /* rCtx.beginPath();
+             rCtx.moveTo(0, 0);
+             rCtx.lineTo(300, 0);
+             rCtx.stroke();
+             rCtx.rotate(-(myRobot as RobotBaseMobile).pose.theta);
+             rCtx.translate(-(myRobot as RobotBaseMobile).pose.x, -(myRobot as RobotBaseMobile).pose.y);
+             rCtx.beginPath();
+             rCtx.strokeStyle = '#ff0000';
+             if (this.bB) {
+                 rCtx.rect(this.bB.x, this.bB.y, this.bB.w, this.bB.h);
+                 rCtx.stroke();
+             }*/
+            rCtx.restore();
         };
         CameraSensor.prototype.getLabel = function () {
             var myLabel = '<div><label>' + 'Line Sensor' + '</label><span>' + UTIL.round(this.line, 2) + '</span></div>';
@@ -1739,14 +1753,15 @@ define(["require", "exports", "robot.base.mobile", "interpreter.constants", "sim
             })
                 .forEach(function (marker) {
                 var myAngle = (Math.atan2(marker.y + marker.h / 2 - myPose.y, marker.x + marker.w / 2 - myPose.x) + 2 * Math.PI) % (2 * Math.PI);
-                if (left > right) {
-                    right += 2 * Math.PI;
+                var myRight = right;
+                if (left > myRight) {
+                    myRight += 2 * Math.PI;
                     if (myAngle < left) {
                         myAngle = myAngle + 2 * Math.PI;
                     }
                 }
                 var dist = Math.sqrt(marker.sqrDist);
-                marker.xDist = (((myAngle - left) / (right - left) - 0.5) * _this.AOV * dist) / 3;
+                marker.xDist = (((myAngle - left) / (myRight - left) - 0.5) * _this.AOV * dist) / 3;
                 marker.yDist = ((dist / _this.MAX_CAM_Y - 0.5) * _this.MAX_CAM_Y) / 3;
                 marker.zDist = dist / 3;
                 _this.listOfMarkersFound.push(marker);
@@ -1754,95 +1769,122 @@ define(["require", "exports", "robot.base.mobile", "interpreter.constants", "sim
             this.line = -1;
             var leftPoint = { x: this.LINE_RADIUS * Math.cos(left), y: this.LINE_RADIUS * Math.sin(left) };
             var rightPoint = { x: this.LINE_RADIUS * Math.cos(right), y: this.LINE_RADIUS * Math.sin(right) };
-            var dist = SIMATH.getDistance(leftPoint, rightPoint);
+            var l = Math.atan2(leftPoint.y, leftPoint.x);
+            var r = Math.atan2(rightPoint.y, rightPoint.x);
             var pixYWidth = Math.abs(rightPoint.y - leftPoint.y);
             var pixXWidth = Math.abs(rightPoint.x - leftPoint.x);
-            var redPixOld;
+            var redPixOld = undefined;
+            this.bB = { h: 0, w: 0, x: 0, y: 0 };
             if (pixYWidth > pixXWidth) {
                 if (leftPoint.x > 0) {
                     this.bB.x = Math.min(leftPoint.x, rightPoint.x) + this.rx;
                     this.bB.y = Math.min(leftPoint.y, rightPoint.y) + this.ry;
-                    this.bB.w = Math.max(Math.max(leftPoint.x, rightPoint.x), this.LINE_RADIUS) + this.rx - this.bB.x;
-                    this.bB.h = -this.bB.y + Math.max(Math.max(leftPoint.y, rightPoint.y)) + this.ry;
-                    var data = uCtx.getImageData(this.bB.x, this.bB.y, this.bB.w, this.bB.h);
-                    for (var i = 0; i < data.height; i++) {
-                        var a = this.LINE_RADIUS * this.LINE_RADIUS - (i + this.bB.y - this.ry) * (i + this.bB.y - this.ry);
-                        var xi = Math.round(Math.sqrt(a) - (this.bB.x - this.rx));
-                        var myIndex = (xi + i * data.width) * 4;
-                        var redPix = this.calculatePix(data.data.slice(myIndex, myIndex + 3));
-                        if (redPixOld == undefined) {
+                    this.bB.w = Math.max(Math.max(leftPoint.x, rightPoint.x), this.LINE_RADIUS) + this.rx - this.bB.x + 1;
+                    this.bB.h = -this.bB.y + Math.max(Math.max(leftPoint.y, rightPoint.y)) + this.ry + 1;
+                    this.constrainBB(uCtx);
+                    var data = this.bB && uCtx.getImageData(this.bB.x, this.bB.y, this.bB.w, this.bB.h);
+                    var dataD = this.bB && udCtx.getImageData(this.bB.x, this.bB.y, this.bB.w, this.bB.h);
+                    if (data) {
+                        for (var i = 0; i < data.height; i++) {
+                            var a = this.LINE_RADIUS * this.LINE_RADIUS - (i + this.bB.y - this.ry) * (i + this.bB.y - this.ry);
+                            var xi = Math.round(Math.sqrt(a) - (this.bB.x - this.rx));
+                            var myIndex = (xi + i * data.width) * 4;
+                            var __ret = this.getPixelData(dataD, myIndex, data, redPixOld);
+                            var redPix = __ret.redPix;
+                            redPixOld = __ret.redPixOld;
+                            if (redPix !== redPixOld) {
+                                var me = Math.atan2(i + this.bB.y - this.ry, xi + this.bB.x - this.rx);
+                                this.line = (me - l) / (r - l) + -0.5;
+                                break;
+                            }
                             redPixOld = redPix;
                         }
-                        if (Math.abs(redPix - redPixOld) > this.THRESHOLD) {
-                            this.line = i / pixYWidth - 0.5;
-                            break;
-                        }
-                        redPixOld = redPix;
                     }
                 }
                 else {
-                    this.bB.y = Math.min(leftPoint.y, rightPoint.y) + this.ry;
-                    this.bB.x = Math.min(Math.min(leftPoint.x, rightPoint.x), -this.LINE_RADIUS) + this.rx;
+                    this.bB.y = Math.min(leftPoint.y, rightPoint.y) + this.ry - 1;
+                    this.bB.x = Math.min(Math.min(leftPoint.x, rightPoint.x), -this.LINE_RADIUS) + this.rx - 1;
                     this.bB.w = Math.max(leftPoint.x, rightPoint.x) + this.rx - this.bB.x;
                     this.bB.h = -this.bB.y + Math.max(Math.max(leftPoint.y, rightPoint.y)) + this.ry;
-                    var data = uCtx.getImageData(this.bB.x, this.bB.y, this.bB.w, this.bB.h);
-                    for (var i = data.height - 1; i >= 0; i--) {
-                        var a = this.LINE_RADIUS * this.LINE_RADIUS - (i + this.bB.y - this.ry) * (i + this.bB.y - this.ry);
-                        var xi = Math.round(-Math.sqrt(a) - (this.bB.x - this.rx));
-                        var myIndex = (xi + i * data.width) * 4;
-                        var redPix = this.calculatePix(data.data.slice(myIndex, myIndex + 3));
-                        if (redPixOld == undefined) {
+                    this.constrainBB(uCtx);
+                    var data = this.bB && uCtx.getImageData(this.bB.x, this.bB.y, this.bB.w, this.bB.h);
+                    var dataD = this.bB && udCtx.getImageData(this.bB.x, this.bB.y, this.bB.w, this.bB.h);
+                    if (data) {
+                        for (var i = data.height - 1; i >= 0; i--) {
+                            var a = this.LINE_RADIUS * this.LINE_RADIUS - (i + this.bB.y - this.ry) * (i + this.bB.y - this.ry);
+                            var xi = Math.round(-Math.sqrt(a) - (this.bB.x - this.rx));
+                            var myIndex = (xi + i * data.width) * 4 - 4;
+                            var __ret = this.getPixelData(dataD, myIndex, data, redPixOld);
+                            var redPix = __ret.redPix;
+                            redPixOld = __ret.redPixOld;
+                            if (redPix !== redPixOld) {
+                                var me = Math.atan2(i + this.bB.y - this.ry, xi + this.bB.x - this.rx);
+                                if (me <= 0) {
+                                    me += 2 * Math.PI;
+                                }
+                                if (l <= 0) {
+                                    l += 2 * Math.PI;
+                                }
+                                if (r <= 0) {
+                                    r += 2 * Math.PI;
+                                }
+                                this.line = (me - l) / (r - l) - 0.5;
+                                break;
+                            }
                             redPixOld = redPix;
                         }
-                        if (Math.abs(redPix - redPixOld) > this.THRESHOLD) {
-                            this.line = 1 - i / pixYWidth - 0.5;
-                            break;
-                        }
-                        redPixOld = redPix;
                     }
                 }
             }
             else {
                 if (leftPoint.y < 0) {
                     this.bB.x = Math.min(Math.min(leftPoint.x, rightPoint.x), this.LINE_RADIUS) + this.rx;
-                    this.bB.w = Math.max(leftPoint.x, rightPoint.x) + this.rx - this.bB.x;
+                    this.bB.w = Math.max(leftPoint.x, rightPoint.x) + this.rx - this.bB.x + 1;
                     this.bB.y = Math.min(Math.min(leftPoint.y, rightPoint.y), -this.LINE_RADIUS) + this.ry;
-                    this.bB.h = Math.max(leftPoint.y, rightPoint.y) + this.ry - this.bB.y;
-                    var data = uCtx.getImageData(this.bB.x, this.bB.y, this.bB.w, this.bB.h);
-                    for (var i = 0; i < data.width; i++) {
-                        var a = this.LINE_RADIUS * this.LINE_RADIUS - (i + this.bB.x - this.rx) * (i + this.bB.x - this.rx);
-                        var xi = Math.round(-Math.sqrt(a) - this.bB.y + this.ry);
-                        var myIndex = (i + xi * data.width) * 4;
-                        var redPix = this.calculatePix(data.data.slice(myIndex, myIndex + 3));
-                        if (redPixOld == undefined) {
+                    this.bB.h = Math.max(leftPoint.y, rightPoint.y) + this.ry - this.bB.y + 1;
+                    this.constrainBB(uCtx);
+                    var data = this.bB && uCtx.getImageData(this.bB.x, this.bB.y, this.bB.w + 1, this.bB.h + 1);
+                    var dataD = this.bB && udCtx.getImageData(this.bB.x, this.bB.y, this.bB.w + 1, this.bB.h + 1);
+                    if (data) {
+                        for (var i = 0; i < data.width; i++) {
+                            var a = this.LINE_RADIUS * this.LINE_RADIUS - (i + this.bB.x - this.rx) * (i + this.bB.x - this.rx);
+                            var yi = Math.round(-Math.sqrt(a) - this.bB.y + this.ry);
+                            var myIndex = (i + yi * data.width) * 4;
+                            var __ret = this.getPixelData(dataD, myIndex, data, redPixOld);
+                            var redPix = __ret.redPix;
+                            redPixOld = __ret.redPixOld;
+                            if (redPix !== redPixOld) {
+                                var me = Math.atan2(yi + this.bB.y - this.ry, i + this.bB.x - this.rx);
+                                this.line = -1 * ((me - r) / (l - r) - 0.5);
+                                break;
+                            }
                             redPixOld = redPix;
                         }
-                        if (Math.abs(redPix - redPixOld) > this.THRESHOLD) {
-                            this.line = i / pixXWidth - 0.5;
-                            break;
-                        }
-                        redPixOld = redPix;
                     }
                 }
                 else {
                     this.bB.x = Math.min(Math.min(leftPoint.x, rightPoint.x), this.LINE_RADIUS) + this.rx;
-                    this.bB.w = Math.max(leftPoint.x, rightPoint.x) + this.rx - this.bB.x;
+                    this.bB.w = Math.max(leftPoint.x, rightPoint.x) + this.rx - this.bB.x + 1;
                     this.bB.y = Math.min(leftPoint.y, rightPoint.y) + this.ry;
-                    this.bB.h = Math.max(Math.max(leftPoint.y, rightPoint.y), this.LINE_RADIUS) + this.ry - this.bB.y;
-                    var data = uCtx.getImageData(this.bB.x, this.bB.y, this.bB.w, this.bB.h);
-                    for (var i = data.width - 1; i >= 0; i--) {
-                        var a = this.LINE_RADIUS * this.LINE_RADIUS - (i + this.bB.x - this.rx) * (i + this.bB.x - this.rx);
-                        var xi = Math.round(Math.sqrt(a) - this.bB.y + this.ry) - 1;
-                        var myIndex = (i + xi * data.width) * 4;
-                        var redPix = this.calculatePix(data.data.slice(myIndex, myIndex + 3));
-                        if (redPixOld == undefined) {
+                    this.bB.h = Math.max(Math.max(leftPoint.y, rightPoint.y), this.LINE_RADIUS) + this.ry - this.bB.y + 1;
+                    this.constrainBB(uCtx);
+                    var data = this.bB && uCtx.getImageData(this.bB.x, this.bB.y, this.bB.w, this.bB.h);
+                    var dataD = this.bB && udCtx.getImageData(this.bB.x, this.bB.y, this.bB.w, this.bB.h);
+                    if (data) {
+                        for (var i = data.width - 1; i >= 0; i--) {
+                            var a = this.LINE_RADIUS * this.LINE_RADIUS - (i + this.bB.x - this.rx) * (i + this.bB.x - this.rx);
+                            var yi = Math.round(Math.sqrt(a) - this.bB.y + this.ry) - 1;
+                            var myIndex = (i + yi * data.width) * 4 - 4;
+                            var __ret = this.getPixelData(dataD, myIndex, data, redPixOld);
+                            var redPix = __ret.redPix;
+                            redPixOld = __ret.redPixOld;
+                            if (redPix !== redPixOld) {
+                                var me = Math.atan2(yi + this.bB.y - this.ry, i + this.bB.x - this.rx);
+                                this.line = (me - l) / (r - l) - 0.5;
+                                break;
+                            }
                             redPixOld = redPix;
                         }
-                        if (Math.abs(redPix - redPixOld) > this.THRESHOLD) {
-                            this.line = 0.5 - i / pixXWidth;
-                            break;
-                        }
-                        redPixOld = redPix;
                     }
                 }
             }
@@ -1857,7 +1899,7 @@ define(["require", "exports", "robot.base.mobile", "interpreter.constants", "sim
             else {
                 values['marker'][C.ID] = this.listOfMarkersFound.map(function (marker) { return marker.markerId; });
                 this.listOfMarkersFound.forEach(function (marker) {
-                    values['marker'][C.INFO][marker.markerId] = [marker.xDist, marker.yDist, 0];
+                    values['marker'][C.INFO][marker.markerId] = [marker.xDist, marker.yDist, marker.zDist];
                 });
             }
             values['camera'] = {};
@@ -1870,10 +1912,10 @@ define(["require", "exports", "robot.base.mobile", "interpreter.constants", "sim
                     obstacle.sqrDist = SIMATH.getDistance(myPose, obstacle);
                     if (obstacle.sqrDist <= _this.MAX_BLOB_DIST_SQR) {
                         var myObstaclePoints = [{ x: obstacle.x - myPose.x, y: obstacle.y - myPose.y }]; /*,
-                            { x: obstacle.x + obstacle.w - myPose.x, y: obstacle.y - myPose.y },
-                            { x: obstacle.x + obstacle.w - myPose.x, y: obstacle.y + obstacle.h - myPose.y },
-                            { x: obstacle.x - myPose.x, y: obstacle.y + obstacle.h - myPose.y },
-                        ];*/
+                           { x: obstacle.x + obstacle.w - myPose.x, y: obstacle.y - myPose.y },
+                           { x: obstacle.x + obstacle.w - myPose.x, y: obstacle.y + obstacle.h - myPose.y },
+                           { x: obstacle.x - myPose.x, y: obstacle.y + obstacle.h - myPose.y },
+                       ];*/
                         var visible_2 = true;
                         for (var i = 0; i < myObstaclePoints.length; i++) {
                             var myAngle = (Math.atan2(myObstaclePoints[i].y, myObstaclePoints[i].x) + 2 * Math.PI) % (2 * Math.PI);
@@ -1891,15 +1933,22 @@ define(["require", "exports", "robot.base.mobile", "interpreter.constants", "sim
                     }
                 }
             });
-            //}
+        };
+        CameraSensor.prototype.getPixelData = function (dataD, myIndex, data, redPixOld) {
+            if (dataD.data[myIndex + 3] === 255) {
+                for (var j = myIndex; j < myIndex + 3; j++) {
+                    data.data[j] = dataD.data[j];
+                }
+            }
+            var redPix = this.calculatePix(data.data.slice(myIndex, myIndex + 3));
+            if (redPixOld == undefined) {
+                redPixOld = redPix;
+            }
+            return { redPix: redPix, redPixOld: redPixOld };
         };
         CameraSensor.prototype.calculatePix = function (rawPix) {
-            var i = 3;
-            var pix = 0;
-            while (i--) {
-                pix += rawPix[i];
-            }
-            return pix / 3;
+            var pix = 0.299 * rawPix[0] + 0.587 * rawPix[1] + 0.114 * rawPix[2];
+            return pix > this.THRESHOLD ? 255 : 0;
         };
         CameraSensor.prototype.checkVisibility = function (id, mP, personalObstacleList) {
             var myIntersectionPoint;
@@ -1943,6 +1992,24 @@ define(["require", "exports", "robot.base.mobile", "interpreter.constants", "sim
                 }
             }
             return false;
+        };
+        CameraSensor.prototype.constrainBB = function (uCtx) {
+            this.bB.x = this.bB.x < 0 ? 0 : this.bB.x;
+            this.bB.y = this.bB.y < 0 ? 0 : this.bB.y;
+            if (this.bB.x + this.bB.w > uCtx.canvas.width) {
+                this.bB.w = uCtx.canvas.width - this.bB.x;
+                if (this.bB.w < 1) {
+                    this.bB = null;
+                    return;
+                }
+            }
+            if (this.bB.y + this.bB.h > uCtx.canvas.height) {
+                this.bB.h = uCtx.canvas.width - this.bB.y;
+                if (this.bB.h < 1) {
+                    this.bB = null;
+                    return;
+                }
+            }
         };
         return CameraSensor;
     }());
