@@ -29,7 +29,7 @@ export class SimulationScene {
         x: 0,
         y: 0,
         w: 0,
-        h: 0
+        h: 0,
     };
     ruler: Ruler;
     sim: SimulationRoberta;
@@ -186,6 +186,25 @@ export class SimulationScene {
         this.obstacleList = newObstacleList;
     }
 
+    addImportMarkerList(importMarkerList: any[]) {
+        let newMarkerList = [];
+        importMarkerList.forEach((obj) => {
+            let newObject = SimObjectFactory.getSimObject(
+                obj.id,
+                this,
+                this.sim.selectionListener,
+                obj.shape,
+                SimObjectType.Marker,
+                obj.p,
+                obj.color,
+                ...obj.params
+            );
+            (newObject as MarkerSimulationObject).markerId = obj.markerId;
+            newMarkerList.push(newObject);
+        });
+        this.markerList = newMarkerList;
+    }
+
     addObstacle(shape: SimObjectShape) {
         this.addSimulationObject(this.obstacleList, shape, SimObjectType.Obstacle);
         this.redrawObstacles = true;
@@ -199,7 +218,7 @@ export class SimulationScene {
         let y = Math.random() * (this.ground['h'] - 200) + 100;
         let newObject = SimObjectFactory.getSimObject(this.uniqueObjectId, this, this.sim.selectionListener, shape, type, {
             x: x,
-            y: y
+            y: y,
         });
         if (shape == SimObjectShape.Marker && markerId) {
             (newObject as MarkerSimulationObject).markerId = markerId;
@@ -381,14 +400,14 @@ export class SimulationScene {
                     if (UTIL.isIE()) {
                         imgType = '.png';
                     }
-                    scene.loadBackgroundImages(function() {
+                    scene.loadBackgroundImages(function () {
                         let mobile: boolean = scene.robots[0].mobile;
                         if (mobile) {
                             $('.simMobile').show();
                             scene.images = scene.loadImages(
                                 ['roadWorks', 'pattern', 'ruler'],
                                 ['roadWorks' + imgType, 'wallPattern.png', 'ruler' + imgType],
-                                function() {
+                                function () {
                                     scene.ground = new Ground(
                                         10,
                                         10,
@@ -472,7 +491,7 @@ export class SimulationScene {
         $('#robotIndex').off('change.sim');
         if (this.robots.length > 1) {
             let scene = this;
-            $('#robotIndex').on('change.sim', function(e) {
+            $('#robotIndex').on('change.sim', function (e) {
                 let indexNew = Number($(this).val());
                 scene.robots[indexNew].selected = true;
                 scene.sim.selectionListener.fire(null);
@@ -505,7 +524,7 @@ export class SimulationScene {
         }
         let numLoading = myImgList.length;
         let scene = this;
-        const onload = function() {
+        const onload = function () {
             if (--numLoading === 0) {
                 callback();
                 if (UTIL.isLocalStorageAvailable() && scene.robots[0].mobile) {
@@ -519,7 +538,7 @@ export class SimulationScene {
                                 'customBackground',
                                 JSON.stringify({
                                     image: customBackground,
-                                    timestamp: new Date().getTime()
+                                    timestamp: new Date().getTime(),
                                 })
                             );
                             customBackground = localStorage.getItem('customBackground');
@@ -546,7 +565,7 @@ export class SimulationScene {
         while (i < myImgList.length) {
             const img = (this.imgBackgroundList[i] = new Image());
             img.onload = onload;
-            img.onerror = function(e) {
+            img.onerror = function (e) {
                 console.error(e);
             };
             img.src = this.imgPath + myImgList[i++];
@@ -556,14 +575,14 @@ export class SimulationScene {
     loadImages(names, files, onAllLoaded) {
         let i = 0;
         let numLoading = names.length;
-        const onload = function() {
+        const onload = function () {
             --numLoading === 0 && onAllLoaded();
         };
         const images = {};
         while (i < names.length) {
             const img = (images[names[i]] = new Image());
             img.onload = onload;
-            img.onerror = function(e) {
+            img.onerror = function (e) {
                 console.error(e);
             };
             img.src = this.imgPath + files[i++];
@@ -602,7 +621,7 @@ export class SimulationScene {
         if ($('#simDiv').hasClass('shifting') && $('#simDiv').hasClass('rightActive')) {
             $('#canvasDiv').css({
                 top: top + 'px',
-                left: left + 'px'
+                left: left + 'px',
             });
         }
         let scene = this;
@@ -656,7 +675,7 @@ export class SimulationScene {
             let top = (this.playground.h - (this.backgroundImg.height + 20) * this.sim.scale) / 2.0;
             $('#canvasDiv').css({
                 top: top + 'px',
-                left: left + 'px'
+                left: left + 'px',
             });
             this.resetAllCanvas();
         }
@@ -710,7 +729,9 @@ export class SimulationScene {
         personalObstacleList.push(this.ground as ISimulationObstacle);
         let myMarkerList: MarkerSimulationObject[] = this.markerList.slice();
         this.robots.forEach((robot) => robot.updateActions(robot, dt, interpreterRunning));
-        this.robots.forEach((robot) => (robot as RobotBaseMobile).updateSensors(interpreterRunning, dt, this.uCtx, this.udCtx, personalObstacleList, this.markerList));
+        this.robots.forEach((robot) =>
+            (robot as RobotBaseMobile).updateSensors(interpreterRunning, dt, this.uCtx, this.udCtx, personalObstacleList, this.markerList)
+        );
         this.draw(dt, interpreterRunning);
     }
 

@@ -27,7 +27,7 @@ define(["require", "exports", "util", "jquery", "simulation.objects", "robot.bas
                 x: 0,
                 y: 0,
                 w: 0,
-                h: 0
+                h: 0,
             };
             this._colorAreaList = [];
             this._obstacleList = [];
@@ -178,6 +178,22 @@ define(["require", "exports", "util", "jquery", "simulation.objects", "robot.bas
             });
             this.obstacleList = newObstacleList;
         };
+        SimulationScene.prototype.addImportMarkerList = function (importMarkerList) {
+            var _this = this;
+            var newMarkerList = [];
+            importMarkerList.forEach(function (obj) {
+                var newObject = simulation_objects_1.SimObjectFactory.getSimObject.apply(simulation_objects_1.SimObjectFactory, __spreadArray([obj.id,
+                    _this,
+                    _this.sim.selectionListener,
+                    obj.shape,
+                    simulation_objects_1.SimObjectType.Marker,
+                    obj.p,
+                    obj.color], obj.params, false));
+                newObject.markerId = obj.markerId;
+                newMarkerList.push(newObject);
+            });
+            this.markerList = newMarkerList;
+        };
         SimulationScene.prototype.addObstacle = function (shape) {
             this.addSimulationObject(this.obstacleList, shape, simulation_objects_1.SimObjectType.Obstacle);
             this.redrawObstacles = true;
@@ -190,7 +206,7 @@ define(["require", "exports", "util", "jquery", "simulation.objects", "robot.bas
             var y = Math.random() * (this.ground['h'] - 200) + 100;
             var newObject = simulation_objects_1.SimObjectFactory.getSimObject(this.uniqueObjectId, this, this.sim.selectionListener, shape, type, {
                 x: x,
-                y: y
+                y: y,
             });
             if (shape == simulation_objects_1.SimObjectShape.Marker && markerId) {
                 newObject.markerId = markerId;
@@ -485,7 +501,7 @@ define(["require", "exports", "util", "jquery", "simulation.objects", "robot.bas
                             catch (e) {
                                 localStorage.setItem('customBackground', JSON.stringify({
                                     image: customBackground,
-                                    timestamp: new Date().getTime()
+                                    timestamp: new Date().getTime(),
                                 }));
                                 customBackground = localStorage.getItem('customBackground');
                             }
@@ -566,7 +582,7 @@ define(["require", "exports", "util", "jquery", "simulation.objects", "robot.bas
             if ($('#simDiv').hasClass('shifting') && $('#simDiv').hasClass('rightActive')) {
                 $('#canvasDiv').css({
                     top: top + 'px',
-                    left: left + 'px'
+                    left: left + 'px',
                 });
             }
             var scene = this;
@@ -619,7 +635,7 @@ define(["require", "exports", "util", "jquery", "simulation.objects", "robot.bas
                 var top_1 = (this.playground.h - (this.backgroundImg.height + 20) * this.sim.scale) / 2.0;
                 $('#canvasDiv').css({
                     top: top_1 + 'px',
-                    left: left + 'px'
+                    left: left + 'px',
                 });
                 this.resetAllCanvas();
             }
@@ -673,7 +689,9 @@ define(["require", "exports", "util", "jquery", "simulation.objects", "robot.bas
             personalObstacleList.push(this.ground);
             var myMarkerList = this.markerList.slice();
             this.robots.forEach(function (robot) { return robot.updateActions(robot, dt, interpreterRunning); });
-            this.robots.forEach(function (robot) { return robot.updateSensors(interpreterRunning, dt, _this.uCtx, _this.udCtx, personalObstacleList, _this.markerList); });
+            this.robots.forEach(function (robot) {
+                return robot.updateSensors(interpreterRunning, dt, _this.uCtx, _this.udCtx, personalObstacleList, _this.markerList);
+            });
             this.draw(dt, interpreterRunning);
         };
         SimulationScene.prototype.toggleTrail = function () {
