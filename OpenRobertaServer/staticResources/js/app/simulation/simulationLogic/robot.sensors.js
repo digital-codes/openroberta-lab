@@ -912,7 +912,7 @@ define(["require", "exports", "robot.base.mobile", "interpreter.constants", "sim
             this.lightValue = this.lightValue > 50 ? 100 : 0;
             this.light = this.lightValue == 0 ? false : true;
             this.color = this.lightValue == 0 ? 'black' : 'white';
-            values['optical'] = {};
+            values['optical'] = values['optical'] || {};
             values['optical'][this.name] = {};
             values['optical'][this.name][C.OPENING] = this.light;
             values['optical'][this.name][C.CLOSING] = !this.light;

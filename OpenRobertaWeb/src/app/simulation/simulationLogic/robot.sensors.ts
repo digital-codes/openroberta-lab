@@ -1178,7 +1178,7 @@ export class OpticalSensor extends LightSensor {
         this.light = this.lightValue == 0 ? false : true;
         this.color = this.lightValue == 0 ? 'black' : 'white';
 
-        values['optical'] = {};
+        values['optical'] = values['optical'] || {};
         values['optical'][this.name] = {};
         values['optical'][this.name][C.OPENING] = this.light;
         values['optical'][this.name][C.CLOSING] = !this.light;
