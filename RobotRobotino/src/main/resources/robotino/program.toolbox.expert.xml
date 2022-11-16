@@ -4,7 +4,7 @@
             <block type="robActions_motorOmni_curve">
                 <value name="X">
                     <block type="math_number">
-                        <field name="NUM">50</field>
+                        <field name="NUM">10</field>
                     </block>
                 </value>
                 <value name="Y">
