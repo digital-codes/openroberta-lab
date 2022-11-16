@@ -184,7 +184,7 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
         this.sb.append("except Exception as e:");
         incrIndentation();
         nlIndent();
-        this.sb.append("print(\"exception on robotino\")");
+        this.sb.append("print(e)");
         nlIndent();
         this.sb.append("raise");
         decrIndentation();
@@ -284,7 +284,7 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
             this.sb.append("_digitalPinValues = [0 for i in range(8)]");
             nlIndent();
             this.sb.append(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(RobotinoMethods.SETDIGITALPIN))
-                .append("(0, False)");
+                .append("(1, False)");
             nlIndent();
         }
 
@@ -502,7 +502,7 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
     @Override
     public Void visitInfraredSensor(InfraredSensor infraredSensor) {
         String port = infraredSensor.getUserDefinedPort();
-        this.sb.append("_getDistance(")
+        this.sb.append(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(RobotinoMethods.GETDISTANCE) + "(")
             .append(port)
             .append(")");
         return null;
@@ -550,9 +550,9 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
     public Void visitOpticalSensor(OpticalSensor opticalSensor) {
         String port = "";
         if ( opticalSensor.getMode().equals("OPENING") ) {
-            port = configurationAst.getConfigurationComponent(opticalSensor.getUserDefinedPort()).getComponentProperties().get("WH").substring(2);
-        } else {
             port = configurationAst.getConfigurationComponent(opticalSensor.getUserDefinedPort()).getComponentProperties().get("BK").substring(2);
+        } else {
+            port = configurationAst.getConfigurationComponent(opticalSensor.getUserDefinedPort()).getComponentProperties().get("WH").substring(2);
         }
         this.sb.append(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(RobotinoMethods.GETDIGITALPIN)).append("(" + port + ")");
         return null;

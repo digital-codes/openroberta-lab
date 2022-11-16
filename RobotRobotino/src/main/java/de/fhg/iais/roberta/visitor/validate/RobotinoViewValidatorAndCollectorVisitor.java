@@ -47,6 +47,7 @@ public class RobotinoViewValidatorAndCollectorVisitor extends AbstractRobotinoVa
     @Override
     public Void visitOdometrySensor(OdometrySensor odometrySensor) {
         usedMethodBuilder.addUsedMethod(RobotinoMethods.GETODOMETRY);
+        usedMethodBuilder.addUsedMethod(RobotinoMethods.RESETODOMETRY);
         return super.visitOdometrySensor(odometrySensor);
     }
 
@@ -65,6 +66,7 @@ public class RobotinoViewValidatorAndCollectorVisitor extends AbstractRobotinoVa
     @Override
     public Void visitOmnidriveDistanceAction(OmnidriveDistanceAction omnidriveDistanceAction) {
         addMotorMethods();
+        usedMethodBuilder.addUsedMethod(RobotinoMethods.RESETODOMETRY);
         usedMethodBuilder.addUsedMethod(RobotinoMethods.DRIVEFORDISTANCE);
         usedMethodBuilder.addUsedMethod(RobotinoMethods.DRIVETOPOSITION);
         return super.visitOmnidriveDistanceAction(omnidriveDistanceAction);
@@ -73,6 +75,7 @@ public class RobotinoViewValidatorAndCollectorVisitor extends AbstractRobotinoVa
     @Override
     public Void visitTurnAction(TurnAction turnAction) {
         addMotorMethods();
+        usedMethodBuilder.addUsedMethod(RobotinoMethods.RESETODOMETRY);
         usedMethodBuilder.addUsedMethod(RobotinoMethods.TURNFORDEGREES);
         return super.visitTurnAction(turnAction);
     }
@@ -80,6 +83,7 @@ public class RobotinoViewValidatorAndCollectorVisitor extends AbstractRobotinoVa
     @Override
     public Void visitOmnidrivePositionAction(OmnidrivePositionAction omnidrivePositionAction) {
         addMotorMethods();
+        usedMethodBuilder.addUsedMethod(RobotinoMethods.RESETODOMETRY);
         usedMethodBuilder.addUsedMethod(RobotinoMethods.DRIVETOPOSITION);
         return super.visitOmnidrivePositionAction(omnidrivePositionAction);
     }

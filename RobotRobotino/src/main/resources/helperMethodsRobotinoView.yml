@@ -43,7 +43,7 @@ SETDIGITALPIN:
     def setDigitalPin(pos, value):
         global _digitalPinValues
         _digitalPinValues[pos-1] = int(value)
-        DIGITALPIN_URL = "http://" + ROBOTINOIP + "/data/digitaloutputstatus"
+        DIGITALPIN_URL = "http://" + ROBOTINOIP + "/data/digitaloutputarray"
         r = requests.post(url = DIGITALPIN_URL, params = PARAMS, json = _digitalPinValues )
 
 GETDIGITALPIN:
@@ -115,7 +115,7 @@ DRIVEFORDISTANCE:
         targetX = RV.readFloatVector(1)[0] + distance * math.cos(angle)
         targetY = RV.readFloatVector(1)[1] + distance * math.sin(angle)
         resultingSpeed = math.sqrt(math.pow(x,2) + math.pow(y,2))
-        _driveToPosition(RV, targetX, targetY, resultingSpeed)
+        driveToPosition(RV, targetX, targetY, resultingSpeed)
 
 TURNFORDEGREES:
   PYTHON: |
