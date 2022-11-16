@@ -41,6 +41,7 @@ ISBUMPED:
 SETDIGITALPIN:
   PYTHON: |
     def setDigitalPin(pos, value):
+        global _digitalPinValues
         _digitalPinValues[pos-1] = int(value)
         DIGITALPIN_URL = "http://" + ROBOTINOIP + "/data/digitaloutputstatus"
         r = requests.post(url = DIGITALPIN_URL, params = PARAMS, json = _digitalPinValues )

@@ -140,7 +140,6 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
             nlIndent();
             nlIndent();
         }
-        generateStart();
         nlIndent();
         this.sb.append("def run(RV):");
         incrIndentation();
@@ -172,11 +171,34 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
             .stream().anyMatch(phrase -> phrase.getKind().getCategory() == Category.METHOD && !phrase.getKind().hasName("METHOD_CALL"));
     }
 
+    private void generateMain() {
+        this.sb.append("def main(RV):");
+        incrIndentation();
+        nlIndent();
+        this.sb.append("try:");
+        incrIndentation();
+        nlIndent();
+        this.sb.append("run(RV)");
+        decrIndentation();
+        nlIndent();
+        this.sb.append("except Exception as e:");
+        incrIndentation();
+        nlIndent();
+        this.sb.append("print(\"exception on robotino\")");
+        nlIndent();
+        this.sb.append("raise");
+        decrIndentation();
+        nlIndent();
+        generateFinally();
+        decrIndentation();
+        nlIndent();
+    }
+
     private void generateStart() {
         this.sb.append("def start(RV):");
         incrIndentation();
         nlIndent();
-        this.sb.append("motorDaemon2 = threading.Thread(target=run, daemon=True, args=(RV,), name='mainProgram')\n" +
+        this.sb.append("motorDaemon2 = threading.Thread(target=main, daemon=True, args=(RV,), name='mainProgram')\n" +
             "    motorDaemon2.start()");
         decrIndentation();
         nlIndent();
@@ -204,7 +226,6 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
         nlIndent();
         nlIndent();
         appendViewMethods();
-        //generateFinally();
         decrIndentation();
         nlIndent();
     }
@@ -224,6 +245,9 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
         decrIndentation();
         nlIndent();
         nlIndent();
+        generateMain();
+        generateStart();
+        nlIndent();
         this.sb.append("def stop(RV):");
         incrIndentation();
         nlIndent();
@@ -242,17 +266,33 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
     private void generateFinally() {
         if ( this.getBean(UsedHardwareBean.class).isActorUsed(RobotinoConstants.OMNIDRIVE) || this.getBean(UsedHardwareBean.class).isActorUsed(SC.DIGITAL_PIN) ) {
             this.sb.append("finally:");
+            incrIndentation();
+            nlIndent();
+            if ( this.getBean(UsedHardwareBean.class).isActorUsed(SC.DIGITAL_PIN) ) {
+                this.sb.append("global _digitalPinValues");
+                nlIndent();
+            }
         }
-        incrIndentation();
-        incrIndentation();
 
-        nlIndent();
         if ( this.getBean(UsedHardwareBean.class).isActorUsed(RobotinoConstants.OMNIDRIVE) ) {
             this.sb.append(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(RobotinoMethods.OMNIDRIVESPEED));
             this.sb.append("(0,0,0)");
             nlIndent();
         }
-        decrIndentation();
+
+        if ( this.getBean(UsedHardwareBean.class).isActorUsed(SC.DIGITAL_PIN) ) {
+            this.sb.append("_digitalPinValues = [0 for i in range(8)]");
+            nlIndent();
+            this.sb.append(this.getBean(CodeGeneratorSetupBean.class).getHelperMethodGenerator().getHelperMethodName(RobotinoMethods.SETDIGITALPIN))
+                .append("(0, False)");
+            nlIndent();
+        }
+
+        if ( this.getBean(UsedHardwareBean.class).isActorUsed(RobotinoConstants.OMNIDRIVE) || this.getBean(UsedHardwareBean.class).isActorUsed(SC.DIGITAL_PIN) ) {
+            decrIndentation();
+            decrIndentation();
+            nlIndent();
+        }
     }
 
     @Override
