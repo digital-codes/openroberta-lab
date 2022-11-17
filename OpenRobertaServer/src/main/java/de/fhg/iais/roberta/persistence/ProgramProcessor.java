@@ -31,16 +31,15 @@ import de.fhg.iais.roberta.persistence.dao.UserGroupDao;
 import de.fhg.iais.roberta.persistence.dao.UserGroupProgramShareDao;
 import de.fhg.iais.roberta.persistence.dao.UserProgramShareDao;
 import de.fhg.iais.roberta.persistence.util.DbSession;
-import de.fhg.iais.roberta.persistence.util.HttpSessionState;
 import de.fhg.iais.roberta.util.Key;
-import de.fhg.iais.roberta.util.basic.Pair;
 import de.fhg.iais.roberta.util.Util;
+import de.fhg.iais.roberta.util.basic.Pair;
 
 public class ProgramProcessor extends AbstractProcessor {
     private static final Logger LOG = LoggerFactory.getLogger(ProgramProcessor.class);
 
-    public ProgramProcessor(DbSession dbSession, HttpSessionState httpSessionState) {
-        super(dbSession, httpSessionState.getUserId());
+    public ProgramProcessor(DbSession dbSession, int userId) {
+        super(dbSession, userId);
     }
 
     public Program getProgramAndLockTable(String programName, String ownerName, String robotName, String authorName) {

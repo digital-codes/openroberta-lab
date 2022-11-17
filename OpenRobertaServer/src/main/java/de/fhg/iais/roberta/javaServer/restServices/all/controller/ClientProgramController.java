@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Inject;
 
 import de.fhg.iais.roberta.blockly.generated.Export;
-import de.fhg.iais.roberta.components.Project;
 import de.fhg.iais.roberta.factory.RobotFactory;
 import de.fhg.iais.roberta.generated.restEntities.BaseResponse;
 import de.fhg.iais.roberta.generated.restEntities.EntityResponse;
@@ -46,7 +45,6 @@ import de.fhg.iais.roberta.generated.restEntities.ShareResponse;
 import de.fhg.iais.roberta.generated.restEntities.UserGroupProgramListRequest;
 import de.fhg.iais.roberta.javaServer.provider.OraData;
 import de.fhg.iais.roberta.javaServer.provider.XsltTrans;
-import de.fhg.iais.roberta.javaServer.restServices.all.service.ProjectService;
 import de.fhg.iais.roberta.persistence.ConfigurationProcessor;
 import de.fhg.iais.roberta.persistence.LikeProcessor;
 import de.fhg.iais.roberta.persistence.ProgramProcessor;
@@ -61,15 +59,15 @@ import de.fhg.iais.roberta.persistence.dao.ConfigurationDao;
 import de.fhg.iais.roberta.persistence.util.DbSession;
 import de.fhg.iais.roberta.persistence.util.HttpSessionState;
 import de.fhg.iais.roberta.util.Key;
-import de.fhg.iais.roberta.util.basic.Pair;
 import de.fhg.iais.roberta.util.ServerProperties;
 import de.fhg.iais.roberta.util.Statistics;
 import de.fhg.iais.roberta.util.Util;
 import de.fhg.iais.roberta.util.UtilForHtmlXml;
 import de.fhg.iais.roberta.util.UtilForREST;
+import de.fhg.iais.roberta.util.UtilForXmlTransformation;
 import de.fhg.iais.roberta.util.XsltTransformer;
 import de.fhg.iais.roberta.util.archiver.UserProgramsArchiver;
-import de.fhg.iais.roberta.util.dbc.DbcException;
+import de.fhg.iais.roberta.util.basic.Pair;
 import de.fhg.iais.roberta.util.jaxb.JaxbHelper;
 
 @Path("/program")
@@ -92,7 +90,7 @@ public class ClientProgramController {
         try {
             SaveResponse response = SaveResponse.make();
             SaveRequest saveRequest = SaveRequest.make(request.getData());
-            ProgramProcessor programProcessor = new ProgramProcessor(dbSession, httpSessionState);
+            ProgramProcessor programProcessor = new ProgramProcessor(dbSession, httpSessionState.getUserId());
             String robot = getRobot(httpSessionState);
             Long timestamp = saveRequest.getTimestamp();
             Timestamp programTimestamp = timestamp == null ? null : new Timestamp(timestamp);
@@ -134,7 +132,7 @@ public class ClientProgramController {
         try {
             BaseResponse response = BaseResponse.make();
             JSONObject dataPart = request.getData();
-            ProgramProcessor programProcessor = new ProgramProcessor(dbSession, httpSessionState);
+            ProgramProcessor programProcessor = new ProgramProcessor(dbSession, httpSessionState.getUserId());
             int userId = httpSessionState.getUserId();
             String robot = getRobot(httpSessionState);
             if ( !httpSessionState.isUserLoggedIn() ) {
@@ -172,7 +170,7 @@ public class ClientProgramController {
         try {
             ListingResponse response = ListingResponse.make();
             JSONObject dataPart = request.getData();
-            ProgramProcessor programProcessor = new ProgramProcessor(dbSession, httpSessionState);
+            ProgramProcessor programProcessor = new ProgramProcessor(dbSession, httpSessionState.getUserId());
             if ( !httpSessionState.isUserLoggedIn() && !dataPart.getString("owner").equals("Roberta") && !dataPart.getString("owner").equals("Gallery") ) {
                 LOG.info("Unauthorized load request");
                 return UtilForREST.makeBaseResponseForError(Key.USER_ERROR_NOT_LOGGED_IN, httpSessionState, null);
@@ -188,7 +186,7 @@ public class ClientProgramController {
                 } else {
                     String configText = programProcessor.getProgramsConfig(program);
                     String transformedXml = xsltTransformer.transform(program.getProgramText());
-                    Pair<String, String> progConfPair = transformBetweenVersions(httpSessionState.getRobotFactory(), transformedXml, configText);
+                    Pair<String, String> progConfPair = UtilForXmlTransformation.transformBetweenVersions(httpSessionState.getRobotFactory(), transformedXml, configText);
                     String configName = program.getConfigName();
                     String configXML = progConfPair.getSecond();
                     response.setProgXML(progConfPair.getFirst());
@@ -229,8 +227,8 @@ public class ClientProgramController {
         try {
             EntityResponse response = EntityResponse.make();
             JSONObject dataPart = request.getData();
-            ProgramProcessor programProcessor = new ProgramProcessor(dbSession, httpSessionState);
-            UserProcessor up = new UserProcessor(dbSession, httpSessionState);
+            ProgramProcessor programProcessor = new ProgramProcessor(dbSession, httpSessionState.getUserId());
+            UserProcessor up = new UserProcessor(dbSession, httpSessionState.getUserId());
             if ( !httpSessionState.isUserLoggedIn() ) {
                 LOG.info("Unauthorized entity request");
                 return UtilForREST.makeBaseResponseForError(Key.USER_ERROR_NOT_LOGGED_IN, httpSessionState, null);
@@ -269,7 +267,7 @@ public class ClientProgramController {
         HttpSessionState httpSessionState = UtilForREST.handleRequestInit(dbSession, LOG, request, true);
         try {
             ListingNamesResponse response = ListingNamesResponse.make();
-            ProgramProcessor programProcessor = new ProgramProcessor(dbSession, httpSessionState);
+            ProgramProcessor programProcessor = new ProgramProcessor(dbSession, httpSessionState.getUserId());
             String robot = getRobot(httpSessionState);
             if ( !httpSessionState.isUserLoggedIn() ) {
                 LOG.error("Unauthorized listing request");
@@ -312,9 +310,9 @@ public class ClientProgramController {
             ListingNamesResponse response = ListingNamesResponse.make();
             UserGroupProgramListRequest request = UserGroupProgramListRequest.make(fullRequest.getData());
 
-            ProgramProcessor programProcessor = new ProgramProcessor(dbSession, httpSessionState);
-            UserProcessor userProcessor = new UserProcessor(dbSession, httpSessionState);
-            UserGroupProcessor userGroupProcessor = new UserGroupProcessor(dbSession, httpSessionState, this.isPublicServer);
+            ProgramProcessor programProcessor = new ProgramProcessor(dbSession, httpSessionState.getUserId());
+            UserProcessor userProcessor = new UserProcessor(dbSession, httpSessionState.getUserId());
+            UserGroupProcessor userGroupProcessor = new UserGroupProcessor(dbSession, httpSessionState.getUserId(), this.isPublicServer);
             String robot = getRobot(httpSessionState);
 
             User user = httpSessionState.isUserLoggedIn() ? userProcessor.getUser(httpSessionState.getUserId()) : null;
@@ -366,7 +364,7 @@ public class ClientProgramController {
         HttpSessionState httpSessionState = UtilForREST.handleRequestInit(dbSession, LOG, request, true);
         try {
             ListingNamesResponse response = ListingNamesResponse.make();
-            ProgramProcessor programProcessor = new ProgramProcessor(dbSession, httpSessionState);
+            ProgramProcessor programProcessor = new ProgramProcessor(dbSession, httpSessionState.getUserId());
             String robot = getRobot(httpSessionState);
             int userId = 1;
             JSONArray programInfo = programProcessor.getProgramInfoOfProgramsOwnedByOrSharedWithUser(userId, robot);
@@ -418,7 +416,7 @@ public class ClientProgramController {
                 if ( robotType1.equals(robot) && robotType2.equals(robot) ) {
                     response.setProgramName(programName);
                     Pair<String, String> progConfPair =
-                        transformBetweenVersions(
+                        UtilForXmlTransformation.transformBetweenVersions(
                             httpSessionState.getRobotFactory(),
                             JaxbHelper.blockSet2xml(jaxbImportExport.getProgram().getBlockSet()),
                             JaxbHelper.blockSet2xml(jaxbImportExport.getConfig().getBlockSet()));
@@ -472,7 +470,7 @@ public class ClientProgramController {
                 return null;
             }
 
-            ProgramProcessor programProcessor = new ProgramProcessor(dbSession, httpSessionState);
+            ProgramProcessor programProcessor = new ProgramProcessor(dbSession, httpSessionState.getUserId());
             InputStream zip = new UserProgramsArchiver(httpSessionState, programProcessor).getArchive();
             ResponseBuilder response = Response.ok(zip, "application/zip");
             zip.close();
@@ -500,8 +498,8 @@ public class ClientProgramController {
         try {
             ShareResponse response = ShareResponse.make();
             ShareRequest shareRequest = ShareRequest.make(request.getData());
-            UserProcessor userProcessor = new UserProcessor(dbSession, httpSessionState);
-            ProgramShareProcessor programShareProcessor = new ProgramShareProcessor(dbSession, httpSessionState);
+            UserProcessor userProcessor = new UserProcessor(dbSession, httpSessionState.getUserId());
+            ProgramShareProcessor programShareProcessor = new ProgramShareProcessor(dbSession, httpSessionState.getUserId());
             int userId = httpSessionState.getUserId();
             String robot = getRobot(httpSessionState);
             if ( !httpSessionState.isUserLoggedIn() ) {
@@ -561,7 +559,7 @@ public class ClientProgramController {
         try {
             BaseResponse response = BaseResponse.make();
             LikeRequest likeRequest = LikeRequest.make(request.getData());
-            LikeProcessor lp = new LikeProcessor(dbSession, httpSessionState);
+            LikeProcessor lp = new LikeProcessor(dbSession, httpSessionState.getUserId());
             if ( !httpSessionState.isUserLoggedIn() ) {
                 LOG.error("Unauthorized");
                 Statistics.info("GalleryLike", "success", false);
@@ -609,12 +607,12 @@ public class ClientProgramController {
             SaveResponse response = SaveResponse.make();
             ShareCreateRequest shareCreateRequest = ShareCreateRequest.make(request.getData());
 
-            ProgramProcessor programProcessor = new ProgramProcessor(dbSession, httpSessionState);
-            ProgramShareProcessor accessRightProcessor = new ProgramShareProcessor(dbSession, httpSessionState);
-            UserProcessor userProcessor = new UserProcessor(dbSession, httpSessionState);
-            ConfigurationProcessor configurationProcessor = new ConfigurationProcessor(dbSession, httpSessionState);
-
             int userId = httpSessionState.getUserId();
+            ProgramProcessor programProcessor = new ProgramProcessor(dbSession, userId);
+            ProgramShareProcessor accessRightProcessor = new ProgramShareProcessor(dbSession, userId);
+            UserProcessor userProcessor = new UserProcessor(dbSession, userId);
+            ConfigurationProcessor configurationProcessor = new ConfigurationProcessor(dbSession, userId);
+
             String robot = getRobot(httpSessionState);
             if ( !httpSessionState.isUserLoggedIn() ) {
                 LOG.error("Unauthorized");
@@ -689,10 +687,12 @@ public class ClientProgramController {
         try {
             BaseResponse response = BaseResponse.make();
             ShareDeleteRequest shareDeleteRequest = ShareDeleteRequest.make(request.getData());
-            ProgramProcessor programProcessor = new ProgramProcessor(dbSession, httpSessionState);
-            ProgramShareProcessor accessRightProcessor = new ProgramShareProcessor(dbSession, httpSessionState);
-            UserProcessor userProcessor = new UserProcessor(dbSession, httpSessionState);
+
             int userId = httpSessionState.getUserId();
+            ProgramProcessor programProcessor = new ProgramProcessor(dbSession, userId);
+            ProgramShareProcessor accessRightProcessor = new ProgramShareProcessor(dbSession, userId);
+            UserProcessor userProcessor = new UserProcessor(dbSession, userId);
+
             String robot = getRobot(httpSessionState);
             if ( !httpSessionState.isUserLoggedIn() ) {
                 LOG.error("Unauthorized");
@@ -733,8 +733,10 @@ public class ClientProgramController {
         HttpSessionState httpSessionState = UtilForREST.handleRequestInit(dbSession, LOG, request, true);
         try {
             ListingNamesResponse response = ListingNamesResponse.make();
-            ProgramProcessor programProcessor = new ProgramProcessor(dbSession, httpSessionState);
+
             int userId = httpSessionState.getUserId();
+            ProgramProcessor programProcessor = new ProgramProcessor(dbSession, userId);
+
             JSONObject data = request.getData();
             String group = data.has("group") ? data.getString("group") : "";
             JSONArray programInfo = programProcessor.getProgramGallery(userId, group);
@@ -758,35 +760,5 @@ public class ClientProgramController {
         return httpSessionState.getRobotFactory(httpSessionState.getRobotName()).getGroup().isEmpty()
             ? httpSessionState.getRobotName()
             : httpSessionState.getRobotFactory(httpSessionState.getRobotName()).getGroup();
-    }
-
-    // Transform programs with old xml versions to new xml versions
-    private static Pair<String, String> transformBetweenVersions(RobotFactory robotFactory, String programText, String configText) {
-        if ( robotFactory.hasWorkflow("transform") ) {
-            if ( configText == null ) {
-                // programs that do not have any configuration modifications are saved into the database without an associated configuration
-                // when loaded, the default configuration should be used
-                configText = robotFactory.getConfigurationDefault();
-            }
-            Project project = new Project.Builder().setFactory(robotFactory).setProgramXml(programText).setConfigurationXml(configText).build();
-            ProjectService.executeWorkflow("transform", project);
-            if ( configText != null ) {
-                if ( project.getRobotFactory().getConfigurationType().equals("new") ) {
-                    return Pair.of(project.getAnnotatedProgramAsXml(), project.getAnnotatedConfigurationAsXml());
-                } else {
-                    // old style configurations do not implement a correct backtransformation, return the input instead
-                    // however the version needs to be updated anyway
-                    // TODO replace all old configurations with new ones
-                    if ( configText.contains("xmlversion=\"2.0\"") ) {
-                        configText = configText.replace("xmlversion=\"2.0\"", "xmlversion=\"3.0\"");
-                    }
-                    return Pair.of(project.getAnnotatedProgramAsXml(), configText);
-                }
-            } else {
-                return Pair.of(project.getAnnotatedProgramAsXml(), null);
-            }
-        } else {
-            throw new DbcException("Every robot needs a transform workflow!");
-        }
     }
 }
