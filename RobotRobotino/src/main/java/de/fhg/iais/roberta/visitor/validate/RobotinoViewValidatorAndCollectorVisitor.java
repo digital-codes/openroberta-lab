@@ -66,6 +66,8 @@ public class RobotinoViewValidatorAndCollectorVisitor extends AbstractRobotinoVa
     @Override
     public Void visitOmnidriveDistanceAction(OmnidriveDistanceAction omnidriveDistanceAction) {
         addMotorMethods();
+        usedMethodBuilder.addUsedMethod(RobotinoMethods.GETODOMETRY);
+        usedMethodBuilder.addUsedMethod(RobotinoMethods.GETDIRECTION);
         usedMethodBuilder.addUsedMethod(RobotinoMethods.ISBUMPED);
         usedMethodBuilder.addUsedMethod(RobotinoMethods.RESETODOMETRY);
         usedMethodBuilder.addUsedMethod(RobotinoMethods.DRIVEFORDISTANCE);
@@ -84,6 +86,8 @@ public class RobotinoViewValidatorAndCollectorVisitor extends AbstractRobotinoVa
     @Override
     public Void visitOmnidrivePositionAction(OmnidrivePositionAction omnidrivePositionAction) {
         addMotorMethods();
+        usedMethodBuilder.addUsedMethod(RobotinoMethods.GETODOMETRY);
+        usedMethodBuilder.addUsedMethod(RobotinoMethods.GETDIRECTION);
         usedMethodBuilder.addUsedMethod(RobotinoMethods.ISBUMPED);
         usedMethodBuilder.addUsedMethod(RobotinoMethods.RESETODOMETRY);
         usedMethodBuilder.addUsedMethod(RobotinoMethods.DRIVETOPOSITION);

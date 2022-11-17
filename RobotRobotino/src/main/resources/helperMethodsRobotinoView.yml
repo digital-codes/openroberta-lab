@@ -94,28 +94,48 @@ RESETODOMETRY:
         time.sleep(0.1)
         RV.writeFloatVector(1, [])
 
+GETDIRECTION:
+  PYTHON: |
+    def getDirection(xTarget, yTarget, speed):
+         vectorX = xTarget - getOdometry("x") * 100
+         vectorY = yTarget - getOdometry("y") * 100
+         absV = math.sqrt(math.pow(vectorX, 2) + math.pow(vectorY, 2))
+         maxSpeedX = (vectorX / absV)
+         maxSpeedY = (vectorY / absV)
+         angle = - getOdometry("rot")
+         rotatedX = (math.cos(angle) * maxSpeedX) - (math.sin(angle) * maxSpeedY)
+         rotatedY = (math.sin(angle) * maxSpeedX + math.cos(angle) * maxSpeedY)
+         return rotatedX * speed, rotatedY * speed
+
 DRIVETOPOSITION:
   PYTHON: |
-    def driveToPosition(RV, x, y, speed):
-        global currentSpeed
-        RV.writeFloatVector(2, [x * 10, y * 10, RV.readFloatVector(1)[2], 1])
-        time.sleep(0.5)
-        while RV.readFloatVector(2)[3] != 1 or not isBumped():
-            speedX = RV.readFloatVector(2)[0] * speed/100
-            speedY = RV.readFloatVector(2)[1] * speed/100
-            currentSpeed = [speedX , speedY, 0]
-            time.sleep(0.05)
-        currentSpeed = [0, 0, 0]
+    def driveToPosition(xTarget, yTarget, speed):
+        firstPositionX, firstPositionY = getOdometry("x"), getOdometry("y")
+        tolerance = 20 * speed/100  
+        while not isBumped():
+            speedX, speedY = getDirection(xTarget, yTarget, speed)
+            xPos, yPos = getOdometry("x"), getOdometry("y")
+            diffx = abs(xPos - xTarget)
+            diffy = abs(xPos - yTarget)
+            if diffx <= tolerance and diffy <= tolerance:
+                speedX = speedX * diffx/tolerance
+                speedY = speedY * diffy/tolerance
+            setSpeedOmnidrivePercent(speedX, speedY, 0)
+
+            if firstPositionX >= xTarget >= xPos or firstPositionX < xTarget <= xPos:
+                if firstPositionY >= yTarget >= yPos or firstPositionY < yTarget <= yPos:
+                    break
+        setSpeedOmnidrivePercent(0, 0, 0)
 
 DRIVEFORDISTANCE:
   PYTHON: |
-    def driveForDistance(RV, x, y, distance):
+    def driveForDistance(x, y, distance):
         distance = distance
         angle = math.atan2(y,  x)
-        targetX = RV.readFloatVector(1)[0] + distance * math.cos(angle)
-        targetY = RV.readFloatVector(1)[1] + distance * math.sin(angle)
+        targetX = getOdometry("x") + distance * math.cos(angle)
+        targetY = getOdometry("y") + distance * math.sin(angle)
         resultingSpeed = math.sqrt(math.pow(x,2) + math.pow(y,2))
-        driveToPosition(RV, targetX, targetY, resultingSpeed)
+        driveToPosition(targetX, targetY, resultingSpeed)
 
 TURNFORDEGREES:
   PYTHON: |
