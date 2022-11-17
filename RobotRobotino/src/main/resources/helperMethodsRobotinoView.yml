@@ -100,7 +100,7 @@ DRIVETOPOSITION:
         global currentSpeed
         RV.writeFloatVector(2, [x * 10, y * 10, RV.readFloatVector(1)[2], 1])
         time.sleep(0.5)
-        while RV.readFloatVector(2)[3] != 1:
+        while RV.readFloatVector(2)[3] != 1 or not isBumped():
             speedX = RV.readFloatVector(2)[0] * speed/100
             speedY = RV.readFloatVector(2)[1] * speed/100
             currentSpeed = [speedX , speedY, 0]
