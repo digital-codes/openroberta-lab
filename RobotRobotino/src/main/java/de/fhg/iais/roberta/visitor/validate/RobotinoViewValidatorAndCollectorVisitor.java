@@ -9,6 +9,7 @@ import de.fhg.iais.roberta.syntax.action.motor.differential.TurnAction;
 import de.fhg.iais.roberta.syntax.actor.robotino.OmnidriveAction;
 import de.fhg.iais.roberta.syntax.actor.robotino.OmnidriveDistanceAction;
 import de.fhg.iais.roberta.syntax.actor.robotino.OmnidrivePositionAction;
+import de.fhg.iais.roberta.syntax.sensor.generic.DetectMarkSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.PinGetValueSensor;
 import de.fhg.iais.roberta.syntax.sensor.generic.TouchSensor;
 import de.fhg.iais.roberta.syntax.sensor.robotino.CameraSensor;
@@ -66,6 +67,7 @@ public class RobotinoViewValidatorAndCollectorVisitor extends AbstractRobotinoVa
     @Override
     public Void visitOmnidriveDistanceAction(OmnidriveDistanceAction omnidriveDistanceAction) {
         addMotorMethods();
+        addErrorToPhrase(omnidriveDistanceAction, "BLOCK_NOT_SUPPORTED");
         usedMethodBuilder.addUsedMethod(RobotinoMethods.ISBUMPED);
         usedMethodBuilder.addUsedMethod(RobotinoMethods.RESETODOMETRY);
         usedMethodBuilder.addUsedMethod(RobotinoMethods.DRIVEFORDISTANCE);
@@ -84,6 +86,7 @@ public class RobotinoViewValidatorAndCollectorVisitor extends AbstractRobotinoVa
     @Override
     public Void visitOmnidrivePositionAction(OmnidrivePositionAction omnidrivePositionAction) {
         addMotorMethods();
+        addErrorToPhrase(omnidrivePositionAction, "BLOCK_NOT_SUPPORTED");
         usedMethodBuilder.addUsedMethod(RobotinoMethods.ISBUMPED);
         usedMethodBuilder.addUsedMethod(RobotinoMethods.RESETODOMETRY);
         usedMethodBuilder.addUsedMethod(RobotinoMethods.DRIVETOPOSITION);
@@ -125,5 +128,11 @@ public class RobotinoViewValidatorAndCollectorVisitor extends AbstractRobotinoVa
     public Void visitOpticalSensor(OpticalSensor opticalSensor) {
         usedMethodBuilder.addUsedMethod(RobotinoMethods.GETDIGITALPIN);
         return super.visitOpticalSensor(opticalSensor);
+    }
+
+    @Override
+    public Void visitDetectMarkSensor(DetectMarkSensor detectMarkSensor) {
+        usedMethodBuilder.addUsedMethod(RobotinoMethods.GETMARKERS);
+        return super.visitDetectMarkSensor(detectMarkSensor);
     }
 }

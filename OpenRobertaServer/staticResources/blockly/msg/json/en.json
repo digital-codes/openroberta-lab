@@ -1,7 +1,7 @@
 {
 	"@metadata": {
 		"author": "Ellen Spertus <ellen.spertus@gmail.com>",
-		"lastupdated": "2022-11-18 11:25:05.737369",
+		"lastupdated": "2022-11-18 16:10:18.531895",
 		"locale": "en",
 		"messagedocumentation" : "qqq"
 	},
@@ -1566,7 +1566,7 @@
 	"SENSOR_DETECTMARK": "marker sensor",
 	"SENSOR_DETECTMARK_NAO": "NAO Mark sensor",
 	"SENSOR_DETECTMARK_GETSAMPLE_TOOLTIP": "Returns one or an array of IDs (number) of the last detected NAO Mark(s). If no marks are detected, -1 or an array consisting of 1 element with value -1 is returned. For a list of NAO marks with corresponding numbers refer to the wiki.",
-	"SENSOR_DETECTMARK_IDALL_GETSAMPLE_TOOLTIP_ROBOTINO": "Returns a list IDs (number) of the currently detected marker(s). If no markers are detected, returns an empty list.",
+	"SENSOR_DETECTMARK_IDALL_GETSAMPLE_TOOLTIP_ROBOTINO": "Returns a list IDs (number) of the currently detected marker(s). If no markers are detected, returns a list containing -1.",
 	"SENSOR_MARKERINF_TOOLTIP": "Returns the position data as a list [x,y,distance] of a specific marker ID found in cm. If no markers are detected, returns a list of -1.",
 	"SENSOR_CAMERA_THRESHOLD_TOOLTIP": "Sets the threshold for color filtering for the marker and color recognition.",
 	"SENSOR_COLOURBLOB_TOOLTIP": "Returns information as a list [x, y, size] about the biggest found area of a color in a specific HSV-range in pixels.",

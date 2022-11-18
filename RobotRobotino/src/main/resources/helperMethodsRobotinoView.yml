@@ -135,6 +135,14 @@ TURNFORDEGREES:
             time.sleep(0.05)
         setSpeedOmnidrivePercent(0, 0, 0)
 
+GETMARKERS:
+  PYTHON: |
+    def getMarkers(RV):
+        markers = RV.readFloatVector(3)
+        if len(markers) == 0:
+            return [-1]
+        return markers
+
 GETMARKERINFO:
   PYTHON: |
     def getMarkerInformation(RV, id):

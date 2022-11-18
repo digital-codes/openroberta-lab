@@ -19,5 +19,6 @@ public enum RobotinoMethods {
     POSTVEL,
     GETMARKERINFO,
     GETCOLOURBLOB,
-    GETCAMERALINE
+    GETCAMERALINE,
+    GETMARKERS
 }
