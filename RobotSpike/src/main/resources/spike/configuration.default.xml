@@ -1,39 +1,39 @@
 <block_set xmlns='http://de.fhg.iais.roberta.blockly' robottype='spike' xmlversion='' description='' tags=''>
     <instance x='300' y='50'>
-        <block type='robConf_differentialdrive' intask='true'>
+        <block id="1" type='robConf_differentialdrive' intask='true'>
             <field name="MOTOR_L">C</field>
             <field name="MOTOR_R">D</field>
         </block>
     </instance>
     <instance x='60' y='100'>
-        <block type='robConf_motor' intask='true'>
+        <block id="2" type='robConf_motor' intask='true'>
             <field name="NAME">MC</field>
             <field name="CONNECTOR">C</field>
         </block>
     </instance>
     <instance x='470' y='100'>
-        <block type='robConf_motor' intask='true'>
+        <block id="3" type='robConf_motor' intask='true'>
             <field name="NAME">MD</field>
             <field name="CONNECTOR">D</field>
         </block>
     </instance>
-    <instance x='275' y='200'>
-        <block type='robConf_buzzer' intask='true' deletable='false'></block>
-    </instance>
-    <instance x='275' y='250'>
-        <block type='robConf_accelerometer' intask='true' deletable='false'></block>
-    </instance>
-    <instance x='275' y='300'>
-        <block type='robConf_gyro' intask='true' deletable='false'></block>
-    </instance>
+    <!--    <instance x='275' y='200'>
+            <block id="4" type='robConf_buzzer' intask='true' deletable='false'></block>
+        </instance>
+        <instance x='275' y='250'>
+            <block id="5" type='robConf_accelerometer' intask='true' deletable='false'></block>
+        </instance>
+        <instance x='275' y='300'>
+            <block id="8" type='robConf_gyro' intask='true' deletable='false'></block>
+        </instance>-->
     <instance x='425' y='200'>
-        <block type='robConf_key' intask='true' deletable='false'>
+        <block id="6" type='robConf_key' intask='true' deletable='false'>
             <field name="NAME">A</field>
             <field name="PIN1">A</field>
         </block>
     </instance>
     <instance x='425' y='275'>
-        <block type='robConf_key' intask='true' deletable='false'>
+        <block id="6" type='robConf_key' intask='true' deletable='false'>
             <field name="NAME">B</field>
             <field name="PIN1">B</field>
         </block>
