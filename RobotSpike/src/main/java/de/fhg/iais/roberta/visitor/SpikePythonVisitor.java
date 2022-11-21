@@ -1,16 +1,14 @@
 package de.fhg.iais.roberta.visitor;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.google.common.collect.ClassToInstanceMap;
 
 import de.fhg.iais.roberta.bean.CodeGeneratorSetupBean;
 import de.fhg.iais.roberta.bean.IProjectBean;
-import de.fhg.iais.roberta.bean.UsedHardwareBean;
 import de.fhg.iais.roberta.components.ConfigurationAst;
-import de.fhg.iais.roberta.components.UsedSensor;
 import de.fhg.iais.roberta.syntax.Phrase;
+import de.fhg.iais.roberta.syntax.action.spike.MotorDiffOnForAction;
 import de.fhg.iais.roberta.syntax.action.spike.MotorOnAction;
 import de.fhg.iais.roberta.syntax.configuration.ConfigurationComponent;
 import de.fhg.iais.roberta.syntax.lang.blocksequence.MainTask;
@@ -22,7 +20,6 @@ import de.fhg.iais.roberta.syntax.lang.stmt.WaitStmt;
 import de.fhg.iais.roberta.syntax.lang.stmt.WaitTimeStmt;
 import de.fhg.iais.roberta.syntax.sensor.generic.TimerReset;
 import de.fhg.iais.roberta.syntax.sensor.generic.TimerSensor;
-import de.fhg.iais.roberta.util.syntax.SC;
 import de.fhg.iais.roberta.visitor.lang.codegen.prog.AbstractPythonVisitor;
 
 /**
@@ -51,23 +48,11 @@ public final class SpikePythonVisitor extends AbstractPythonVisitor {
         if ( !withWrapping ) {
             return;
         }
-        /*this.sb.append("import spike");
-        if ( this.getBean(UsedHardwareBean.class).isActorUsed(SC.ENCODER) ) {
-            this.sb.append(", mbot2");
-        }
-        if ( this.getBean(UsedHardwareBean.class).isSensorUsed(SpikeConstants.MBUILDSENSOR) ) {
-            this.sb.append(", mbuild");
-        }
-        nlIndent();
-        this.sb.append("import time");
-        nlIndent();
-        this.sb.append("import math, random");
-        nlIndent();
-        if ( this.getBean(UsedHardwareBean.class).isActorUsed(SC.DIFFERENTIALDRIVE) ) {
-            appendRobotVariables();
-        }
-        generateTimerVariables();
-        addColors();*/
+        this.src.add("from spike import PrimeHub, LightMatrix, Button, StatusLight, ForceSensor, MotionSensor, Speaker, ColorSensor, App, DistanceSensor, Motor, MotorPair").nlI();
+        this.src.add("from spike.control import wait_for_seconds, wait_until, Timer").nlI();
+        this.src.add("from math import *").nlI().nlI();
+        this.src.add("hub = PrimeHub()").nlI();
+
         if ( !this.getBean(CodeGeneratorSetupBean.class).getUsedMethods().isEmpty() ) {
             String helperMethodImpls =
                 this.getBean(CodeGeneratorSetupBean.class)
@@ -75,38 +60,6 @@ public final class SpikePythonVisitor extends AbstractPythonVisitor {
                     .getHelperMethodDefinitions(this.getBean(CodeGeneratorSetupBean.class).getUsedMethods());
             this.sb.append(helperMethodImpls);
         }
-    }
-
-    private void appendRobotVariables() {
-       /* ConfigurationComponent diffDrive = getDiffDrive();
-        if ( diffDrive != null ) {
-            nlIndent();
-            double circumference = Double.parseDouble(diffDrive.getComponentProperties().get(SpikeConstants.DIFF_WHEEL_DIAMETER)) * Math.PI;
-            double trackWidth = Double.parseDouble(diffDrive.getComponentProperties().get(SpikeConstants.DIFF_TRACK_WIDTH));
-            this.sb.append("_trackWidth = ");
-            this.sb.append(trackWidth);
-            nlIndent();
-            this.sb.append("_circumference = ");
-            this.sb.append(circumference);
-            nlIndent();
-            this.sb.append("_diffPortsSwapped = ");
-            this.sb.append(this.rightMotorPort.equals("EM1") ? "True" : "False");
-            nlIndent();
-        }*/
-    }
-
-    private void generateTimerVariables() {
-        this.getBean(UsedHardwareBean.class)
-            .getUsedSensors()
-            .stream()
-            .filter(usedSensor -> usedSensor.getType().equals(SC.TIMER))
-            .collect(Collectors.groupingBy(UsedSensor::getPort))
-            .keySet()
-            .forEach(port -> {
-                this.usedGlobalVarInFunctions.add("_timer" + port);
-                this.sb.append("_timer").append(port).append(" = spike.timer.get()");
-                nlIndent();
-            });
     }
 
     @Override
@@ -120,8 +73,9 @@ public final class SpikePythonVisitor extends AbstractPythonVisitor {
         if ( !this.usedGlobalVarInFunctions.isEmpty() ) {
             nlIndent();
             this.sb.append("global ").append(String.join(", ", this.usedGlobalVarInFunctions));
+        } else {
+            addPassIfProgramIsEmpty();
         }
-
         return null;
     }
 
@@ -145,23 +99,11 @@ public final class SpikePythonVisitor extends AbstractPythonVisitor {
         this.sb.append("except Exception as e:");
         incrIndentation();
         nlIndent();
-        this.sb.append("spike.display.show_label(\"Exeption on Mbot 2\", 16, int(8 * 0 + 5), int(17 * 0))");
-        nlIndent();
-        this.sb.append("spike.display.show_label(e, 16, int(8 * 0 + 5), int(17 * 1))");
-        nlIndent();
-        this.sb.append("raise");
+        this.sb.append("hub.light_matrix.show_image('SAD')");
         decrIndentation();
-        if ( this.getBean(UsedHardwareBean.class).isActorUsed(SC.ENCODER) ) {
-            nlIndent();
-            this.sb.append("finally:");
-            incrIndentation();
-            nlIndent();
-            this.sb.append("mbot2.motor_stop(\"all\")");
-            nlIndent();
-            this.sb.append("mbot2.EM_stop(\"all\")");
-            decrIndentation();
-        }
+        //TODO finally close open ports
         decrIndentation();
+        nlIndent();
         nlIndent();
 
         this.sb.append("main()");
@@ -223,7 +165,12 @@ public final class SpikePythonVisitor extends AbstractPythonVisitor {
     }
 
     public Void visitMotorOnAction(MotorOnAction motorOnAction) {
-        this.sb.append("beate");
+        //TODO
+        return null;
+    }
+
+    public Void visitMotorDiffOnForAction(MotorDiffOnForAction motorDiffOnForAction) {
+        //TODO
         return null;
     }
 }
