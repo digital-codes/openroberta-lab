@@ -92,7 +92,7 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
         nlIndent();
         this.sb.append("PARAMS = {'sid':'robertaProgram'}");
         nlIndent();
-        this.sb.append("MAXSPEED = 1");
+        this.sb.append("MAXSPEED = 0.5");
         generateOptionalVariables();
     }
 
