@@ -144,7 +144,7 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
         this.sb.append("def run(RV):");
         incrIndentation();
         generateGlobalVariables();
-        this.sb.append("time.sleep(2)");
+        this.sb.append("time.sleep(1)");
         if ( this.getBean(UsedHardwareBean.class).isSensorUsed(RobotinoConstants.ODOMETRY) ) {
             nlIndent();
             //odometrieReset
@@ -155,6 +155,8 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
             //default threshold
             nlIndent();
             this.sb.append("RV.writeFloat(4, 100) ");
+            nlIndent();
+            this.sb.append("time.sleep(0.05)");
         }
         generateTimerVariables(true);
         for ( VarDeclaration var : varDeclarations ) {
@@ -544,6 +546,8 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
         this.sb.append("RV.writeFloat(4, ");
         cameraThreshold.threshold.accept(this);
         this.sb.append(")");
+        this.sb.append("time.sleep(0.05)");
+
         return null;
     }
 

@@ -102,29 +102,39 @@ DRIVETOPOSITION:
   PYTHON: |
     def driveToPosition(RV, x, y, speed):
         global currentSpeed
+        speed = abs(speed)
         RV.writeFloatVector(2, [x * 10, y * 10, RV.readFloatVector(1)[2], 1])
         time.sleep(0.5)
         while RV.readFloatVector(2)[3] != 1 and not isBumped():
-            returnedSpeedX = RV.readFloatVector(2)[0]
-            returnedSpeedY = RV.readFloatVector(2)[1]
-            speedX = (returnedSpeedX * speed / 100) * 10
-            speedY = (returnedSpeedY * speed / 100) * 10
-            if math.sqrt(math.pow(speedX, 2) + math.pow(speedY, 2)) < 0.04:
-                speedX = returnedSpeedX * 10
-                speedY = returnedSpeedY * 10
+            returnedSpeedX = RV.readFloatVector(2)[0] * 10
+            returnedSpeedY = RV.readFloatVector(2)[1] * 10
+            speedX = (returnedSpeedX * speed / 100)
+            speedY = (returnedSpeedY * speed / 100)
+            if abs(speedX) < 0.005:
+                speedX = toSlowCheck(returnedSpeedX, speedX)
+            if abs(speedY) < 0.005:
+                speedY = toSlowCheck(returnedSpeedY, speedY)
     
             currentSpeed = [speedX, speedY, 0]
             time.sleep(0.05)
         currentSpeed = [0, 0, 0]
+    
+    def toSlowCheck(rawSpeed, percentSpeed):
+        if abs(rawSpeed) < 0.005:
+            return rawSpeed
+        elif percentSpeed < 0:
+            return -0.005
+        else:
+            return 0.005
+
 
 DRIVEFORDISTANCE:
   PYTHON: |
     def driveForDistance(RV, x, y, distance):
-        distance = distance
-        angle = math.atan2(y,  x)
-        targetX = RV.readFloatVector(1)[0] + distance * math.cos(angle)
-        targetY = RV.readFloatVector(1)[1] + distance * math.sin(angle)
-        resultingSpeed = math.sqrt(math.pow(x,2) + math.pow(y,2))
+        angle = math.atan2(y, x)
+        targetX = RV.readFloatVector(1)[0] / 10 + distance * math.cos(angle)
+        targetY = RV.readFloatVector(1)[1] / 10 + distance * math.sin(angle)
+        resultingSpeed = math.sqrt(math.pow(x, 2) + math.pow(y, 2))
         driveToPosition(RV, targetX, targetY, resultingSpeed)
 
 TURNFORDEGREES:
@@ -174,6 +184,9 @@ GETCOLOURBLOB:
         value = RV.readFloatVector(6)
         if value[3] <= 0:
             value = [-1,-1,0,0]
+        else:
+            value[0] = (value[0]/640) -0.5
+            value[1] = (value[1]/480) -0.5
         return value
 
 GETCAMERALINE:
@@ -181,6 +194,6 @@ GETCAMERALINE:
     def getCameraLine(RV):
         value = RV.readFloatVector(5)
         if value[0]:
-            return value[1]
+            return (value[1]/640) -0.5
         else:
             return -1
