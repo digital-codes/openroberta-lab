@@ -13,6 +13,10 @@ OMNIDRIVESPEED:
 POSTVEL:
   PYTHON: |
     def postVel():
+        global currentSpeed
+        for speed in currentSpeed:
+            if speed > MAXSPEED:
+                speed = MAXSPEED                    
         OMNIDRIVE_URL = "http://" + ROBOTINOIP + "/data/omnidrive"
         r = requests.post(url = OMNIDRIVE_URL, params = PARAMS, json = currentSpeed )
 
@@ -100,10 +104,16 @@ DRIVETOPOSITION:
         global currentSpeed
         RV.writeFloatVector(2, [x * 10, y * 10, RV.readFloatVector(1)[2], 1])
         time.sleep(0.5)
-        while RV.readFloatVector(2)[3] != 1 or not isBumped():
-            speedX = RV.readFloatVector(2)[0] * speed/100
-            speedY = RV.readFloatVector(2)[1] * speed/100
-            currentSpeed = [speedX , speedY, 0]
+        while RV.readFloatVector(2)[3] != 1 and not isBumped():
+            returnedSpeedX = RV.readFloatVector(2)[0]
+            returnedSpeedY = RV.readFloatVector(2)[1]
+            speedX = (returnedSpeedX * speed / 100) * 10
+            speedY = (returnedSpeedY * speed / 100) * 10
+            if math.sqrt(math.pow(speedX, 2) + math.pow(speedY, 2)) < 0.04:
+                speedX = returnedSpeedX * 10
+                speedY = returnedSpeedY * 10
+    
+            currentSpeed = [speedX, speedY, 0]
             time.sleep(0.05)
         currentSpeed = [0, 0, 0]
 
