@@ -546,8 +546,8 @@ public final class RobotinoViewPythonVisitor extends AbstractPythonVisitor imple
         this.sb.append("RV.writeFloat(4, ");
         cameraThreshold.threshold.accept(this);
         this.sb.append(")");
-        this.sb.append("time.sleep(0.05)");
-
+        this.nlIndent();
+        this.sb.append("time.sleep(0.005)");
         return null;
     }
 
