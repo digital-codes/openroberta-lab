@@ -32,7 +32,7 @@ import de.fhg.iais.roberta.util.jaxb.JaxbHelper;
  * <b>transform old xml to new (for mbed-plugins)</b><br>
  * <br>
  * We need access to a hsqldb target server, which -for testing- can be started by<br>
- * <code>java -Xmx8G -cp [[path-to-hsqldb-2.4.0.jar]] org.hsqldb.Server --database.0 file:[[db-directory]]/openroberta-db --dbname.0 openroberta-db &</code><br>
+ * <code>java -Xmx8G -cp [[path-to-hsqldb.jar]] org.hsqldb.Server --database.0 file:[[db-directory]]/openroberta-db --dbname.0 openroberta-db &</code><br>
  * This server will later SELECT data and UPDATE rows after modifications.<br>
  * BE CAREFUL <i>NOT</i> TO SHUTDOWN A DATABASE IN USE (e.g. by the public OpenRobertaLab server!)<br>
  * Do not forget to inspect the changes in the database by running a GUI-tool (e.g. by using <code>./admin.sh ... sql-gui</code>)
